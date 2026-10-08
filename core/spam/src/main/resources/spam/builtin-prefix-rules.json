@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "version": "2026.10.08",
+  "rules": [
+    {
+      "id": "es-400-commercial",
+      "country": "ES",
+      "prefix": "400",
+      "level": "RULE",
+      "informational": true,
+      "source": "BOE-A-2026-8409"
+    }
+  ]
+}

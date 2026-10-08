@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contacts_title">Contacts</string>
+    <string name="contacts_search_hint">Search contacts</string>
+    <string name="contacts_search_clear">Clear search</string>
+    <string name="contacts_add">New contact</string>
+    <string name="contacts_favorites">Favorites</string>
+    <string name="contacts_empty">No contacts yet</string>
+    <string name="contacts_no_results">No contacts match your search</string>
+    <string name="contacts_index_description">Alphabet index. Swipe up or down to jump to a letter.</string>
+    <string name="contacts_permission_rationale">Allow access to your contacts to see, search and edit them.</string>
+    <string name="contacts_permission_button">Allow access</string>
+
+    <string name="contact_back">Back</string>
+    <string name="contact_call">Call %1$s</string>
+    <string name="contact_email_to">Send an email to %1$s</string>
+    <string name="contact_star">Add to favorites</string>
+    <string name="contact_unstar">Remove from favorites</string>
+    <string name="contact_edit">Edit</string>
+    <string name="contact_share">Share</string>
+    <string name="contact_delete">Delete</string>
+    <string name="contact_delete_title">Delete contact?</string>
+    <string name="contact_delete_message">%1$s will be removed from this phone and from the account it is synced with.</string>
+    <string name="contact_cancel">Cancel</string>
+    <string name="contact_not_found">This contact no longer exists</string>
+    <string name="contact_share_failed">No app can receive this contact</string>
+    <string name="contact_section_phones">Phone numbers</string>
+    <string name="contact_section_emails">Email addresses</string>
+    <string name="contact_section_birthday">Birthday</string>
+    <string name="contact_section_notes">Notes</string>
+    <string name="contact_section_account">Account</string>
+    <string name="contact_account_local">Device (not synced)</string>
+    <string name="contact_account_format">%1$s (%2$s)</string>
+    <string name="contact_unnamed">Unnamed contact</string>
+
+    <string name="edit_title_new">New contact</string>
+    <string name="edit_title_edit">Edit contact</string>
+    <string name="edit_close">Close without saving</string>
+    <string name="edit_save">Save</string>
+    <string name="edit_name">Name</string>
+    <string name="edit_organization">Organization</string>
+    <string name="edit_phone">Phone</string>
+    <string name="edit_email">Email</string>
+    <string name="edit_notes">Notes</string>
+    <string name="edit_add_phone">Add phone</string>
+    <string name="edit_add_email">Add email</string>
+    <string name="edit_remove_phone">Remove phone</string>
+    <string name="edit_remove_email">Remove email</string>
+    <string name="edit_type_phone">Phone type: %1$s</string>
+    <string name="edit_type_email">Email type: %1$s</string>
+    <string name="edit_birthday_add">Add birthday</string>
+    <string name="edit_birthday_remove">Remove birthday</string>
+    <string name="edit_birthday_ok">OK</string>
+    <string name="edit_account">Save to account</string>
+    <string name="edit_error_required">Enter a name or a phone number</string>
+    <string name="edit_error_save">The contact could not be saved</string>
+
+    <string name="label_mobile">Mobile</string>
+    <string name="label_home">Home</string>
+    <string name="label_work">Work</string>
+    <string name="label_main">Main</string>
+    <string name="label_other">Other</string>
+</resources>

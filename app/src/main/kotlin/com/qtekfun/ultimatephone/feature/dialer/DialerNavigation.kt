@@ -1,6 +1,5 @@
 package com.qtekfun.ultimatephone.feature.dialer
 
-import androidx.compose.material3.Text
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -9,7 +8,7 @@ import androidx.navigation.navArgument
 import com.qtekfun.ultimatephone.navigation.DIALER_NUMBER_ARG
 import com.qtekfun.ultimatephone.navigation.DIALER_ROUTE_PATTERN
 
-fun NavGraphBuilder.dialerGraph(@Suppress("UNUSED_PARAMETER") navController: NavController) {
+fun NavGraphBuilder.dialerGraph(@Suppress("UNUSED_PARAMETER") navController: NavController, onRequestPhoneRole: () -> Unit) {
     composable(
         route = DIALER_ROUTE_PATTERN,
         arguments = listOf(
@@ -19,5 +18,7 @@ fun NavGraphBuilder.dialerGraph(@Suppress("UNUSED_PARAMETER") navController: Nav
                 defaultValue = null
             }
         )
-    ) { Text("Dialer") }
+    ) { entry ->
+        DialerScreen(initialNumber = entry.arguments?.getString(DIALER_NUMBER_ARG), onRequestPhoneRole = onRequestPhoneRole)
+    }
 }

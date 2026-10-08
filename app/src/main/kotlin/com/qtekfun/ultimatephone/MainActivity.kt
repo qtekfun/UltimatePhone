@@ -8,12 +8,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.core.designsystem.UltimatePhoneTheme
 import com.qtekfun.ultimatephone.navigation.AppNavHost
+import com.qtekfun.ultimatephone.settings.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var settings: SettingsRepository
+
     private var dialNumber by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +27,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         dialNumber = numberFrom(intent)
         setContent {
-            UltimatePhoneTheme {
+            val prefs by settings.settings.collectAsStateWithLifecycle()
+            UltimatePhoneTheme(mode = prefs.themeMode) {
                 AppNavHost(initialDialNumber = dialNumber)
             }
         }

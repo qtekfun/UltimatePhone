@@ -1,5 +1,7 @@
 package com.qtekfun.ultimatephone.navigation
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -10,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -23,6 +26,9 @@ import com.qtekfun.ultimatephone.feature.settings.settingsGraph
 @Composable
 fun AppNavHost(initialDialNumber: String?) {
     val navController = rememberNavController()
+    val roleViewModel: RoleViewModel = hiltViewModel()
+    val roleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
+    val requestPhoneRole = { roleViewModel.phoneRoleIntent()?.let { roleLauncher.launch(it) } ?: Unit }
     val backStack by navController.currentBackStackEntryAsState()
     val hierarchy = backStack?.destination?.hierarchy
     Scaffold(
@@ -50,10 +56,10 @@ fun AppNavHost(initialDialNumber: String?) {
             startDestination = dialerRoute(initialDialNumber),
             modifier = Modifier.padding(padding)
         ) {
-            dialerGraph(navController)
+            dialerGraph(navController, requestPhoneRole)
             recentsGraph(navController)
             contactsGraph(navController)
-            settingsGraph(navController)
+            settingsGraph(navController, requestPhoneRole)
         }
     }
 }

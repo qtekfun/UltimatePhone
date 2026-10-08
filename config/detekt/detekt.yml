@@ -26,6 +26,8 @@ complexity:
     excludes: ['**/test/**', '**/androidTest/**']
     thresholdInFiles: 25
     thresholdInClasses: 40
+    # TelecomCalls implements the whole CallController interface in one process-wide object.
+    thresholdInObjects: 30
   ComplexCondition:
     threshold: 5
   NestedBlockDepth:

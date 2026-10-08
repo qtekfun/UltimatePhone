@@ -5,7 +5,7 @@ import android.telephony.TelephonyManager
 import java.util.Locale
 
 /** The ISO region used to read numbers that have no country code: the SIM's country, else the phone's locale. */
-interface RegionProvider {
+fun interface RegionProvider {
     fun defaultRegion(): String
 }
 

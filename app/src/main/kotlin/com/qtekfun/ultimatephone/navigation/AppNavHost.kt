@@ -3,8 +3,17 @@ package com.qtekfun.ultimatephone.navigation
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -80,16 +89,31 @@ private fun MainContent(initialDialNumber: String?) {
             }
         }
     ) { padding ->
+        // The scaffold only pads for the bottom bar. Everything else the system draws over (status bar, cutout, side bars, the
+        // keyboard) is applied once here and consumed, so screens with their own top bar never pad twice. The setup guide
+        // is not padded here: it handles every inset itself.
+        val containerInsets = if (inSetupGuide) {
+            Modifier
+        } else {
+            Modifier
+                .padding(padding)
+                .consumeWindowInsets(padding)
+                .windowInsetsPadding(
+                    WindowInsets.systemBars.union(WindowInsets.displayCutout)
+                        .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+                )
+                .imePadding()
+        }
         NavHost(
             navController = navController,
             startDestination = dialerRoute(initialDialNumber),
-            modifier = Modifier.padding(padding)
+            modifier = containerInsets
         ) {
             dialerGraph(navController, requestPhoneRole)
             recentsGraph(navController)
             contactsGraph(navController)
             settingsGraph(navController, requestPhoneRole)
-            composable(ONBOARDING_ROUTE) { OnboardingRoute(onFinished = { navController.popBackStack() }, embedded = true) }
+            composable(ONBOARDING_ROUTE) { OnboardingRoute(onFinished = { navController.popBackStack() }) }
         }
     }
 }

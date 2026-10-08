@@ -4,7 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -26,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -48,10 +52,10 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
     var regionDialog by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(stringResource(R.string.nav_settings), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.nav_settings), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
 
         Section(R.string.settings_phone_app)
         if (state.phoneRoleAvailable) {
@@ -121,7 +125,10 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
 
 @Composable
 private fun NavRow(title: Int, summary: Int, onClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp)) {
+    Column(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(onClick = onClick).padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
         Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
         Text(stringResource(summary), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
@@ -130,13 +137,18 @@ private fun NavRow(title: Int, summary: Int, onClick: () -> Unit) {
 @Composable
 private fun Section(title: Int) {
     HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
-    Text(stringResource(title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+    Text(
+        stringResource(title),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.semantics { heading() }
+    )
 }
 
 @Composable
 private fun RadioRow(label: String, selected: Boolean, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().selectable(selected = selected, role = Role.RadioButton, onClick = onClick).padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(selected = selected, onClick = null)
@@ -167,7 +179,7 @@ private fun RegionDialog(current: String?, onDismiss: () -> Unit, onSelect: (Str
                     Text(
                         text = regionName(code),
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth().clickable { onSelect(code) }.padding(vertical = 10.dp)
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(code) }.padding(vertical = 12.dp)
                     )
                 }
             }

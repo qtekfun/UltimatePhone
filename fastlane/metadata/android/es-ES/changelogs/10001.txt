@@ -1,0 +1,1 @@
+Primera versión candidata: teléfono, contactos, filtro de spam local, paquetes de comercios, sincronización con Nextcloud y copia cifrada.

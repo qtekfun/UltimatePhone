@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -135,12 +139,16 @@ private fun CommercialSection(selected: SpamAction, onSelect: (SpamAction) -> Un
 @Composable
 private fun BusinessSwitch(checked: Boolean, onChange: (Boolean) -> Unit) {
     HorizontalDivider()
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         Column(Modifier.weight(1f)) {
             Text(stringResource(R.string.spam_business_title), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.spam_business_help), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 
@@ -168,6 +176,7 @@ private fun ActionPicker(label: String, selected: SpamAction, onSelect: (SpamAct
                     selected = selected == action,
                     onClick = { onSelect(action) },
                     shape = SegmentedButtonDefaults.itemShape(index, SELECTABLE_ACTIONS.size),
+                    modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                     label = { Text(stringResource(actionLabelRes(action))) }
                 )
             }
@@ -177,7 +186,7 @@ private fun ActionPicker(label: String, selected: SpamAction, onSelect: (SpamAct
 
 @Composable
 private fun LinkRow(title: Int, summary: Int, onClick: () -> Unit) {
-    Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp)) {
+    Column(Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClick = onClick).padding(vertical = 8.dp)) {
         Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
         Text(stringResource(summary), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }

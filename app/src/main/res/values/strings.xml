@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UltimatePhone Spike</string>
+    <string name="channel_incoming">Incoming calls</string>
+    <string name="channel_ongoing">Ongoing call</string>
+    <string name="incoming_call">Incoming call %1$s</string>
+    <string name="ongoing_call">Call with %1$s</string>
+    <string name="no_call">No call</string>
+    <string name="spam_warning">Test list match: %1$s</string>
+
+    <string name="section_roles">Roles and permissions</string>
+    <string name="btn_role_dialer">Request phone app role</string>
+    <string name="btn_role_screening">Request call screening role</string>
+    <string name="btn_permissions">Grant permissions</string>
+    <string name="btn_default_apps">Open default apps settings</string>
+    <string name="btn_battery">Battery optimisation settings</string>
+    <string name="btn_probe">Run capability probe</string>
+
+    <string name="section_screening">Screening test list</string>
+    <string name="screening_hint">Numbers on this list are handled before the call rings. Matching uses the trailing digits.</string>
+    <string name="hint_rule_number">Number or last digits (6 or more)</string>
+    <string name="btn_add_rule">Add rule</string>
+    <string name="btn_clear_rules">Clear rules</string>
+    <string name="no_rules">No rules</string>
+
+    <string name="section_dial">Dial</string>
+    <string name="hint_dial_number">Number to call</string>
+    <string name="btn_refresh_sims">Refresh SIM list</string>
+    <string name="btn_dial">Call</string>
+    <string name="no_sims">No SIM accounts (grant phone permission)</string>
+
+    <string name="section_data">Call log and contacts</string>
+    <string name="btn_read_calllog">Read last calls</string>
+    <string name="btn_contacts_count">Count contacts</string>
+    <string name="btn_contact_create">Create test contact</string>
+    <string name="btn_contact_delete">Delete test contacts</string>
+
+    <string name="section_recording">Recording</string>
+    <string name="recording_hint">Start a source, talk for a few seconds, stop, then read the log. Try with and without speaker.</string>
+    <string name="btn_record">Record: %1$s</string>
+    <string name="btn_record_stop">Stop recording</string>
+    <string name="btn_probe_sources">Probe all audio sources (no call)</string>
+
+    <string name="section_background">Background work</string>
+    <string name="btn_bg_daily">Schedule daily job (Wi-Fi only)</string>
+    <string name="btn_bg_fast">Schedule 15-minute job (any network)</string>
+    <string name="btn_bg_once">Run one job now</string>
+    <string name="btn_bg_cancel">Cancel scheduled jobs</string>
+
+    <string name="section_log">Event log</string>
+    <string name="btn_log_copy">Copy log</string>
+    <string name="btn_log_clear">Clear log</string>
+
+    <string name="btn_answer">Answer</string>
+    <string name="btn_reject">Reject</string>
+    <string name="btn_hangup">Hang up</string>
+    <string name="btn_speaker">Speaker on/off</string>
+    <string name="btn_mute">Mute on/off</string>
+</resources>

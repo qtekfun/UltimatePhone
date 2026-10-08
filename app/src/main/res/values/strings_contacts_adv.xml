@@ -6,12 +6,18 @@
     <string name="contactsadv_menu_duplicates">Find duplicates</string>
     <string name="contactsadv_menu_import">Import vCard</string>
     <string name="contactsadv_menu_export_all">Export all contacts</string>
-    <string name="contactsadv_selection_count">%1$d selected</string>
+    <plurals name="contactsadv_selection_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
     <string name="contactsadv_selection_clear">Clear selection</string>
     <string name="contactsadv_select_action">Select</string>
     <string name="contactsadv_export_selected">Export selected contacts</string>
     <string name="contactsadv_export_one">Export as vCard file</string>
-    <string name="contactsadv_export_done">Exported %1$d contacts</string>
+    <plurals name="contactsadv_export_done">
+        <item quantity="one">Exported %1$d contact</item>
+        <item quantity="other">Exported %1$d contacts</item>
+    </plurals>
     <string name="contactsadv_export_one_done">Contact exported</string>
     <string name="contactsadv_export_failed">The file could not be written</string>
     <string name="contactsadv_filter_label">Filter by group</string>
@@ -22,7 +28,10 @@
     <!-- Groups -->
     <string name="contactsadv_groups_title">Groups</string>
     <string name="contactsadv_groups_empty">No groups yet. Create one to organize your contacts.</string>
-    <string name="contactsadv_groups_members">%1$d contacts</string>
+    <plurals name="contactsadv_groups_members">
+        <item quantity="one">%1$d contact</item>
+        <item quantity="other">%1$d contacts</item>
+    </plurals>
     <string name="contactsadv_groups_read_only">managed by its account</string>
     <string name="contactsadv_groups_add">New group</string>
     <string name="contactsadv_groups_create_title">New group</string>
@@ -48,7 +57,10 @@
     <string name="contactsadv_dup_empty">No duplicates found</string>
     <string name="contactsadv_dup_count">Possible duplicates: %1$d</string>
     <string name="contactsadv_dup_ignore_all">Ignore all</string>
-    <string name="contactsadv_dup_members">%1$d contacts</string>
+    <plurals name="contactsadv_dup_members">
+        <item quantity="one">%1$d contact</item>
+        <item quantity="other">%1$d contacts</item>
+    </plurals>
     <string name="contactsadv_dup_reason_number">Same number</string>
     <string name="contactsadv_dup_reason_email">Same email</string>
     <string name="contactsadv_dup_reason_name">Similar name</string>
@@ -61,10 +73,10 @@
 
     <!-- Merge review -->
     <string name="contactsadv_review_title">Review merge</string>
-    <string name="contactsadv_review_nothing_deleted">Nothing is deleted. The contacts are joined into one that keeps every phone number and email address. Untick a contact to leave it out.</string>
+    <string name="contactsadv_review_nothing_deleted">Nothing is deleted. The contacts are joined into one that keeps every phone number and email address. Uncheck a contact to leave it out.</string>
     <string name="contactsadv_review_include">Include %1$s in the merge</string>
     <string name="contactsadv_review_result">The merged contact will contain</string>
-    <string name="contactsadv_review_need_two">Keep at least two contacts ticked to merge.</string>
+    <string name="contactsadv_review_need_two">Keep at least two contacts checked to merge.</string>
     <string name="contactsadv_review_merge">Merge</string>
     <string name="contactsadv_review_not_dups">Not duplicates</string>
     <string name="contactsadv_review_confirm_title">Merge these contacts?</string>
@@ -91,12 +103,24 @@
     <string name="contactsadv_import_importing">Importing contacts…</string>
     <string name="contactsadv_import_read_failed">The file could not be read</string>
     <string name="contactsadv_import_none">No contacts were found in this file</string>
-    <string name="contactsadv_import_found">%1$d contacts found</string>
-    <string name="contactsadv_import_invalid">%1$d entries could not be read and will be skipped</string>
-    <string name="contactsadv_import_dups">%1$d look like contacts you already have</string>
+    <plurals name="contactsadv_import_found">
+        <item quantity="one">%1$d contact found</item>
+        <item quantity="other">%1$d contacts found</item>
+    </plurals>
+    <plurals name="contactsadv_import_invalid">
+        <item quantity="one">%1$d entry could not be read and will be skipped</item>
+        <item quantity="other">%1$d entries could not be read and will be skipped</item>
+    </plurals>
+    <plurals name="contactsadv_import_dups">
+        <item quantity="one">%1$d looks like a contact you already have</item>
+        <item quantity="other">%1$d look like contacts you already have</item>
+    </plurals>
     <string name="contactsadv_import_skip_dups">Skip contacts I already have</string>
     <string name="contactsadv_import_account">Import into</string>
-    <string name="contactsadv_import_action">Import %1$d contacts</string>
+    <plurals name="contactsadv_import_action">
+        <item quantity="one">Import %1$d contact</item>
+        <item quantity="other">Import %1$d contacts</item>
+    </plurals>
     <string name="contactsadv_import_done_title">Import finished</string>
     <string name="contactsadv_import_done_imported">Imported: %1$d</string>
     <string name="contactsadv_import_done_dups">Skipped, already in your contacts: %1$d</string>

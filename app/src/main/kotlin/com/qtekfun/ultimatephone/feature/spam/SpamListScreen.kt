@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -102,6 +103,7 @@ fun SpamListRoute(onBack: () -> Unit, viewModel: SpamListViewModel = hiltViewMod
 private fun EntryRow(entry: ListEntry, onRemove: () -> Unit) {
     val title = if (entry.kind == EntryKind.PREFIX) stringResource(R.string.spam_entry_prefix, entry.value) else entry.value
     ListItem(
+        modifier = Modifier.semantics(mergeDescendants = true) {},
         supportingContent = {
             Column {
                 entry.label?.let { Text(it) }

@@ -106,8 +106,8 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
         Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME), style = MaterialTheme.typography.bodyMedium)
         TextButton(onClick = viewModel::runDiagnostics) { Text(stringResource(R.string.settings_diagnostics)) }
         state.capabilities?.lines()?.forEach { (name, value) ->
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(name, style = MaterialTheme.typography.bodySmall)
+            Row(modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
                 Text(value, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
@@ -128,7 +128,7 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
 @Composable
 private fun NavRow(title: Int, summary: Int, onClick: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(onClick = onClick).padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).clickable(role = Role.Button, onClick = onClick).padding(vertical = 8.dp),
         verticalArrangement = Arrangement.Center
     ) {
         Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
@@ -181,7 +181,7 @@ private fun RegionDialog(current: String?, onDismiss: () -> Unit, onSelect: (Str
                     Text(
                         text = regionName(code),
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(code) }.padding(vertical = 12.dp)
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button) { onSelect(code) }.padding(vertical = 12.dp)
                     )
                 }
             }

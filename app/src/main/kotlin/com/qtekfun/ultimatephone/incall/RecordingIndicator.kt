@@ -24,7 +24,10 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -77,17 +80,23 @@ private fun RecordingBar(startedAtMillis: Long, onStop: () -> Unit) {
         }
     }
     val time = RecordingFormatters.duration(elapsed)
-    val description = stringResource(R.string.recording_indicator_description, time)
     Row(
         modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TARGET),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = description }, verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.size(12.dp).background(MaterialTheme.colorScheme.error, CircleShape))
-            Spacer(Modifier.width(8.dp))
-            Text(time, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-        }
+        // The state is never colour alone: a dot, the word "Recording" and the elapsed time. The word is a polite live region so
+        // TalkBack announces it when recording starts; the ticking time is not, or it would be read every second.
+        Spacer(Modifier.size(12.dp).background(MaterialTheme.colorScheme.error, CircleShape).clearAndSetSemantics {})
+        Spacer(Modifier.width(8.dp))
+        Text(
+            stringResource(R.string.recording_indicator_label),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(time, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
         Spacer(Modifier.width(8.dp))
         val stopDescription = stringResource(R.string.recording_stop_description)
         TextButton(onClick = onStop, modifier = Modifier.heightIn(min = MIN_TARGET).semantics { contentDescription = stopDescription }) {
@@ -99,7 +108,10 @@ private fun RecordingBar(startedAtMillis: Long, onStop: () -> Unit) {
 @Composable
 private fun NoticeCard(text: String, action: String, onAction: () -> Unit, title: String? = null, error: Boolean = false) {
     val container = if (error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
-    Card(colors = CardDefaults.cardColors(containerColor = container), modifier = Modifier.fillMaxWidth()) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = container),
+        modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite }
+    ) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
             if (title != null) Text(title, style = MaterialTheme.typography.titleSmall)
             Text(text, style = MaterialTheme.typography.bodyMedium)
@@ -119,6 +131,8 @@ internal fun RecordAction(ui: RecordingUi, onClick: () -> Unit, size: Dp, modifi
         onClick = onClick,
         size = size,
         modifier = modifier,
-        enabled = recording || !ui.isBusy
+        enabled = recording || !ui.isBusy,
+        // The label already says what the button does (Record / Stop recording); it is not an on/off switch.
+        toggle = false
     )
 }

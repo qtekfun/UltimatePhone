@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -45,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -171,7 +174,7 @@ private fun GroupRow(group: ContactGroup, onRename: () -> Unit, onDelete: () -> 
     val readOnly = if (group.editable) "" else " · " + stringResource(R.string.contactsadv_groups_read_only)
     ListItem(
         headlineContent = { Text(group.title) },
-        supportingContent = { Text(account + stringResource(R.string.contactsadv_groups_members, group.memberCount) + readOnly) },
+        supportingContent = { Text(account + pluralStringResource(R.plurals.contactsadv_groups_members, group.memberCount, group.memberCount) + readOnly) },
         trailingContent = if (group.editable) {
             {
                 Row {
@@ -208,7 +211,7 @@ private fun GroupNameDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(title)) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },

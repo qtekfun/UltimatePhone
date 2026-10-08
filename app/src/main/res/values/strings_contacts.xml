@@ -7,7 +7,6 @@
     <string name="contacts_favorites">Favorites</string>
     <string name="contacts_empty">No contacts yet</string>
     <string name="contacts_no_results">No contacts match your search</string>
-    <string name="contacts_index_description">Alphabet index. Swipe up or down to jump to a letter.</string>
     <string name="contacts_permission_rationale">Allow access to your contacts to see, search and edit them.</string>
     <string name="contacts_permission_button">Allow access</string>
 

@@ -29,8 +29,11 @@
     <string name="sync_last_sync">Last sync: %1$s</string>
     <string name="sync_never">Not synced yet</string>
     <string name="sync_pending">Changes are waiting to be uploaded.</string>
-    <string name="sync_result">Done. %1$d received, %2$d sent.</string>
-    <string name="sync_bad_lines">%1$d unreadable lines in the remote files were skipped.</string>
+    <string name="sync_result">Done. Received: %1$d. Sent: %2$d.</string>
+    <plurals name="sync_bad_lines">
+        <item quantity="one">%1$d unreadable line in the remote files was skipped.</item>
+        <item quantity="other">%1$d unreadable lines in the remote files were skipped.</item>
+    </plurals>
     <string name="sync_forget">Forget account</string>
     <string name="sync_forget_title">Forget the Nextcloud account?</string>
     <string name="sync_forget_message">The account and the saved app password are removed from this phone and sync stops. Your lists and the files in Nextcloud are not changed.</string>

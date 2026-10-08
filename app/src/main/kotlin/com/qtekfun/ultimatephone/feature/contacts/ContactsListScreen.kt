@@ -51,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,15 +62,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -116,13 +125,13 @@ private fun ContactsListContentScreen(
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(VCARD_MIME)) { uri ->
         if (uri != null) viewModel.exportTo(uri)
     }
-    val exportedMany = stringResource(R.string.contactsadv_export_done)
+    val resources = LocalContext.current.resources
     val exportFailed = stringResource(R.string.contactsadv_export_failed)
     LaunchedEffect(viewModel) {
         viewModel.exportResults.collect { result ->
             snackbar.showSnackbar(
                 when (result) {
-                    is ExportResult.Done -> exportedMany.format(result.count)
+                    is ExportResult.Done -> resources.getQuantityString(R.plurals.contactsadv_export_done, result.count, result.count)
                     ExportResult.Failed -> exportFailed
                 }
             )
@@ -232,9 +241,12 @@ private fun SelectionBar(count: Int, onExport: () -> Unit, onClear: () -> Unit) 
     Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onClear) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.contactsadv_selection_clear)) }
         Text(
-            stringResource(R.string.contactsadv_selection_count, count),
+            pluralStringResource(R.plurals.contactsadv_selection_count, count, count),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.weight(1f).semantics { heading() }
+            modifier = Modifier.weight(1f).semantics {
+                heading()
+                liveRegion = LiveRegionMode.Polite
+            }
         )
         IconButton(onClick = onExport) { Icon(Icons.Outlined.FileDownload, contentDescription = stringResource(R.string.contactsadv_export_selected)) }
     }
@@ -259,11 +271,12 @@ private fun GroupChips(groups: List<ContactGroup>, active: Long?, onChoose: (Lon
 
 @Composable
 private fun SearchField(query: String, onChange: (String) -> Unit) {
+    val searchHint = stringResource(R.string.contacts_search_hint)
     TextField(
         value = query,
         onValueChange = onChange,
         singleLine = true,
-        placeholder = { Text(stringResource(R.string.contacts_search_hint)) },
+        placeholder = { Text(searchHint) },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
@@ -273,7 +286,7 @@ private fun SearchField(query: String, onChange: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         shape = CircleShape,
         colors = TextFieldDefaults.colors(focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).semantics { contentDescription = searchHint }
     )
 }
 
@@ -315,7 +328,7 @@ private fun SectionHeader(text: String) {
         text = text,
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 40.dp, top = 12.dp, bottom = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 48.dp, top = 12.dp, bottom = 4.dp).semantics { heading() }
     )
 }
 
@@ -325,8 +338,9 @@ private fun ContactRow(row: ListRow.Item, selected: Boolean, onOpenContact: (Str
     val contact = row.contact
     val name = contact.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
     val selectLabel = stringResource(R.string.contactsadv_select_action)
+    val favoriteState = stringResource(R.string.contactsadv_field_favorite)
     ListItem(
-        headlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        headlineContent = { Text(name, maxLines = 2, overflow = TextOverflow.Ellipsis) },
         leadingContent = { ContactAvatar(name = name, photoUri = contact.photoThumbUri) },
         trailingContent = when {
             selected -> {
@@ -340,36 +354,48 @@ private fun ContactRow(row: ListRow.Item, selected: Boolean, onOpenContact: (Str
         colors = if (selected) ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer) else ListItemDefaults.colors(),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 24.dp)
-            .semantics { this.selected = selected }
-            .combinedClickable(onLongClickLabel = selectLabel, onLongClick = { onSelect(contact.lookupKey) }, onClick = { onOpenContact(contact.lookupKey) })
+            .padding(end = INDEX_WIDTH - 8.dp)
+            .semantics {
+                this.selected = selected
+                if (contact.starred) stateDescription = favoriteState
+            }
+            .combinedClickable(role = Role.Button, onLongClickLabel = selectLabel, onLongClick = {
+                onSelect(contact.lookupKey)
+            }, onClick = { onOpenContact(contact.lookupKey) })
     )
 }
 
 /** Fast scroller: tap or drag over the letters to jump to that section. */
 @Composable
 private fun LetterIndex(letters: List<String>, onSelect: (String) -> Unit, modifier: Modifier = Modifier) {
-    val description = stringResource(R.string.contacts_index_description)
-    Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .width(24.dp)
-            .clearAndSetSemantics { contentDescription = description }
-            .pointerInput(letters) {
-                detectTapGestures(onTap = { offset -> pickLetter(offset.y, size.height, letters, onSelect) })
-            }
-            .pointerInput(letters) {
-                detectVerticalDragGestures(
-                    onDragStart = { offset -> pickLetter(offset.y, size.height, letters, onSelect) },
-                    onVerticalDrag = { change, _ -> pickLetter(change.position.y, size.height, letters, onSelect) }
-                )
-            },
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        letters.forEach { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary) }
+    // A touch shortcut only: TalkBack users scroll the list itself, so the strip is hidden from the accessibility tree.
+    // Its letters ignore the font scale, otherwise 26 of them could never fit the screen height at large text sizes.
+    val density = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
+        Column(
+            modifier = modifier
+                .fillMaxHeight()
+                .width(INDEX_WIDTH)
+                .clearAndSetSemantics {}
+                .pointerInput(letters) {
+                    detectTapGestures(onTap = { offset -> pickLetter(offset.y, size.height, letters, onSelect) })
+                }
+                .pointerInput(letters) {
+                    detectVerticalDragGestures(
+                        onDragStart = { offset -> pickLetter(offset.y, size.height, letters, onSelect) },
+                        onVerticalDrag = { change, _ -> pickLetter(change.position.y, size.height, letters, onSelect) }
+                    )
+                },
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            letters.forEach { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary) }
+        }
     }
 }
+
+/** Wide enough to be a comfortable touch target (48dp) along the edge of the list. */
+private val INDEX_WIDTH = 48.dp
 
 private fun pickLetter(y: Float, height: Int, letters: List<String>, onSelect: (String) -> Unit) {
     onSelect(letters[(y / height * letters.size).toInt().coerceIn(0, letters.lastIndex)])

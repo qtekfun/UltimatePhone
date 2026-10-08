@@ -54,9 +54,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -194,7 +200,9 @@ private fun RecentsBar(canClear: Boolean, onClear: () -> Unit) {
 @Composable
 private fun SelectionBar(count: Int, onClose: () -> Unit, onDelete: () -> Unit) {
     TopAppBar(
-        title = { Text(stringResource(R.string.recents_selected_count, count)) },
+        title = {
+            Text(pluralStringResource(R.plurals.recents_selected_count, count, count), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+        },
         windowInsets = WindowInsets(0),
         navigationIcon = {
             IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.recents_cancel_selection)) }
@@ -271,7 +279,7 @@ private fun SectionHeader(text: String) {
             text = text,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics { heading() }
         )
     }
 }
@@ -282,11 +290,16 @@ private fun RecentsRowItem(row: RecentsRow, showSim: Boolean, selected: Boolean,
     val title = row.caller.title ?: stringResource(R.string.recents_unknown_caller)
     val typeLabel = stringResource(row.type.label())
     val supporting = if (row.count > 1) "$typeLabel · ${stringResource(R.string.recents_count_calls, row.count)}" else typeLabel
+    val newState = stringResource(R.string.recents_new)
     val containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
     ListItem(
         modifier = Modifier
-            .semantics { this.selected = selected }
+            .semantics {
+                this.selected = selected
+                if (row.isNew && !selected) stateDescription = newState
+            }
             .combinedClickable(
+                role = Role.Button,
                 onClickLabel = stringResource(if (row.isPrivate) R.string.recents_select else R.string.recents_call_back),
                 onClick = onClick,
                 onLongClickLabel = stringResource(R.string.recents_select),
@@ -330,11 +343,8 @@ private fun RowAvatar(row: RecentsRow, title: String, selected: Boolean) {
     if (selected) {
         Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp)) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = stringResource(R.string.recents_selected),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+                // Decorative: the row itself carries the "selected" state.
+                Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
     } else if (row.caller.business != null) {

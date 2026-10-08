@@ -4,6 +4,9 @@
 
     <string name="dialer_call">Call</string>
     <string name="dialer_delete">Delete digit</string>
+    <string name="dialer_clear">Clear number</string>
+    <string name="dialer_paste">Paste number</string>
+    <string name="dialer_key_plus">Enter plus sign</string>
     <string name="dialer_sim_slot">SIM %1$d</string>
     <string name="phone_role_banner_title">Make UltimatePhone your phone app</string>
     <string name="phone_role_banner_body">To receive and place calls with this app, choose it as your default phone app.</string>
@@ -14,7 +17,7 @@
     <string name="incall_calling">Calling…</string>
     <string name="incall_on_hold">On hold · %1$s</string>
     <string name="incall_conference">Conference · %1$d people</string>
-    <string name="incall_waiting">Waiting: %1$s</string>
+    <string name="incall_waiting">Call waiting: %1$s</string>
     <string name="incall_held">On hold: %1$s</string>
     <string name="incall_swap">Swap</string>
     <string name="incall_answer">Answer</string>
@@ -30,6 +33,10 @@
     <string name="incall_route_speaker">Speaker</string>
     <string name="incall_route_bluetooth">Bluetooth</string>
     <string name="incall_route_headset">Headset</string>
+    <string name="incall_state_on">On</string>
+    <string name="incall_state_off">Off</string>
+    <string name="incall_key_star">Star</string>
+    <string name="incall_key_pound">Pound</string>
 
     <string name="settings_phone_app">Phone app</string>
     <string name="settings_phone_app_active">UltimatePhone is your default phone app</string>

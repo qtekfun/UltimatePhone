@@ -40,7 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -87,12 +91,13 @@ fun OnboardingRoute(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            LinearProgressIndicator(progress = { flow.position.toFloat() / flow.total }, modifier = Modifier.fillMaxWidth())
+            // The text below says the same as the bar, so the bar is hidden from TalkBack.
+            LinearProgressIndicator(progress = { flow.position.toFloat() / flow.total }, modifier = Modifier.fillMaxWidth().clearAndSetSemantics {})
             Text(
                 stringResource(R.string.onboarding_step_of, flow.position, flow.total),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }
             )
             Column(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
@@ -156,7 +161,9 @@ internal fun StepTitle(title: Int, body: Int) {
 private fun WelcomeStep() {
     StepTitle(R.string.onboarding_welcome_title, R.string.onboarding_welcome_body)
     listOf(R.string.onboarding_welcome_point_private, R.string.onboarding_welcome_point_offline, R.string.onboarding_welcome_point_optional).forEach {
-        Text("•  " + stringResource(it), style = MaterialTheme.typography.bodyLarge)
+        val point = stringResource(it)
+        // The bullet is only decoration: TalkBack reads the sentence alone.
+        Text("•  $point", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.semantics { contentDescription = point })
     }
 }
 
@@ -186,7 +193,7 @@ private fun RolesStep(roles: RolesState, viewModel: OnboardingViewModel) {
 private fun RoleCard(title: Int, body: Int, available: Boolean, held: Boolean, onRequest: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
             Text(stringResource(body), style = MaterialTheme.typography.bodyMedium)
             when {
                 held -> Text(
@@ -219,7 +226,7 @@ private fun PermissionsStep() {
         val missing = missingByGroup.getValue(group)
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(group.title), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(group.title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
                 Text(stringResource(group.reason), style = MaterialTheme.typography.bodyMedium)
                 when {
                     missing.isEmpty() -> Text(

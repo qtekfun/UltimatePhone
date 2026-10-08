@@ -182,8 +182,10 @@ private fun RecordingCard(
 
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(modifier = Modifier.semantics(mergeDescendants = true) {}) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             if (player != null && player.ready) {
                 val time =
                     stringResource(
@@ -204,15 +206,30 @@ private fun RecordingCard(
                 Text(time, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp))
             }
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                // Each button names the recording it acts on, since TalkBack reads them one by one.
+                val playLabel =
+                    stringResource(R.string.recording_action_for, stringResource(if (playing) R.string.recording_pause else R.string.recording_play), title)
                 IconButton(onClick = onPlay) {
+                    Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, contentDescription = playLabel)
+                }
+                IconButton(onClick = onShare) {
                     Icon(
-                        if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = stringResource(if (playing) R.string.recording_pause else R.string.recording_play)
+                        Icons.Filled.Share,
+                        contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_share), title)
                     )
                 }
-                IconButton(onClick = onShare) { Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.recording_share)) }
-                IconButton(onClick = onRename) { Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.recording_rename)) }
-                IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.recording_delete)) }
+                IconButton(onClick = onRename) {
+                    Icon(
+                        Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_rename), title)
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_delete), title)
+                    )
+                }
             }
         }
     }

@@ -4,11 +4,15 @@ import android.text.format.DateUtils
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -35,7 +39,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -61,7 +71,7 @@ internal fun syncErrorText(error: SyncError): Int = when (error) {
 }
 
 /** Settings > Nextcloud sync. */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SyncRoute(onBack: () -> Unit, viewModel: SyncViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -86,7 +96,7 @@ fun SyncRoute(onBack: () -> Unit, viewModel: SyncViewModel = hiltViewModel()) {
         ) {
             Text(stringResource(R.string.sync_intro), style = MaterialTheme.typography.bodyMedium)
             AccountFields(state, viewModel)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = viewModel::test, enabled = state.action != SyncAction.Testing) { Text(stringResource(R.string.sync_test)) }
                 Button(onClick = { viewModel.save() }, enabled = state.form.serverUrl.isNotBlank() && state.form.username.isNotBlank()) {
                     Text(stringResource(R.string.sync_save))
@@ -122,16 +132,17 @@ fun SyncRoute(onBack: () -> Unit, viewModel: SyncViewModel = hiltViewModel()) {
  * The Nextcloud account form with a Connect button, for the onboarding step. It tests the connection, saves the account,
  * turns sync on and calls [onDone]; "Not now" calls [onDone] too, without saving anything.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NextcloudSetupContent(onDone: () -> Unit, modifier: Modifier = Modifier, viewModel: SyncViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     Column(modifier = modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.sync_setup_title), style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.sync_setup_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
         Text(stringResource(R.string.sync_setup_intro), style = MaterialTheme.typography.bodyMedium)
         Text(stringResource(R.string.sync_intro), style = MaterialTheme.typography.bodyMedium)
         AccountFields(state, viewModel)
         ActionMessage(state.action)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.Center) {
             Button(
                 onClick = { viewModel.connect(onDone) },
                 enabled = state.action != SyncAction.Testing && state.form.serverUrl.isNotBlank() && state.form.username.isNotBlank()
@@ -181,6 +192,12 @@ private fun AccountFields(state: SyncScreenState, viewModel: SyncViewModel) {
 
 @Composable
 private fun ActionMessage(action: SyncAction) {
+    // Progress, success and failure appear under the buttons: TalkBack announces them by itself.
+    Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) { ActionMessageText(action) }
+}
+
+@Composable
+private fun ActionMessageText(action: SyncAction) {
     when (action) {
         SyncAction.None -> Unit
         SyncAction.Testing -> Text(stringResource(R.string.sync_testing), style = MaterialTheme.typography.bodyMedium)
@@ -191,7 +208,10 @@ private fun ActionMessage(action: SyncAction) {
             if (action.counters.badLines >
                 0
             ) {
-                Text(stringResource(R.string.sync_bad_lines, action.counters.badLines), style = MaterialTheme.typography.bodySmall)
+                Text(
+                    pluralStringResource(R.plurals.sync_bad_lines, action.counters.badLines, action.counters.badLines),
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
         is SyncAction.Failed -> Text(
@@ -206,7 +226,12 @@ private fun ActionMessage(action: SyncAction) {
 private fun StatusSection(state: SyncScreenState, viewModel: SyncViewModel) {
     val sync = state.sync
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                .toggleable(value = sync.enabled, enabled = sync.isConfigured, role = Role.Switch, onValueChange = viewModel::setEnabled),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(stringResource(R.string.sync_enable), style = MaterialTheme.typography.bodyLarge)
                 Text(
@@ -215,7 +240,7 @@ private fun StatusSection(state: SyncScreenState, viewModel: SyncViewModel) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Switch(checked = sync.enabled, onCheckedChange = viewModel::setEnabled, enabled = sync.isConfigured)
+            Switch(checked = sync.enabled, onCheckedChange = null, enabled = sync.isConfigured)
         }
         val last = sync.lastSyncAt
         Text(

@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -65,7 +69,9 @@ internal fun DataStep(state: OnboardingUiState, viewModel: OnboardingViewModel) 
 private fun RegionRow(group: RegionGroup, selected: Boolean, onToggle: () -> Unit) {
     val name = group.region?.let { PackCatalog.regionName(it) }.orEmpty()
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onToggle).semantics { role = Role.Checkbox }.padding(vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(value = selected, role = Role.Checkbox, onValueChange = {
+            onToggle()
+        }).padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(checked = selected, onCheckedChange = null)
@@ -122,7 +128,7 @@ internal fun BatteryStep(state: OnboardingUiState) {
         var failed by remember(topic.topic) { mutableStateOf(false) }
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(topicTitle(topic.topic)), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(topicTitle(topic.topic)), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
                 Text(guideText(topic.textKey, topic.topic), style = MaterialTheme.typography.bodyMedium)
                 if (topic.intents.isNotEmpty()) {
                     OutlinedButton(onClick = {
@@ -185,8 +191,11 @@ internal fun SummaryStep(state: OnboardingUiState, onFinish: (download: Boolean)
     )
     val later = OnboardingFlow.pendingForLater(state.flow)
     if (later.isNotEmpty()) {
-        Text(stringResource(R.string.onboarding_summary_later), style = MaterialTheme.typography.titleMedium)
-        later.forEach { Text("•  " + stringResource(stepName(it)), style = MaterialTheme.typography.bodyLarge) }
+        Text(stringResource(R.string.onboarding_summary_later), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+        later.forEach {
+            val name = stringResource(stepName(it))
+            Text("•  $name", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.semantics { contentDescription = name })
+        }
     }
     val downloading = state.selectedRegions.isNotEmpty()
     if (downloading) {

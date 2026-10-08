@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -48,13 +52,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,6 +90,7 @@ private val KEYS = listOf(
     listOf(Key('*'), Key('0', "+"), Key('#'))
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewModel: DialerViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -133,7 +141,10 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
             onPaste = { text -> viewModel.paste(text) }
         )
         if (state.sims.size > 1) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(vertical = 4.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(vertical = 4.dp)
+            ) {
                 state.sims.forEach { sim ->
                     FilterChip(
                         selected = sim.key == state.selectedSimKey,
@@ -207,7 +218,7 @@ private fun DefaultPhoneBanner(onClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.phone_role_banner_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.phone_role_banner_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
             Text(stringResource(R.string.phone_role_banner_body), style = MaterialTheme.typography.bodyMedium)
             TextButton(onClick = onClick) { Text(stringResource(R.string.phone_role_banner_action)) }
         }
@@ -222,29 +233,34 @@ private fun Suggestions(
     onClick: (com.qtekfun.ultimatephone.core.contacts.DialerSuggestion) -> Unit,
     onBusinessClick: (BusinessHit) -> Unit
 ) {
+    val callLabel = stringResource(R.string.dialer_call)
     LazyColumn(modifier = modifier, reverseLayout = true, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         items(suggestions, key = { it.lookupKey + it.number }) { suggestion ->
             Row(
-                modifier = Modifier.fillMaxWidth().combinedClickable(onClick = { onClick(suggestion) }).padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TARGET)
+                    .combinedClickable(role = Role.Button, onClickLabel = callLabel, onClick = { onClick(suggestion) })
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Avatar(name = suggestion.displayName)
                 Column {
-                    Text(suggestion.displayName, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(suggestion.displayName, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(suggestion.number, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
         items(businesses, key = { "business:" + it.e164 }) { hit ->
             Row(
-                modifier = Modifier.fillMaxWidth().combinedClickable(onClick = { onBusinessClick(hit) }).padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TARGET)
+                    .combinedClickable(role = Role.Button, onClickLabel = callLabel, onClick = { onBusinessClick(hit) })
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 BusinessAvatar(BusinessCategories.iconName(hit.category))
                 Column {
-                    Text(hit.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(hit.name, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     BusinessCategoryLine(BusinessCategories.normalized(hit.category), BusinessCategories.iconName(hit.category))
                 }
             }
@@ -258,7 +274,7 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
     val context = LocalContext.current
     Row(modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(
-            modifier = Modifier.weight(1f).combinedClickable(onClick = {}, onLongClick = {
+            modifier = Modifier.weight(1f).combinedClickable(onClick = {}, onLongClickLabel = stringResource(R.string.dialer_paste), onLongClick = {
                 val clip = context.getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
                 if (!clip.isNullOrBlank()) onPaste(clip)
             }),
@@ -268,17 +284,26 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
             Text(
                 text = text,
                 style = MaterialTheme.typography.headlineLarge.copy(fontSize = numberFontSizeSp(text.length).sp),
-                maxLines = 1,
+                // Two lines with very large text, so a long number is not cut to a few digits.
+                maxLines = if (LocalDensity.current.fontScale >= BIG_FONT_SCALE) 2 else 1,
                 overflow = TextOverflow.StartEllipsis,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { contentDescription = text }
             )
         }
         if (text.isNotEmpty()) {
-            Box(modifier = Modifier.combinedClickable(onClick = onBackspace, onLongClick = onClear)) {
-                IconButton(onClick = onBackspace) {
-                    Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = stringResource(R.string.dialer_delete))
-                }
+            // One control: tap deletes a digit, long press clears the number. TalkBack offers both as actions.
+            Box(
+                modifier = Modifier.minimumInteractiveComponentSize().clip(CircleShape).combinedClickable(
+                    role = Role.Button,
+                    onClickLabel = stringResource(R.string.dialer_delete),
+                    onClick = onBackspace,
+                    onLongClickLabel = stringResource(R.string.dialer_clear),
+                    onLongClick = onClear
+                ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = stringResource(R.string.dialer_delete))
             }
         }
     }
@@ -291,16 +316,28 @@ private fun Keypad(keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit)
         KEYS.forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 row.forEach { key ->
+                    // "2 A B C" would be read letter by letter: say the digit (or the symbol's name) only.
+                    val keyName = when (key.char) {
+                        '*' -> stringResource(R.string.incall_key_star)
+                        '#' -> stringResource(R.string.incall_key_pound)
+                        else -> key.char.toString()
+                    }
+                    val plusLabel = if (key.char == '0') stringResource(R.string.dialer_key_plus) else null
                     Surface(
                         shape = RoundedCornerShape(28.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).heightIn(min = keyHeight).combinedClickable(
+                        modifier = Modifier.weight(1f).heightIn(min = keyHeight).semantics { contentDescription = keyName }.combinedClickable(
                             role = Role.Button,
+                            onLongClickLabel = plusLabel,
                             onClick = { onKey(key.char) },
                             onLongClick = { if (key.char == '0') onLongZero() else onKey(key.char) }
                         )
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.clearAndSetSemantics {}
+                        ) {
                             Text(key.char.toString(), style = MaterialTheme.typography.headlineSmall)
                             if (key.letters.isNotEmpty()) Text(key.letters, style = MaterialTheme.typography.labelSmall)
                         }
@@ -340,5 +377,6 @@ private fun rememberDtmfTones(): DtmfTones {
 }
 
 private const val TONE_VOLUME = 80
+private val MIN_TARGET = 48.dp
 private val COMPACT_HEIGHT = 640.dp
 private const val BIG_FONT_SCALE = 1.5f

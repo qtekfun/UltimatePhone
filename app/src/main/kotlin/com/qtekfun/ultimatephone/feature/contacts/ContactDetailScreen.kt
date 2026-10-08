@@ -58,6 +58,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -190,7 +193,7 @@ private fun DetailBody(contact: ContactDetail, groups: List<ContactGroupState>, 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
         Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             ContactAvatar(name = name, photoUri = contact.photoUri, size = 112.dp)
-            Text(name, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+            Text(name, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
             if (contact.organization.isNotBlank()) {
                 Text(contact.organization, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -204,11 +207,12 @@ private fun DetailBody(contact: ContactDetail, groups: List<ContactGroupState>, 
                     headlineContent = { Text(number) },
                     supportingContent = { Text(stored.typeLabel) },
                     trailingContent = {
-                        FilledTonalIconButton(onClick = { onCall(number) }) {
-                            Icon(Icons.Filled.Call, contentDescription = stringResource(R.string.contact_call, number))
+                        // The whole row calls; the button is the same action for sighted users, so TalkBack skips it.
+                        FilledTonalIconButton(onClick = { onCall(number) }, modifier = Modifier.clearAndSetSemantics {}) {
+                            Icon(Icons.Filled.Call, contentDescription = null)
                         }
                     },
-                    modifier = Modifier.clickable { onCall(number) }
+                    modifier = Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.contact_call, number)) { onCall(number) }
                 )
             }
         }
@@ -219,8 +223,10 @@ private fun DetailBody(contact: ContactDetail, groups: List<ContactGroupState>, 
                 ListItem(
                     headlineContent = { Text(address) },
                     supportingContent = { Text(stored.typeLabel) },
-                    trailingContent = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.contact_email_to, address)) },
-                    modifier = Modifier.clickable { sendEmail(context, address) }
+                    trailingContent = { Icon(Icons.Filled.Email, contentDescription = null) },
+                    modifier = Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.contact_email_to, address)) {
+                        sendEmail(context, address)
+                    }
                 )
             }
         }
@@ -298,7 +304,7 @@ private fun Section(title: Int) {
         text = stringResource(title),
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp).semantics { heading() }
     )
 }
 

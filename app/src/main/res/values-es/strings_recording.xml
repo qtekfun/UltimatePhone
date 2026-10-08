@@ -13,7 +13,7 @@
     <string name="recording_dismiss">Descartar</string>
 
     <!-- Pantalla de llamada -->
-    <string name="recording_indicator_description">Grabando, %1$s</string>
+    <string name="recording_indicator_label">Grabando</string>
     <string name="recording_mic_warning_title">Solo micrófono</string>
     <string name="recording_mic_warning_text">En este teléfono la app solo puede grabar tu micrófono. Activa el altavoz para captar a la otra persona.</string>
     <string name="recording_mic_warning_ok">Entendido</string>
@@ -105,6 +105,7 @@
     <string name="recording_item_outgoing">Saliente · %1$s</string>
     <string name="recording_item_subtitle">%1$s · %2$s · %3$s</string>
     <string name="recording_item_subtitle_no_duration">%1$s · %2$s</string>
+    <string name="recording_action_for">%1$s: %2$s</string>
     <string name="recording_play">Reproducir</string>
     <string name="recording_pause">Pausar</string>
     <string name="recording_share">Compartir</string>

@@ -19,14 +19,14 @@
     <string name="spam_action_reject">Rechazar</string>
     <string name="spam_commercial_title">Llamadas comerciales</string>
     <string name="spam_commercial_help">Las empresas en España deben llamar desde números que empiezan por 400. Es información, no spam: por defecto la llamada solo se etiqueta. Puedes elegir silenciarla o rechazarla.</string>
-    <string name="spam_business_title">Un negocio identificado no es spam</string>
-    <string name="spam_business_help">Un número identificado como negocio se muestra con su nombre aunque una fuente lo incluya.</string>
+    <string name="spam_business_title">Un comercio identificado no es spam</string>
+    <string name="spam_business_help">Un número identificado como comercio se muestra con su nombre aunque una fuente lo incluya.</string>
     <string name="spam_own_list_title">Tu lista de spam</string>
     <string name="spam_own_list_summary">Números y prefijos que has marcado tú</string>
     <string name="spam_allowed_title">Números permitidos</string>
     <string name="spam_allowed_summary">Números y prefijos que nunca se filtran</string>
     <string name="spam_data_link_title">Fuentes y paquetes de datos</string>
-    <string name="spam_data_link_summary">De dónde salen los números marcados y los negocios</string>
+    <string name="spam_data_link_summary">De dónde salen los números marcados y los comercios</string>
     <string name="spam_latency">Filtrado reciente más lento: %1$d ms</string>
 
     <!-- Lista propia y números permitidos -->
@@ -60,8 +60,8 @@
     <string name="spam_reason_own">Está en tu lista de spam.</string>
     <string name="spam_reason_source">Aparece en la fuente %1$s.</string>
     <string name="spam_reason_rule">Coincide con la regla: %1$s.</string>
-    <string name="spam_reason_business">Negocio identificado: %1$s.</string>
-    <string name="spam_reason_business_category">Negocio identificado: %1$s (%2$s).</string>
+    <string name="spam_reason_business">Comercio identificado: %1$s.</string>
+    <string name="spam_reason_business_category">Comercio identificado: %1$s (%2$s).</string>
     <string name="spam_reason_contact">Pertenece a uno de tus contactos.</string>
     <string name="spam_reason_allowed">Está en tus números permitidos.</string>
     <string name="spam_reason_nothing">Nada ha marcado este número.</string>

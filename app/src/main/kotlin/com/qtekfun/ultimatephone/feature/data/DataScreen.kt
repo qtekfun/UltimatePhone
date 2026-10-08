@@ -2,12 +2,16 @@ package com.qtekfun.ultimatephone.feature.data
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -36,8 +40,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -218,13 +225,14 @@ private fun RegionCard(group: RegionGroup, state: DataUiState, viewModel: DataVi
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RegionActions(group: RegionGroup, state: DataUiState, viewModel: DataViewModel) {
     val missing = group.packs.filter { !it.isInstalled || it.updateAvailable }.map { it.entry.id }
     val installed = group.packs.filter { it.isInstalled }.map { it.entry.id }
     val busy = group.packs.any { state.progress[it.entry.id] != null }
     if (missing.size > 1 || installed.size > 1) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (missing.size > 1) {
                 TextButton(onClick = { viewModel.install(missing) }, enabled = !busy) {
                     Text(stringResource(R.string.data_region_install_all, SizeFormat.format(group.pendingDownloadBytes)))
@@ -237,12 +245,16 @@ private fun RegionActions(group: RegionGroup, state: DataUiState, viewModel: Dat
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PackRow(pack: PackItem, progress: PackProgress?, viewModel: DataViewModel) {
+    // With large text the buttons go under the description instead of squeezing it.
+    val stacked = LocalDensity.current.fontScale >= STACK_FONT_SCALE
+    val title = packTitle(pack.entry)
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(packTitle(pack.entry), style = MaterialTheme.typography.bodyLarge)
+            Column(modifier = Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+                Text(title, style = MaterialTheme.typography.bodyLarge)
                 Text(
                     stringResource(
                         R.string.data_pack_detail,
@@ -262,8 +274,9 @@ private fun PackRow(pack: PackItem, progress: PackProgress?, viewModel: DataView
                 }
                 pack.entry.note?.takeIf { it.isNotBlank() }?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             }
-            PackButtons(pack, progress, viewModel)
+            if (!stacked) PackButtons(pack, title, progress, viewModel)
         }
+        if (stacked) FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { PackButtons(pack, title, progress, viewModel) }
         when (progress) {
             PackProgress.Queued -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             is PackProgress.Downloading -> {
@@ -279,34 +292,46 @@ private fun PackRow(pack: PackItem, progress: PackProgress?, viewModel: DataView
     }
 }
 
+private const val STACK_FONT_SCALE = 1.3f
+
+/** A pack button says which pack it acts on ("Install: Businesses (Spain)"), since TalkBack reads buttons one by one. */
 @Composable
-private fun PackButtons(pack: PackItem, progress: PackProgress?, viewModel: DataViewModel) {
+private fun PackButton(label: Int, packTitle: String, onClick: () -> Unit) {
+    val spoken = stringResource(R.string.data_pack_action, stringResource(label), packTitle)
+    TextButton(onClick = onClick, modifier = Modifier.semantics { contentDescription = spoken }) { Text(stringResource(label)) }
+}
+
+@Composable
+private fun PackButtons(pack: PackItem, title: String, progress: PackProgress?, viewModel: DataViewModel) {
     val id = pack.entry.id
     when (progress) {
-        PackProgress.Queued, is PackProgress.Downloading -> TextButton(onClick = { viewModel.cancel(id) }) { Text(stringResource(R.string.data_cancel)) }
-        is PackProgress.Failed -> {
-            TextButton(onClick = {
-                viewModel.dismissFailure(id)
-                viewModel.install(listOf(id))
-            }) { Text(stringResource(R.string.data_retry)) }
+        PackProgress.Queued, is PackProgress.Downloading -> PackButton(R.string.data_cancel, title) { viewModel.cancel(id) }
+        is PackProgress.Failed -> PackButton(R.string.data_retry, title) {
+            viewModel.dismissFailure(id)
+            viewModel.install(listOf(id))
         }
         null -> if (!pack.isInstalled) {
-            TextButton(onClick = { viewModel.install(listOf(id)) }) { Text(stringResource(R.string.data_install)) }
+            PackButton(R.string.data_install, title) { viewModel.install(listOf(id)) }
         } else {
-            if (pack.updateAvailable) TextButton(onClick = { viewModel.install(listOf(id)) }) { Text(stringResource(R.string.data_update)) }
-            TextButton(onClick = { viewModel.remove(listOf(id)) }) { Text(stringResource(R.string.data_remove)) }
+            if (pack.updateAvailable) PackButton(R.string.data_update, title) { viewModel.install(listOf(id)) }
+            PackButton(R.string.data_remove, title) { viewModel.remove(listOf(id)) }
         }
     }
 }
 
 @Composable
 private fun SwitchRow(title: Int, summary: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(
+            min = 56.dp
+        ).toggleable(value = checked, role = Role.Switch, onValueChange = onChange).padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(summary), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

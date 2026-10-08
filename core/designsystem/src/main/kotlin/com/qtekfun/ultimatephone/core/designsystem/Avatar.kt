@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -35,11 +36,14 @@ private fun avatarColor(name: String): Color {
     return palette[Math.floorMod(name.hashCode(), palette.size)]
 }
 
-/** Circle with initials. A photo, when there is one, is drawn by the caller on top via [content]. */
+/**
+ * Circle with initials. A photo, when there is one, is drawn by the caller on top via [content].
+ * It is decorative: the name is always next to it, so TalkBack must not read the initials as well.
+ */
 @Composable
 fun Avatar(name: String, modifier: Modifier = Modifier, size: Dp = 40.dp, content: @Composable () -> Unit = {}) {
     Box(
-        modifier = modifier.size(size).clip(CircleShape).background(avatarColor(name)),
+        modifier = modifier.size(size).clip(CircleShape).background(avatarColor(name)).clearAndSetSemantics {},
         contentAlignment = Alignment.Center
     ) {
         Text(text = initialsOf(name), style = MaterialTheme.typography.titleMedium)

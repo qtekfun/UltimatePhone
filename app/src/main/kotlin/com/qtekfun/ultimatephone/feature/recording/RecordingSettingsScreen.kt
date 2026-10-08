@@ -176,7 +176,9 @@ fun RecordingSettingsRoute(onBack: () -> Unit, onOpenRecordings: () -> Unit, vie
             TestResultText(state.test)
 
             HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
-            Column(modifier = Modifier.fillMaxWidth().heightIn(min = MIN_ROW).clickable(onClick = onOpenRecordings).padding(vertical = 8.dp)) {
+            Column(
+                modifier = Modifier.fillMaxWidth().heightIn(min = MIN_ROW).clickable(role = Role.Button, onClick = onOpenRecordings).padding(vertical = 8.dp)
+            ) {
                 Text(stringResource(R.string.recording_list_row), style = MaterialTheme.typography.bodyLarge)
                 Text(
                     stringResource(R.string.recording_list_row_summary),

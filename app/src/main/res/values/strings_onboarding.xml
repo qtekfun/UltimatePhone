@@ -56,7 +56,7 @@
 
     <!-- Nextcloud -->
     <string name="onboarding_nextcloud_title">Nextcloud (optional)</string>
-    <string name="onboarding_nextcloud_body">You will be able to sync your own spam list and allowlist with your Nextcloud. This is optional and arrives in a later update.</string>
+    <string name="onboarding_nextcloud_body">You can sync your spam list and allowed numbers with your own Nextcloud. This is optional: set it up later in Settings > Nextcloud sync.</string>
     <string name="onboarding_nextcloud_later">Set up later</string>
     <string name="onboarding_nextcloud_now">Set up now</string>
 

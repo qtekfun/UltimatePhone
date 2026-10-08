@@ -121,6 +121,7 @@ dependencies {
     implementation(project(":core:spam"))
     implementation(project(":core:sync"))
     implementation(project(":core:settings"))
+    implementation(project(":core:recording"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

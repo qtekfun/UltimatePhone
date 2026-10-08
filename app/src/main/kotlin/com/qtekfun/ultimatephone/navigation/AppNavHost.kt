@@ -38,24 +38,25 @@ import com.qtekfun.ultimatephone.feature.onboarding.OnboardingGateViewModel
 import com.qtekfun.ultimatephone.feature.onboarding.OnboardingRoute
 import com.qtekfun.ultimatephone.feature.recents.recentsGraph
 import com.qtekfun.ultimatephone.feature.settings.settingsGraph
+import com.qtekfun.ultimatephone.feature.spam.spamWhyRoute
 
 /**
  * The app's navigation. Until the first-run flow (onboarding) has been completed, it is the only thing shown; it works
  * without an account or a network and its steps can be skipped.
  */
 @Composable
-fun AppNavHost(initialDialNumber: String?) {
+fun AppNavHost(initialDialNumber: String?, whyFlaggedNumber: String? = null, onWhyFlaggedHandled: () -> Unit = {}) {
     val gate: OnboardingGateViewModel = hiltViewModel()
     val onboardingCompleted by gate.completed.collectAsStateWithLifecycle()
     when (onboardingCompleted) {
         null -> Box(Modifier.fillMaxSize())
         false -> OnboardingRoute(onFinished = {})
-        true -> MainContent(initialDialNumber)
+        true -> MainContent(initialDialNumber, whyFlaggedNumber, onWhyFlaggedHandled)
     }
 }
 
 @Composable
-private fun MainContent(initialDialNumber: String?) {
+private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, onWhyFlaggedHandled: () -> Unit) {
     val navController = rememberNavController()
     val roleViewModel: RoleViewModel = hiltViewModel()
     val roleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
@@ -63,6 +64,13 @@ private fun MainContent(initialDialNumber: String?) {
     // A new tel: link while the app is already open must reach the keypad too, not only the first one.
     LaunchedEffect(initialDialNumber) {
         if (!initialDialNumber.isNullOrBlank()) navController.openDialer(initialDialNumber)
+    }
+    // Asked for by the call screen: open the explanation of its spam warning. Until the setup guide is done this is not reached.
+    LaunchedEffect(whyFlaggedNumber) {
+        if (whyFlaggedNumber != null) {
+            navController.navigate(spamWhyRoute(whyFlaggedNumber)) { launchSingleTop = true }
+            onWhyFlaggedHandled()
+        }
     }
     val backStack by navController.currentBackStackEntryAsState()
     val hierarchy = backStack?.destination?.hierarchy

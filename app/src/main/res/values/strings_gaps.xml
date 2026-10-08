@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Call screen: open the explanation of a spam warning in the app -->
+    <string name="gaps_incall_why_flagged">Why was this flagged?</string>
+    <string name="gaps_incall_why_flagged_hint">Opens the app. The call goes on.</string>
+</resources>

@@ -3,6 +3,13 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.0-rc3]
+
+- Business names on the keypad now work: the data packs use an index that Android supports (the previous one needed a SQLite module Android does not include). Data packs are updated automatically.
+- Contacts: find and merge duplicates (nothing is lost), groups, vCard import and export.
+- Call recording (microphone; it records the other person only through the speaker unless the phone allows line capture), with a legal notice and a folder of your choice.
+- Emulator smoke tests in CI, on Android with and without Google apps.
+
 ## [0.1.0-rc2]
 
 - Fixed a crash when opening the app for the first time (the contacts observer was registered before the permission was granted).

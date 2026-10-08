@@ -70,14 +70,28 @@ class SystemContactsRepository(
     @Volatile
     private var generation = 0L
 
-    init {
-        val invalidator = object : ContentObserver(Handler(Looper.getMainLooper())) {
-            override fun onChange(selfChange: Boolean) {
-                generation++
-                index = null
-            }
+    private val invalidator = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) {
+            generation++
+            index = null
         }
-        resolver.registerContentObserver(Contacts.CONTENT_URI, true, invalidator)
+    }
+
+    @Volatile
+    private var invalidatorRegistered = false
+
+    /**
+     * Watches the contacts so the search index is rebuilt after a change. Registering needs READ_CONTACTS, which the user
+     * grants after the app has started, so this is retried on use and never done at construction (that crashed start-up).
+     */
+    private fun ensureInvalidator() {
+        if (invalidatorRegistered || !canRead()) return
+        try {
+            resolver.registerContentObserver(Contacts.CONTENT_URI, true, invalidator)
+            invalidatorRegistered = true
+        } catch (_: SecurityException) {
+            // The permission was revoked between the check and the call; try again next time.
+        }
     }
 
     private fun hasPermission(permission: String) = ContextCompat.checkSelfPermission(appContext, permission) == PackageManager.PERMISSION_GRANTED
@@ -93,7 +107,11 @@ class SystemContactsRepository(
                 trySend(Unit)
             }
         }
-        resolver.registerContentObserver(uri, true, observer)
+        try {
+            resolver.registerContentObserver(uri, true, observer)
+        } catch (_: SecurityException) {
+            // Without the permission there is nothing to observe; the single initial emission loads an empty result.
+        }
         trySend(Unit)
         awaitClose { resolver.unregisterContentObserver(observer) }
     }.conflate()
@@ -146,6 +164,7 @@ class SystemContactsRepository(
     }
 
     private suspend fun currentIndex(): List<SuggestionEntry> {
+        ensureInvalidator()
         index?.let { return it }
         return indexLock.withLock {
             index ?: withContext(ioDispatcher) {

@@ -45,3 +45,7 @@ fun contactEditRoute(lookupKey: String? = null, number: String? = null): String 
 const val CALL_DETAIL_ROUTE = "recents/detail/{number}"
 
 fun callDetailRoute(number: String): String = "recents/detail/${android.net.Uri.encode(number)}"
+
+/** Sub-screens of Settings. Each owns a nested graph registered from `settingsGraph`. */
+const val SETTINGS_SPAM_ROUTE = "settings/spam"
+const val SETTINGS_DATA_ROUTE = "settings/data"

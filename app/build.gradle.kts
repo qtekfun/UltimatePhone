@@ -116,6 +116,7 @@ dependencies {
     implementation(project(":core:contacts"))
     implementation(project(":core:calllog"))
     implementation(project(":core:datapacks"))
+    implementation(project(":core:spam"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

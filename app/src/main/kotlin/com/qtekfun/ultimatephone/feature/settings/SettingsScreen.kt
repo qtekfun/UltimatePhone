@@ -34,10 +34,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.BuildConfig
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.designsystem.ThemeMode
+import com.qtekfun.ultimatephone.navigation.SETTINGS_DATA_ROUTE
+import com.qtekfun.ultimatephone.navigation.SETTINGS_SPAM_ROUTE
 import java.util.Locale
 
 @Composable
-fun SettingsScreen(onRequestPhoneRole: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
     var regionDialog by remember { mutableStateOf(false) }
@@ -62,6 +64,10 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, viewModel: SettingsViewModel 
         } else {
             Text(stringResource(R.string.settings_phone_app_unavailable))
         }
+
+        Section(R.string.settings_spam)
+        NavRow(R.string.settings_spam_title, R.string.settings_spam_summary) { onOpen(SETTINGS_SPAM_ROUTE) }
+        NavRow(R.string.settings_data_title, R.string.settings_data_summary) { onOpen(SETTINGS_DATA_ROUTE) }
 
         Section(R.string.settings_appearance)
         ThemeMode.entries.forEach { mode ->
@@ -104,6 +110,14 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, viewModel: SettingsViewModel 
                 regionDialog = false
             }
         )
+    }
+}
+
+@Composable
+private fun NavRow(title: Int, summary: Int, onClick: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp)) {
+        Text(stringResource(title), style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(summary), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

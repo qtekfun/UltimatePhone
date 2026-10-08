@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation(project(":core:phonenumber"))
+    implementation(project(":core:telecom"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.javax.inject)

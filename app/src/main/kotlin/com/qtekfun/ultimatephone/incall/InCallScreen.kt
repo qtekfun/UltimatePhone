@@ -60,6 +60,8 @@ import com.qtekfun.ultimatephone.core.telecom.AudioRoute
 import com.qtekfun.ultimatephone.core.telecom.CallDurationFormatter
 import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
+import com.qtekfun.ultimatephone.feature.spam.CallSpamPanel
+import com.qtekfun.ultimatephone.feature.spam.CallSpamUi
 import kotlinx.coroutines.delay
 
 private const val ENDED_DELAY_MS = 1500L
@@ -71,6 +73,7 @@ private val DIAL_KEYS = listOf("123", "456", "789", "*0#")
 fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: () -> Unit) {
     val calls by viewModel.calls.collectAsStateWithLifecycle()
     val audio by viewModel.audio.collectAsStateWithLifecycle()
+    val spam by viewModel.spam.collectAsStateWithLifecycle()
     var showKeypad by remember { mutableStateOf(false) }
 
     // Once nothing is left, show "call ended" for a moment and close.
@@ -97,6 +100,12 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
         ) {
             if (other != null) OtherCallCard(other, onSwap = viewModel::swap)
             CallHeader(primary)
+            CallSpamPanel(
+                ui = spam[primary.id] ?: CallSpamUi(),
+                ringing = primary.status == CallStatus.RINGING,
+                onNotSpam = { viewModel.notSpam(primary) },
+                onMarkSpam = { viewModel.markSpam(primary) }
+            )
             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 if (showKeypad && primary.status != CallStatus.RINGING) {
                     DtmfKeypad(onDown = { viewModel.dtmfDown(primary, it) }, onUp = { viewModel.dtmfUp(primary) })

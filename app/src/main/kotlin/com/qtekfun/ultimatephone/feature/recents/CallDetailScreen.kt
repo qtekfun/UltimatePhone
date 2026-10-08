@@ -65,6 +65,7 @@ fun CallDetailRoute(
     onAddToContact: (lookupKey: String, number: String) -> Unit,
     onOpenContact: (lookupKey: String) -> Unit,
     onEditContact: (lookupKey: String) -> Unit,
+    onWhyFlagged: (number: String) -> Unit,
     viewModel: CallDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -96,7 +97,11 @@ fun CallDetailRoute(
         onAddToExistingContact = { picker.launch(null) },
         onOpenContact = onOpenContact,
         onEditContact = onEditContact,
-        onDelete = { confirmDelete = true }
+        onDelete = { confirmDelete = true },
+        onMarkSpam = viewModel::markSpam,
+        onRemoveSpam = viewModel::removeFromSpam,
+        onAllow = viewModel::allow,
+        onWhyFlagged = { onWhyFlagged(state.number) }
     )
 
     Scaffold(
@@ -136,7 +141,7 @@ fun CallDetailRoute(
 private fun CallDetailContent(state: CallDetailUiState, handlers: DetailHandlers, modifier: Modifier = Modifier) {
     val caller = state.caller
     val title = caller?.title ?: stringResource(R.string.recents_unknown_caller)
-    val actions = detailActions(caller, state.isPrivate, state.entries.isNotEmpty(), handlers)
+    val actions = detailActions(caller, state.isPrivate, state.entries.isNotEmpty(), handlers, state.spam)
     LazyColumn(modifier.fillMaxSize()) {
         item(key = "header") {
             Column(

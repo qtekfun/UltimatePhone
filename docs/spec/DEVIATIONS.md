@@ -37,3 +37,11 @@ Each entry: what the spec says, what reality requires, what was done instead.
 - **Done:** only Bouncy Castle's lightweight `Ed25519Signer` is used (R8 removes the rest). The signature is detached
   (`manifest.json.sig`, base64 of the 64 raw bytes over the exact manifest bytes). The implementation is tested against
   the RFC 8032 test vector so it interoperates with the signer in the data pipeline.
+
+## D-006 · Spam decision on the call screen does not go through the caller label resolver
+- **Brief:** extend `TelecomCalls.labelResolver` so the in-call path warns when the screening role is not held.
+- **Reality:** `CallerLabel` carries a name and photo only, and the resolver runs once per call in the telecom module,
+  which must not know about spam. Changing it would also conflict with the business-name work in the same file.
+- **Done:** the in-call view model asks `DecisionEngine.verdictForCall`, which reuses the decision the screening
+  service just stored in `DecisionStore` (live map, 30 s) and otherwise decides and records it. Same decision, computed
+  once per call, no change to `core/telecom`. Without the screening role the app can warn but cannot silence or reject.

@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.qtekfun.ultimatephone.feature.spam.spamWhyRoute
 import com.qtekfun.ultimatephone.navigation.CALL_DETAIL_ROUTE
 import com.qtekfun.ultimatephone.navigation.callDetailRoute
 import com.qtekfun.ultimatephone.navigation.contactDetailRoute
@@ -28,7 +29,8 @@ fun NavGraphBuilder.recentsGraph(navController: NavController) {
                 onCreateContact = { number -> navController.navigate(contactEditRoute(number = number)) },
                 onAddToContact = { lookupKey, number -> navController.navigate(contactEditRoute(lookupKey = lookupKey, number = number)) },
                 onOpenContact = { lookupKey -> navController.navigate(contactDetailRoute(lookupKey)) },
-                onEditContact = { lookupKey -> navController.navigate(contactEditRoute(lookupKey = lookupKey)) }
+                onEditContact = { lookupKey -> navController.navigate(contactEditRoute(lookupKey = lookupKey)) },
+                onWhyFlagged = { number -> navController.navigate(spamWhyRoute(number)) }
             )
         }
     }

@@ -61,6 +61,10 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.designsystem.Avatar
+import com.qtekfun.ultimatephone.data.BusinessCategories
+import com.qtekfun.ultimatephone.data.BusinessHit
+import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
+import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
 
 private data class Key(val char: Char, val letters: String = "")
 
@@ -99,8 +103,10 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
         if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
         Suggestions(
             suggestions = state.suggestions,
+            businesses = state.businessSuggestions,
             modifier = Modifier.weight(1f).fillMaxWidth(),
-            onClick = { suggestion -> placeCall { viewModel.callSuggestion(suggestion) } }
+            onClick = { suggestion -> placeCall { viewModel.callSuggestion(suggestion) } },
+            onBusinessClick = { hit -> placeCall { viewModel.callBusiness(hit) } }
         )
         NumberField(
             text = state.displayNumber,
@@ -160,8 +166,10 @@ private fun DefaultPhoneBanner(onClick: () -> Unit) {
 @Composable
 private fun Suggestions(
     suggestions: List<com.qtekfun.ultimatephone.core.contacts.DialerSuggestion>,
+    businesses: List<BusinessHit>,
     modifier: Modifier,
-    onClick: (com.qtekfun.ultimatephone.core.contacts.DialerSuggestion) -> Unit
+    onClick: (com.qtekfun.ultimatephone.core.contacts.DialerSuggestion) -> Unit,
+    onBusinessClick: (BusinessHit) -> Unit
 ) {
     LazyColumn(modifier = modifier, reverseLayout = true, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         items(suggestions, key = { it.lookupKey + it.number }) { suggestion ->
@@ -174,6 +182,19 @@ private fun Suggestions(
                 Column {
                     Text(suggestion.displayName, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(suggestion.number, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+        items(businesses, key = { "business:" + it.e164 }) { hit ->
+            Row(
+                modifier = Modifier.fillMaxWidth().combinedClickable(onClick = { onBusinessClick(hit) }).padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                BusinessAvatar(BusinessCategories.iconName(hit.category))
+                Column {
+                    Text(hit.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    BusinessCategoryLine(BusinessCategories.normalized(hit.category), BusinessCategories.iconName(hit.category))
                 }
             }
         }

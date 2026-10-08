@@ -48,4 +48,9 @@
     <string name="settings_about">About</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_diagnostics">Show device capabilities</string>
+    <string name="settings_spam">Spam protection</string>
+    <string name="settings_spam_title">Spam filter</string>
+    <string name="settings_spam_summary">Levels, your own list, allowed numbers and sources</string>
+    <string name="settings_data_title">Data</string>
+    <string name="settings_data_summary">Regions, businesses and updates</string>
 </resources>

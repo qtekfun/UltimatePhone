@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Spam -->
+    <string name="spam_title">Spam filter</string>
+    <string name="spam_back">Back</string>
+    <string name="spam_role_title">Call screening</string>
+    <string name="spam_role_held">UltimatePhone screens your incoming calls, so flagged calls can be silenced or rejected before they ring.</string>
+    <string name="spam_role_missing">UltimatePhone is not your call screening app. Warnings still appear on the call screen, but calls cannot be silenced or rejected automatically.</string>
+    <string name="spam_role_unavailable">This device does not offer a call screening role. Warnings still appear on the call screen.</string>
+    <string name="spam_role_request">Use UltimatePhone for call screening</string>
+    <string name="spam_actions_title">What to do with flagged calls</string>
+    <string name="spam_actions_help">Choose an action for each kind of match. Warn shows a notice on the call screen and lets the call through.</string>
+    <string name="spam_level_own">Your spam list</string>
+    <string name="spam_level_community">Community sources</string>
+    <string name="spam_level_rule">Prefix rules</string>
+    <string name="spam_action_none">Nothing</string>
+    <string name="spam_action_warn">Warn</string>
+    <string name="spam_action_silence">Silence</string>
+    <string name="spam_action_reject">Reject</string>
+    <string name="spam_commercial_title">Commercial calls</string>
+    <string name="spam_commercial_help">Companies in Spain have to call from numbers starting with 400. This is information, not spam: by default the call is only labelled. You can choose to silence or reject it.</string>
+    <string name="spam_business_title">Identified business is not spam</string>
+    <string name="spam_business_help">A number identified as a business is shown with its name even if a source lists it.</string>
+    <string name="spam_own_list_title">Your spam list</string>
+    <string name="spam_own_list_summary">Numbers and prefixes you flagged yourself</string>
+    <string name="spam_allowed_title">Allowed numbers</string>
+    <string name="spam_allowed_summary">Numbers and prefixes that are never filtered</string>
+    <string name="spam_data_link_title">Sources and data packs</string>
+    <string name="spam_data_link_summary">Where flagged numbers and businesses come from</string>
+    <string name="spam_latency">Slowest recent screening: %1$d ms</string>
+
+    <!-- Own list and allowed numbers -->
+    <string name="spam_own_list_empty">Your spam list is empty. Mark a number as spam from the call history or add one here.</string>
+    <string name="spam_allowed_empty">No allowed numbers. Numbers you add here are never flagged.</string>
+    <string name="spam_add">Add</string>
+    <string name="spam_kind_number">Number</string>
+    <string name="spam_kind_prefix">Prefix</string>
+    <string name="spam_field_number">Phone number</string>
+    <string name="spam_field_prefix">Prefix with country code</string>
+    <string name="spam_field_label">Label (optional)</string>
+    <string name="spam_field_note">Note (optional)</string>
+    <string name="spam_error_number">This is not a valid phone number.</string>
+    <string name="spam_error_prefix">Enter a prefix with country code and at least 4 digits, for example +34900.</string>
+    <string name="spam_save">Save</string>
+    <string name="spam_cancel">Cancel</string>
+    <string name="spam_entry_prefix">Prefix %1$s</string>
+    <string name="spam_entry_added">Added %1$s</string>
+    <string name="spam_remove_entry">Remove %1$s</string>
+
+    <!-- Why was this flagged -->
+    <string name="spam_why_title">Why was this flagged?</string>
+    <string name="spam_why_number">Number</string>
+    <string name="spam_why_level">Level</string>
+    <string name="spam_why_reason">Reason</string>
+    <string name="spam_why_date">Date</string>
+    <string name="spam_why_action">Action</string>
+    <string name="spam_why_none">No decision has been recorded for this number yet.</string>
+    <string name="spam_why_allowed">This number is in your allowed numbers.</string>
+    <string name="spam_not_spam">Not spam</string>
+    <string name="spam_reason_own">It is in your spam list.</string>
+    <string name="spam_reason_source">It is listed by the source %1$s.</string>
+    <string name="spam_reason_rule">It matches the rule: %1$s.</string>
+    <string name="spam_reason_business">Identified business: %1$s.</string>
+    <string name="spam_reason_business_category">Identified business: %1$s (%2$s).</string>
+    <string name="spam_reason_contact">It belongs to one of your contacts.</string>
+    <string name="spam_reason_allowed">It is in your allowed numbers.</string>
+    <string name="spam_reason_nothing">Nothing flagged this number.</string>
+    <string name="spam_short_source">Source %1$s</string>
+    <string name="spam_rule_es_400_commercial">Commercial call (prefix 400)</string>
+    <string name="spam_rule_generic">Matches a prefix rule</string>
+
+    <!-- Call screen -->
+    <string name="spam_incall_warning_title">Possible spam call</string>
+    <string name="spam_incall_warning_body">Flagged by: %1$s. %2$s</string>
+    <string name="spam_incall_mark_spam">Mark as spam</string>
+    <string name="spam_incall_marked">Added to your spam list.</string>
+    <string name="spam_incall_allowed">Added to your allowed numbers.</string>
+
+    <!-- Call history -->
+    <string name="spam_filter_chip">Spam</string>
+    <string name="spam_badge">Spam</string>
+    <string name="spam_badge_reason">Spam · %1$s</string>
+    <string name="spam_badge_info">Commercial call</string>
+    <string name="spam_action_mark">Mark as spam</string>
+    <string name="spam_action_unmark">Remove from spam list</string>
+    <string name="spam_action_allow">Add to allowed numbers</string>
+    <string name="spam_action_remove_allowed">Remove from allowed numbers</string>
+    <string name="spam_action_why">Why was this flagged?</string>
+</resources>

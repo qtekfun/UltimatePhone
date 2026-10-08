@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "guides": [
+    {
+      "id": "coloros",
+      "manufacturers": ["oppo", "realme", "oneplus"],
+      "topics": {
+        "battery": {
+          "textKey": "onboarding_oem_coloros_battery",
+          "intents": [
+            { "component": "com.oplus.battery/com.oplus.powermanager.fuelgaue.PowerUsageModelActivity" },
+            { "component": "com.coloros.oppoguardelf/com.coloros.powermanager.fuelgaue.PowerUsageModelActivity" },
+            { "component": "com.coloros.oppoguardelf/com.coloros.powermanager.fuelgaue.PowerConsumptionActivity" }
+          ]
+        },
+        "autostart": {
+          "textKey": "onboarding_oem_coloros_autostart",
+          "intents": [
+            { "component": "com.oplus.safecenter/com.oplus.safecenter.permission.startup.StartupAppListActivity" },
+            { "component": "com.coloros.safecenter/com.coloros.safecenter.permission.startup.StartupAppListActivity" },
+            { "component": "com.coloros.safecenter/com.coloros.safecenter.startupapp.StartupAppListActivity" }
+          ]
+        },
+        "popup": {
+          "textKey": "onboarding_oem_coloros_popup",
+          "intents": [
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        },
+        "fullscreen": {
+          "textKey": "onboarding_oem_coloros_fullscreen",
+          "intents": [
+            { "action": "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", "data": "package:{package}" },
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "samsung",
+      "manufacturers": ["samsung"],
+      "topics": {
+        "battery": {
+          "textKey": "onboarding_oem_samsung_battery",
+          "intents": [
+            { "component": "com.samsung.android.lool/com.samsung.android.sm.battery.ui.BatteryActivity" },
+            { "component": "com.samsung.android.sm_cn/com.samsung.android.sm.battery.ui.BatteryActivity" },
+            { "action": "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS" }
+          ]
+        },
+        "autostart": {
+          "textKey": "onboarding_oem_samsung_autostart",
+          "intents": [
+            { "component": "com.samsung.android.lool/com.samsung.android.sm.battery.ui.usage.CheckableAppListActivity" },
+            { "component": "com.samsung.android.lool/com.samsung.android.sm.battery.ui.BatteryActivity" }
+          ]
+        },
+        "popup": {
+          "textKey": "onboarding_oem_samsung_popup",
+          "intents": [
+            { "action": "android.settings.action.MANAGE_OVERLAY_PERMISSION", "data": "package:{package}" }
+          ]
+        },
+        "fullscreen": {
+          "textKey": "onboarding_oem_samsung_fullscreen",
+          "intents": [
+            { "action": "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", "data": "package:{package}" },
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "xiaomi",
+      "manufacturers": ["xiaomi", "redmi", "poco", "blackshark"],
+      "topics": {
+        "battery": {
+          "textKey": "onboarding_oem_xiaomi_battery",
+          "intents": [
+            {
+              "component": "com.miui.powerkeeper/com.miui.powerkeeper.ui.HiddenAppsConfigActivity",
+              "extras": { "package_name": "{package}" }
+            }
+          ]
+        },
+        "autostart": {
+          "textKey": "onboarding_oem_xiaomi_autostart",
+          "intents": [
+            { "component": "com.miui.securitycenter/com.miui.permcenter.autostart.AutoStartManagementActivity" }
+          ]
+        },
+        "popup": {
+          "textKey": "onboarding_oem_xiaomi_popup",
+          "intents": [
+            { "action": "miui.intent.action.APP_PERM_EDITOR", "extras": { "extra_pkgname": "{package}" } },
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        },
+        "fullscreen": {
+          "textKey": "onboarding_oem_xiaomi_fullscreen",
+          "intents": [
+            { "action": "miui.intent.action.APP_PERM_EDITOR", "extras": { "extra_pkgname": "{package}" } },
+            { "action": "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", "data": "package:{package}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "stock",
+      "manufacturers": ["google", "motorola", "nokia", "hmd global", "fairphone", "sony"],
+      "topics": {
+        "battery": {
+          "textKey": "onboarding_oem_stock_battery",
+          "intents": [
+            { "action": "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS" }
+          ]
+        },
+        "autostart": {
+          "textKey": "onboarding_oem_stock_autostart",
+          "intents": []
+        },
+        "popup": {
+          "textKey": "onboarding_oem_stock_popup",
+          "intents": [
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        },
+        "fullscreen": {
+          "textKey": "onboarding_oem_stock_fullscreen",
+          "intents": [
+            { "action": "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", "data": "package:{package}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "generic",
+      "manufacturers": [],
+      "topics": {
+        "battery": {
+          "textKey": "onboarding_oem_generic_battery",
+          "intents": [
+            { "action": "android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS" },
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        },
+        "autostart": {
+          "textKey": "onboarding_oem_generic_autostart",
+          "intents": [
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        },
+        "popup": {
+          "textKey": "onboarding_oem_generic_popup",
+          "intents": [
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        },
+        "fullscreen": {
+          "textKey": "onboarding_oem_generic_fullscreen",
+          "intents": [
+            { "action": "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT", "data": "package:{package}" },
+            { "action": "android.settings.APPLICATION_DETAILS_SETTINGS", "data": "package:{package}" }
+          ]
+        }
+      }
+    }
+  ]
+}

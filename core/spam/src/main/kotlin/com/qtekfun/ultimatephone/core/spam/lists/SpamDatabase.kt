@@ -1,6 +1,7 @@
 package com.qtekfun.ultimatephone.core.spam.lists
 
 import android.content.Context
+import androidx.room3.AutoMigration
 import androidx.room3.Dao
 import androidx.room3.Database
 import androidx.room3.Entity
@@ -61,12 +62,19 @@ interface ListEntryDao {
     suspend fun upsertAll(entries: List<ListEntryEntity>)
 }
 
-@Database(entities = [ListEntryEntity::class], version = SpamDatabase.VERSION, exportSchema = true)
+@Database(
+    entities = [ListEntryEntity::class, CallDecisionEntity::class],
+    version = SpamDatabase.VERSION,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)]
+)
 abstract class SpamDatabase : RoomDatabase() {
     abstract fun listEntryDao(): ListEntryDao
 
+    abstract fun callDecisionDao(): CallDecisionDao
+
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
         const val FILE_NAME = "spam.db"
 
         fun create(context: Context): SpamDatabase = Room.databaseBuilder<SpamDatabase>(context.applicationContext, FILE_NAME)

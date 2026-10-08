@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_title">Data</string>
+    <string name="data_back">Back</string>
+    <string name="data_cancel">Cancel</string>
+    <string name="data_retry">Retry</string>
+
+    <!-- Status -->
+    <string name="data_last_update">Last update: %1$s</string>
+    <string name="data_never_updated">Not updated yet</string>
+    <string name="data_last_error">Last problem: %1$s</string>
+    <string name="data_update_now">Update now</string>
+    <string name="data_updating">Updating…</string>
+    <string name="data_update_done">Everything is up to date</string>
+    <string name="data_update_failed">The update did not finish. See the status above.</string>
+    <string name="data_no_network">There is no network connection.</string>
+    <string name="data_blocked_wifi">“Update over Wi-Fi only” is on and you are not on an unmetered network. Connect to Wi-Fi or turn the option off.</string>
+
+    <!-- Errors -->
+    <string name="data_error_network">No connection, or the server did not answer</string>
+    <string name="data_error_signature">The list of packs failed its signature check and was ignored</string>
+    <string name="data_error_manifest">The list of packs is damaged or needs a newer version of the app</string>
+    <string name="data_error_invalid_url">The address must be a valid https:// URL</string>
+    <string name="data_error_too_large">The file is too large</string>
+    <string name="data_error_no_numbers">The file contains no valid phone numbers</string>
+    <string name="data_error_wifi_only">Waiting for Wi-Fi</string>
+    <string name="data_error_storage">Could not write to storage</string>
+    <string name="data_error_http">The server answered with error %1$s</string>
+    <string name="data_error_unknown">Unknown problem</string>
+    <string name="data_install_network">The download was interrupted</string>
+    <string name="data_install_corrupt">The download was damaged or did not match the signed list</string>
+    <string name="data_install_unsupported">This pack cannot be used by this version of the app</string>
+
+    <!-- Packs -->
+    <string name="data_packs_title">Data packs</string>
+    <string name="data_loading_list">Loading the list of packs…</string>
+    <string name="data_no_manifest">The list of packs has not been downloaded yet. Connect to the internet and try again. Everything else works without it.</string>
+    <string name="data_cached_notice">You are offline or the server is unreachable. Showing the last list that was downloaded.</string>
+    <string name="data_region_global">All regions</string>
+    <string name="data_pack_businesses">Businesses</string>
+    <string name="data_pack_rules">Prefix rules</string>
+    <string name="data_pack_spam">Spam list (%1$s)</string>
+    <string name="data_pack_sizes">Download %1$s · installed %2$s</string>
+    <string name="data_pack_detail">Version %1$s · download %2$s · installed %3$s</string>
+    <string name="data_installed">Installed</string>
+    <string name="data_update_available">Update available</string>
+    <string name="data_install">Install</string>
+    <string name="data_update">Update</string>
+    <string name="data_remove">Remove</string>
+    <string name="data_region_install_all">Install all (%1$s)</string>
+    <string name="data_region_remove_all">Remove all</string>
+    <string name="data_progress">%1$s of %2$s</string>
+    <string name="data_metered_title">Use mobile data?</string>
+    <string name="data_metered_body">You are not on Wi-Fi. Download %1$s anyway?</string>
+    <string name="data_metered_confirm">Download anyway</string>
+
+    <!-- Update settings -->
+    <string name="data_updates_title">Updates</string>
+    <string name="data_wifi_only">Update over Wi-Fi only</string>
+    <string name="data_wifi_only_summary">Packs and sources are only downloaded on unmetered networks.</string>
+    <string name="data_auto_update">Update automatically</string>
+    <string name="data_auto_update_summary">Check once a day in the background.</string>
+
+    <!-- Storage -->
+    <string name="data_storage_title">Storage</string>
+    <string name="data_space_used">Space used by data: %1$s</string>
+    <string name="data_delete_all">Delete downloaded data</string>
+    <string name="data_delete_all_title">Delete all data packs?</string>
+    <string name="data_delete_all_body">Business names and downloaded lists are removed from this device. You can download them again at any time.</string>
+    <string name="data_delete_confirm">Delete</string>
+
+    <!-- Custom sources -->
+    <string name="data_sources_title">Custom spam sources</string>
+    <string name="data_sources_summary">Lists of phone numbers you add by https:// address. They are downloaded to this device and checked there; no number ever leaves it.</string>
+    <string name="data_sources_empty">No custom sources yet.</string>
+    <string name="data_source_add">Add source</string>
+    <string name="data_source_name">Name</string>
+    <string name="data_source_url">Address (https://)</string>
+    <string name="data_source_format">Format</string>
+    <string name="data_format_txt">Text, one number per line</string>
+    <string name="data_format_csv">CSV</string>
+    <string name="data_format_jsonl">JSON Lines</string>
+    <string name="data_source_level">Treat matches as</string>
+    <string name="data_level_community">Community list</string>
+    <string name="data_level_rule">Rule</string>
+    <string name="data_source_test">Test download</string>
+    <string name="data_source_testing">Testing…</string>
+    <string name="data_source_test_ok">Found %1$d valid numbers (%2$d invalid, %3$d repeated).</string>
+    <string name="data_source_updated">Updated %1$s · %2$d numbers</string>
+    <string name="data_source_never">Not downloaded yet</string>
+    <string name="data_source_refresh">Refresh</string>
+    <string name="data_source_remove_title">Remove this source?</string>
+    <string name="data_source_remove_body">%1$s and its downloaded numbers are removed from this device.</string>
+
+    <!-- Attribution (mandatory) -->
+    <string name="data_attribution_title">Business data</string>
+    <string name="data_attribution_text">Business names come from OpenStreetMap. © OpenStreetMap contributors. The data is available under the Open Database Licence (ODbL).</string>
+    <string name="data_coverage_note">Coverage is partial: many businesses have no phone number on the map.</string>
+    <string name="data_attribution_osm_link">OpenStreetMap copyright</string>
+    <string name="data_attribution_licence_link">Read the ODbL licence</string>
+
+    <!-- Business categories (ids defined by the data repository) -->
+    <string name="data_category_food">Food and drink</string>
+    <string name="data_category_grocery">Groceries</string>
+    <string name="data_category_shopping">Shopping</string>
+    <string name="data_category_health">Health</string>
+    <string name="data_category_lodging">Accommodation</string>
+    <string name="data_category_automotive">Automotive</string>
+    <string name="data_category_finance">Finance</string>
+    <string name="data_category_beauty">Beauty</string>
+    <string name="data_category_services">Services</string>
+    <string name="data_category_office">Office</string>
+    <string name="data_category_education">Education</string>
+    <string name="data_category_government">Government</string>
+    <string name="data_category_transport">Transport</string>
+    <string name="data_category_leisure">Leisure</string>
+    <string name="data_category_culture">Culture</string>
+    <string name="data_category_other">Business</string>
+    <string name="data_business_suggestions">Businesses</string>
+</resources>

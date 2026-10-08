@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_title">Datos</string>
+    <string name="data_back">Atrás</string>
+    <string name="data_cancel">Cancelar</string>
+    <string name="data_retry">Reintentar</string>
+
+    <!-- Estado -->
+    <string name="data_last_update">Última actualización: %1$s</string>
+    <string name="data_never_updated">Aún sin actualizar</string>
+    <string name="data_last_error">Último problema: %1$s</string>
+    <string name="data_update_now">Actualizar ahora</string>
+    <string name="data_updating">Actualizando…</string>
+    <string name="data_update_done">Todo está al día</string>
+    <string name="data_update_failed">La actualización no terminó. Mira el estado de arriba.</string>
+    <string name="data_no_network">No hay conexión de red.</string>
+    <string name="data_blocked_wifi">«Actualizar solo con Wi-Fi» está activado y no estás en una red sin tarifa por uso. Conéctate a Wi-Fi o desactiva la opción.</string>
+
+    <!-- Errores -->
+    <string name="data_error_network">Sin conexión o el servidor no respondió</string>
+    <string name="data_error_signature">La lista de paquetes no superó la comprobación de firma y se ignoró</string>
+    <string name="data_error_manifest">La lista de paquetes está dañada o necesita una versión más reciente de la app</string>
+    <string name="data_error_invalid_url">La dirección debe ser una URL https:// válida</string>
+    <string name="data_error_too_large">El archivo es demasiado grande</string>
+    <string name="data_error_no_numbers">El archivo no contiene números de teléfono válidos</string>
+    <string name="data_error_wifi_only">Esperando Wi-Fi</string>
+    <string name="data_error_storage">No se pudo escribir en el almacenamiento</string>
+    <string name="data_error_http">El servidor respondió con el error %1$s</string>
+    <string name="data_error_unknown">Problema desconocido</string>
+    <string name="data_install_network">La descarga se interrumpió</string>
+    <string name="data_install_corrupt">La descarga estaba dañada o no coincidía con la lista firmada</string>
+    <string name="data_install_unsupported">Esta versión de la app no puede usar este paquete</string>
+
+    <!-- Paquetes -->
+    <string name="data_packs_title">Paquetes de datos</string>
+    <string name="data_loading_list">Cargando la lista de paquetes…</string>
+    <string name="data_no_manifest">Aún no se ha descargado la lista de paquetes. Conéctate a internet y vuelve a intentarlo. Todo lo demás funciona sin ella.</string>
+    <string name="data_cached_notice">Estás sin conexión o el servidor no responde. Se muestra la última lista descargada.</string>
+    <string name="data_region_global">Todas las regiones</string>
+    <string name="data_pack_businesses">Comercios</string>
+    <string name="data_pack_rules">Reglas de prefijo</string>
+    <string name="data_pack_spam">Lista de spam (%1$s)</string>
+    <string name="data_pack_sizes">Descarga %1$s · instalado %2$s</string>
+    <string name="data_pack_detail">Versión %1$s · descarga %2$s · instalado %3$s</string>
+    <string name="data_installed">Instalado</string>
+    <string name="data_update_available">Actualización disponible</string>
+    <string name="data_install">Instalar</string>
+    <string name="data_update">Actualizar</string>
+    <string name="data_remove">Quitar</string>
+    <string name="data_region_install_all">Instalar todo (%1$s)</string>
+    <string name="data_region_remove_all">Quitar todo</string>
+    <string name="data_progress">%1$s de %2$s</string>
+    <string name="data_metered_title">¿Usar datos móviles?</string>
+    <string name="data_metered_body">No estás en una red Wi-Fi. ¿Descargar %1$s de todos modos?</string>
+    <string name="data_metered_confirm">Descargar igualmente</string>
+
+    <!-- Ajustes de actualización -->
+    <string name="data_updates_title">Actualizaciones</string>
+    <string name="data_wifi_only">Actualizar solo con Wi-Fi</string>
+    <string name="data_wifi_only_summary">Los paquetes y las fuentes solo se descargan en redes sin tarifa por uso.</string>
+    <string name="data_auto_update">Actualizar automáticamente</string>
+    <string name="data_auto_update_summary">Comprobar una vez al día en segundo plano.</string>
+
+    <!-- Almacenamiento -->
+    <string name="data_storage_title">Almacenamiento</string>
+    <string name="data_space_used">Espacio usado por los datos: %1$s</string>
+    <string name="data_delete_all">Borrar los datos descargados</string>
+    <string name="data_delete_all_title">¿Borrar todos los paquetes de datos?</string>
+    <string name="data_delete_all_body">Los nombres de comercios y las listas descargadas se eliminan de este dispositivo. Puedes volver a descargarlos cuando quieras.</string>
+    <string name="data_delete_confirm">Borrar</string>
+
+    <!-- Fuentes personalizadas -->
+    <string name="data_sources_title">Fuentes de spam personalizadas</string>
+    <string name="data_sources_summary">Listas de números de teléfono que añades por dirección https://. Se descargan a este dispositivo y se comprueban aquí; ningún número sale de él.</string>
+    <string name="data_sources_empty">Aún no hay fuentes personalizadas.</string>
+    <string name="data_source_add">Añadir fuente</string>
+    <string name="data_source_name">Nombre</string>
+    <string name="data_source_url">Dirección (https://)</string>
+    <string name="data_source_format">Formato</string>
+    <string name="data_format_txt">Texto, un número por línea</string>
+    <string name="data_format_csv">CSV</string>
+    <string name="data_format_jsonl">JSON Lines</string>
+    <string name="data_source_level">Tratar las coincidencias como</string>
+    <string name="data_level_community">Lista comunitaria</string>
+    <string name="data_level_rule">Regla</string>
+    <string name="data_source_test">Probar descarga</string>
+    <string name="data_source_testing">Probando…</string>
+    <string name="data_source_test_ok">Se encontraron %1$d números válidos (%2$d no válidos, %3$d repetidos).</string>
+    <string name="data_source_updated">Actualizada %1$s · %2$d números</string>
+    <string name="data_source_never">Aún sin descargar</string>
+    <string name="data_source_refresh">Actualizar</string>
+    <string name="data_source_remove_title">¿Quitar esta fuente?</string>
+    <string name="data_source_remove_body">%1$s y sus números descargados se eliminan de este dispositivo.</string>
+
+    <!-- Atribución (obligatoria) -->
+    <string name="data_attribution_title">Datos de comercios</string>
+    <string name="data_attribution_text">Los nombres de comercios proceden de OpenStreetMap. © Colaboradores de OpenStreetMap. Los datos están disponibles bajo la Licencia de Base de Datos Abierta (ODbL).</string>
+    <string name="data_coverage_note">La cobertura es parcial: muchos comercios no tienen teléfono en el mapa.</string>
+    <string name="data_attribution_osm_link">Derechos de autor de OpenStreetMap</string>
+    <string name="data_attribution_licence_link">Leer la licencia ODbL</string>
+
+    <!-- Categorías de comercios (ids definidos por el repositorio de datos) -->
+    <string name="data_category_food">Comida y bebida</string>
+    <string name="data_category_grocery">Alimentación</string>
+    <string name="data_category_shopping">Tiendas</string>
+    <string name="data_category_health">Salud</string>
+    <string name="data_category_lodging">Alojamiento</string>
+    <string name="data_category_automotive">Automoción</string>
+    <string name="data_category_finance">Finanzas</string>
+    <string name="data_category_beauty">Belleza</string>
+    <string name="data_category_services">Servicios</string>
+    <string name="data_category_office">Oficinas</string>
+    <string name="data_category_education">Educación</string>
+    <string name="data_category_government">Administración</string>
+    <string name="data_category_transport">Transporte</string>
+    <string name="data_category_leisure">Ocio</string>
+    <string name="data_category_culture">Cultura</string>
+    <string name="data_category_other">Comercio</string>
+    <string name="data_business_suggestions">Comercios</string>
+</resources>

@@ -67,6 +67,14 @@ class CallTypeAndFilterTest {
     }
 
     @Test
+    fun spamMatchesWhatThePredicateFlagsAndNothingWithoutIt() {
+        val all = listOf(entry(3, number = "+34900111222"), entry(2, number = "+34600111222"), entry(1, number = "+34900111222"))
+        assertTrue(all.filtered(CallLogFilter.Spam).isEmpty())
+        assertEquals(listOf(3L, 1L), all.filtered(CallLogFilter.Spam) { it.number == "+34900111222" }.map { it.id })
+        assertFalse(CallLogFilter.Missed.matches(entry(1, type = CallType.INCOMING)) { true })
+    }
+
+    @Test
     fun filteredKeepsOrderAndShortCircuitsAll() {
         val all = listOf(entry(3, type = CallType.MISSED), entry(2, type = CallType.OUTGOING), entry(1, type = CallType.MISSED))
         assertEquals(listOf(3L, 1L), all.filtered(CallLogFilter.Missed).map { it.id })

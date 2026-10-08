@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_settings_title">Setup guide</string>
+    <string name="onboarding_settings_summary">Phone role, permissions, data regions and battery settings</string>
+
+    <string name="onboarding_step_of">Step %1$d of %2$d</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_next">Continue</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_skip">Skip for now</string>
+
+    <!-- Welcome -->
+    <string name="onboarding_welcome_title">Welcome to UltimatePhone</string>
+    <string name="onboarding_welcome_body">A phone app that keeps everything on your device. It names businesses and warns you about unwanted calls using lists stored on your phone.</string>
+    <string name="onboarding_welcome_point_private">Phone numbers never leave your device.</string>
+    <string name="onboarding_welcome_point_offline">No account and no internet connection are needed.</string>
+    <string name="onboarding_welcome_point_optional">Every step after this one is optional and can be done later in Settings.</string>
+
+    <!-- Roles -->
+    <string name="onboarding_roles_title">Make it your phone app</string>
+    <string name="onboarding_roles_body">Android lets you choose which app handles calls and which one screens them. Both choices are optional and you can change them at any time in Android settings.</string>
+    <string name="onboarding_role_phone_title">Phone app</string>
+    <string name="onboarding_role_phone_body">Shows incoming calls, the call screen and your call history.</string>
+    <string name="onboarding_role_screening_title">Call screening</string>
+    <string name="onboarding_role_screening_body">Lets the app check an incoming number against your lists before the phone rings.</string>
+    <string name="onboarding_role_active">Active</string>
+    <string name="onboarding_role_unavailable">Not available on this device</string>
+    <string name="onboarding_role_request">Choose</string>
+
+    <!-- Permissions -->
+    <string name="onboarding_perm_title">Permissions</string>
+    <string name="onboarding_perm_body">Each permission is requested on its own, with the reason. You can refuse any of them; the matching feature simply stays off.</string>
+    <string name="onboarding_perm_allow">Allow</string>
+    <string name="onboarding_perm_granted">Allowed</string>
+    <string name="onboarding_perm_blocked">Android is not asking again. You can allow it in the app\'s system settings.</string>
+    <string name="onboarding_perm_open_settings">Open app settings</string>
+    <string name="onboarding_perm_phone_title">Calls and phone state</string>
+    <string name="onboarding_perm_phone_reason">Needed to place calls, to know which SIM is used and to answer or reject calls from the call screen.</string>
+    <string name="onboarding_perm_contacts_title">Contacts</string>
+    <string name="onboarding_perm_contacts_reason">Needed to show names for numbers, to search while you dial and to edit your contacts. Contacts are never uploaded.</string>
+    <string name="onboarding_perm_calllog_title">Call history</string>
+    <string name="onboarding_perm_calllog_reason">Needed to show and manage your recent calls.</string>
+    <string name="onboarding_perm_notifications_title">Notifications</string>
+    <string name="onboarding_perm_notifications_reason">Needed to show incoming and missed calls when the app is not on screen.</string>
+
+    <!-- Data regions -->
+    <string name="onboarding_data_title">Data for your region</string>
+    <string name="onboarding_data_body">Choose the countries whose business names and prefix rules you want. They are signed packs downloaded to your phone, and you can remove them at any time.</string>
+    <string name="onboarding_data_loading">Loading regions…</string>
+    <string name="onboarding_data_offline">The list of regions could not be loaded. You can retry, or skip this step and choose in Settings > Data when you are online.</string>
+    <string name="onboarding_data_cached">You seem to be offline. Showing the last list that was downloaded.</string>
+    <string name="onboarding_data_size">Download %1$s · installed %2$s</string>
+    <string name="onboarding_data_total">Selected: download %1$s, installed %2$s.</string>
+    <string name="onboarding_data_none">Nothing selected. You can add regions later in Settings > Data.</string>
+    <string name="onboarding_data_wifi_warning">You are not on Wi-Fi. Downloads wait for Wi-Fi unless you change that in Settings > Data.</string>
+
+    <!-- Nextcloud -->
+    <string name="onboarding_nextcloud_title">Nextcloud (optional)</string>
+    <string name="onboarding_nextcloud_body">You will be able to sync your own spam list and allowlist with your Nextcloud. This is optional and arrives in a later update.</string>
+    <string name="onboarding_nextcloud_later">Set up later</string>
+    <string name="onboarding_nextcloud_now">Set up now</string>
+
+    <!-- Battery and background -->
+    <string name="onboarding_battery_title">Keep calls reliable</string>
+    <string name="onboarding_battery_body">Some phones stop background apps to save battery, which can delay the call screen or hide it over the lock screen. These settings prevent that.</string>
+    <string name="onboarding_battery_detected">Detected: %1$s (%2$s)</string>
+    <string name="onboarding_open_settings">Open settings</string>
+    <string name="onboarding_open_failed">This phone has no screen for that. Follow the steps above in Android settings.</string>
+    <string name="onboarding_topic_battery">Battery optimisation</string>
+    <string name="onboarding_topic_autostart">Auto-start</string>
+    <string name="onboarding_topic_popup">Pop-ups in the background</string>
+    <string name="onboarding_topic_fullscreen">Full-screen calls over the lock screen</string>
+    <string name="onboarding_guide_coloros">ColorOS, OPPO, realme, OnePlus</string>
+    <string name="onboarding_guide_samsung">Samsung One UI</string>
+    <string name="onboarding_guide_xiaomi">Xiaomi, Redmi, POCO</string>
+    <string name="onboarding_guide_stock">Android as shipped by Google</string>
+    <string name="onboarding_guide_generic">Generic guide</string>
+
+    <!-- Summary -->
+    <string name="onboarding_summary_title">All set</string>
+    <string name="onboarding_summary_body">This is where things stand. You can change any of it later.</string>
+    <string name="onboarding_summary_phone">Phone app</string>
+    <string name="onboarding_summary_screening">Call screening</string>
+    <string name="onboarding_summary_yes">on</string>
+    <string name="onboarding_summary_not_yet">not yet</string>
+    <string name="onboarding_summary_regions">Data regions: %1$s (about %2$s to download)</string>
+    <string name="onboarding_summary_no_regions">No data regions selected.</string>
+    <string name="onboarding_summary_later">To do later in Settings:</string>
+    <string name="onboarding_summary_download_now">The download starts as soon as you finish.</string>
+    <string name="onboarding_summary_download_later">There is no suitable connection now. The download starts automatically when you are on Wi-Fi.</string>
+    <string name="onboarding_summary_finish_download">Finish and download</string>
+    <string name="onboarding_summary_finish_no_download">Finish without downloading</string>
+    <string name="onboarding_summary_finish">Finish</string>
+    <string name="onboarding_step_name_roles">Phone app and call screening</string>
+    <string name="onboarding_step_name_permissions">Permissions</string>
+    <string name="onboarding_step_name_data">Data regions</string>
+    <string name="onboarding_step_name_nextcloud">Nextcloud</string>
+    <string name="onboarding_step_name_battery">Battery and background settings</string>
+    <string name="onboarding_step_name_other">Other settings</string>
+
+    <!-- Manufacturer guides. Looked up by name from assets/oem_guides.json: add a language by adding the same names. -->
+    <string name="onboarding_oem_coloros_battery">Open Settings > Battery and find UltimatePhone in the app list. Allow background activity and do not let the system optimise or restrict it.</string>
+    <string name="onboarding_oem_coloros_autostart">Open Settings > Apps > Auto-start (or App management > Auto-launch) and switch UltimatePhone on.</string>
+    <string name="onboarding_oem_coloros_popup">Open Settings > Apps > App management > UltimatePhone > Permissions and allow “Display pop-ups while running in the background” and “Display over other apps”.</string>
+    <string name="onboarding_oem_coloros_fullscreen">In the same permissions page allow full-screen notifications or lock screen display, so the call screen can appear when the phone is locked.</string>
+    <string name="onboarding_oem_samsung_battery">Open Settings > Battery > Background usage limits. Remove UltimatePhone from “Sleeping apps” and “Deep sleeping apps” and add it to “Never sleeping apps”.</string>
+    <string name="onboarding_oem_samsung_autostart">Samsung has no separate auto-start list. Just make sure UltimatePhone is not in “Sleeping apps” or “Deep sleeping apps”.</string>
+    <string name="onboarding_oem_samsung_popup">Open Settings > Apps > UltimatePhone > Appear on top and switch it on.</string>
+    <string name="onboarding_oem_samsung_fullscreen">Allow full-screen notifications for UltimatePhone (Settings > Notifications > Advanced settings, or the app\'s notification settings).</string>
+    <string name="onboarding_oem_xiaomi_battery">Open Settings > Apps > Manage apps > UltimatePhone > Battery saver and choose “No restrictions”.</string>
+    <string name="onboarding_oem_xiaomi_autostart">Open Security > Permissions > Autostart and switch UltimatePhone on.</string>
+    <string name="onboarding_oem_xiaomi_popup">Open the app\'s Other permissions and allow “Display pop-up windows while running in the background”.</string>
+    <string name="onboarding_oem_xiaomi_fullscreen">In the same Other permissions page, allow “Show on lock screen”.</string>
+    <string name="onboarding_oem_stock_battery">Allow UltimatePhone to ignore battery optimisation: show “All apps”, find UltimatePhone and choose “Don\'t optimise”.</string>
+    <string name="onboarding_oem_stock_autostart">Not needed on this phone: Android does not restrict auto-start.</string>
+    <string name="onboarding_oem_stock_popup">Usually not needed. Open the app info if call screens ever fail to appear.</string>
+    <string name="onboarding_oem_stock_fullscreen">Allow full-screen notifications for UltimatePhone so incoming calls can appear over the lock screen (Android 14 and later).</string>
+    <string name="onboarding_oem_generic_battery">Look for battery or power settings, find UltimatePhone and exclude it from battery optimisation and background restrictions.</string>
+    <string name="onboarding_oem_generic_autostart">If your phone has an auto-start or auto-launch list (often under Security or Apps), switch UltimatePhone on.</string>
+    <string name="onboarding_oem_generic_popup">If your phone has a pop-up or display-over-other-apps permission, allow it for UltimatePhone.</string>
+    <string name="onboarding_oem_generic_fullscreen">Allow UltimatePhone to show full-screen notifications or to display over the lock screen, so incoming calls appear when the phone is locked.</string>
+</resources>

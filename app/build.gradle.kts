@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.licensee)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 /**
@@ -116,6 +117,7 @@ dependencies {
     implementation(project(":core:contacts"))
     implementation(project(":core:calllog"))
     implementation(project(":core:datapacks"))
+    implementation(project(":core:spam"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -123,6 +125,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
 

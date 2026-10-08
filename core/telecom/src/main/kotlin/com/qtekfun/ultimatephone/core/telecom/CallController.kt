@@ -2,8 +2,20 @@ package com.qtekfun.ultimatephone.core.telecom
 
 import kotlinx.coroutines.flow.StateFlow
 
-/** What a caller turned out to be. Filled in by the app, which knows contacts (and, later, businesses and spam). */
-data class CallerLabel(val name: String?, val photoUri: String? = null)
+/**
+ * What a caller turned out to be. Filled in by the app, which knows contacts, businesses and (later) spam.
+ *
+ * @property businessCategory category id of an identified business (`food`, `health`...), null for a contact.
+ * @property businessIcon icon name for [businessCategory], mapped to a vector by the UI.
+ * @property isBusiness true when [name] comes from a business pack rather than from a contact.
+ */
+data class CallerLabel(
+    val name: String?,
+    val photoUri: String? = null,
+    val businessCategory: String? = null,
+    val businessIcon: String? = null,
+    val isBusiness: Boolean = false
+)
 
 fun interface CallerLabelResolver {
     suspend fun resolve(number: String): CallerLabel?

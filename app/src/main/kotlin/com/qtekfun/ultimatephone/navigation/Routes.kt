@@ -49,3 +49,6 @@ fun callDetailRoute(number: String): String = "recents/detail/${android.net.Uri.
 /** Sub-screens of Settings. Each owns a nested graph registered from `settingsGraph`. */
 const val SETTINGS_SPAM_ROUTE = "settings/spam"
 const val SETTINGS_DATA_ROUTE = "settings/data"
+
+/** The setup guide (onboarding), re-run from Settings. The first run is shown by `AppNavHost` before any other screen. */
+const val ONBOARDING_ROUTE = "onboarding"

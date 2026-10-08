@@ -14,6 +14,8 @@ import com.qtekfun.ultimatephone.core.contacts.ContactsRepository
 import com.qtekfun.ultimatephone.core.phonenumber.PhoneNormalizer
 import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
+import com.qtekfun.ultimatephone.data.BusinessFinder
+import com.qtekfun.ultimatephone.data.NoBusinesses
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -54,10 +56,11 @@ class CallDetailViewModel @Inject constructor(
     private val placer: CallPlacer,
     private val numberKeys: NumberKeys,
     normalizer: PhoneNormalizer,
-    regionProvider: RegionProvider
+    regionProvider: RegionProvider,
+    businesses: BusinessFinder = NoBusinesses
 ) : ViewModel() {
     private val number: String = savedStateHandle.get<String>(NUMBER_ARG).orEmpty()
-    private val resolver = CallerResolver(contacts, normalizer, regionProvider)
+    private val resolver = CallerResolver(contacts, normalizer, regionProvider, businesses)
     private val refresh = MutableStateFlow(0)
     private val eventChannel = Channel<CallDetailEvent>(Channel.BUFFERED)
 

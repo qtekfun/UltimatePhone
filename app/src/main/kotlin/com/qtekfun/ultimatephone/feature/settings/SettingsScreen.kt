@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.BuildConfig
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.designsystem.ThemeMode
+import com.qtekfun.ultimatephone.navigation.ONBOARDING_ROUTE
 import com.qtekfun.ultimatephone.navigation.SETTINGS_DATA_ROUTE
 import com.qtekfun.ultimatephone.navigation.SETTINGS_SPAM_ROUTE
 import java.util.Locale
@@ -68,6 +69,7 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
         Section(R.string.settings_spam)
         NavRow(R.string.settings_spam_title, R.string.settings_spam_summary) { onOpen(SETTINGS_SPAM_ROUTE) }
         NavRow(R.string.settings_data_title, R.string.settings_data_summary) { onOpen(SETTINGS_DATA_ROUTE) }
+        NavRow(R.string.onboarding_settings_title, R.string.onboarding_settings_summary) { onOpen(ONBOARDING_ROUTE) }
 
         Section(R.string.settings_appearance)
         ThemeMode.entries.forEach { mode ->

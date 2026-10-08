@@ -16,6 +16,7 @@ import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
+import com.qtekfun.ultimatephone.data.BusinessFinder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import javax.inject.Inject
@@ -88,8 +89,9 @@ class RecentsViewModel internal constructor(
         placer: CallPlacer,
         numberKeys: NumberKeys,
         normalizer: PhoneNormalizer,
-        regionProvider: RegionProvider
-    ) : this(calls, simRepository, placer, numberKeys, CallerResolver(contacts, normalizer, regionProvider), Clock.systemDefaultZone())
+        regionProvider: RegionProvider,
+        businesses: BusinessFinder
+    ) : this(calls, simRepository, placer, numberKeys, CallerResolver(contacts, normalizer, regionProvider, businesses), Clock.systemDefaultZone())
 
     private val filter = MutableStateFlow<CallLogFilter>(CallLogFilter.All)
     private val selection = MutableStateFlow<Set<Long>>(emptySet())

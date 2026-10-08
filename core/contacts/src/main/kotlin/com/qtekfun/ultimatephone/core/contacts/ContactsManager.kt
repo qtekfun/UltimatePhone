@@ -3,7 +3,11 @@ package com.qtekfun.ultimatephone.core.contacts
 import kotlinx.coroutines.flow.Flow
 
 /** The contacts repository plus detail, writing and account listing. Writes need WRITE_CONTACTS; failures return null/false. */
-interface ContactsManager : ContactsRepository {
+interface ContactsManager :
+    ContactsRepository,
+    ContactGroups,
+    ContactDuplicates,
+    ContactVCards {
     suspend fun getContact(lookupKey: String): ContactDetail?
 
     /** Emits the contact now and again whenever it changes; emits null when it no longer exists. */

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lista de contactos: menú, selección, filtro por grupo, exportación -->
+    <string name="contactsadv_menu_more">Más opciones</string>
+    <string name="contactsadv_menu_groups">Grupos</string>
+    <string name="contactsadv_menu_duplicates">Buscar duplicados</string>
+    <string name="contactsadv_menu_import">Importar vCard</string>
+    <string name="contactsadv_menu_export_all">Exportar todos los contactos</string>
+    <string name="contactsadv_selection_count">%1$d seleccionados</string>
+    <string name="contactsadv_selection_clear">Borrar selección</string>
+    <string name="contactsadv_select_action">Seleccionar</string>
+    <string name="contactsadv_export_selected">Exportar contactos seleccionados</string>
+    <string name="contactsadv_export_one">Exportar como archivo vCard</string>
+    <string name="contactsadv_export_done">%1$d contactos exportados</string>
+    <string name="contactsadv_export_one_done">Contacto exportado</string>
+    <string name="contactsadv_export_failed">No se pudo escribir el archivo</string>
+    <string name="contactsadv_filter_label">Filtrar por grupo</string>
+    <string name="contactsadv_filter_all">Todos</string>
+    <string name="contactsadv_done">Hecho</string>
+    <string name="contactsadv_yes">Sí</string>
+
+    <!-- Grupos -->
+    <string name="contactsadv_groups_title">Grupos</string>
+    <string name="contactsadv_groups_empty">Aún no hay grupos. Crea uno para organizar tus contactos.</string>
+    <string name="contactsadv_groups_members">%1$d contactos</string>
+    <string name="contactsadv_groups_read_only">gestionado por su cuenta</string>
+    <string name="contactsadv_groups_add">Nuevo grupo</string>
+    <string name="contactsadv_groups_create_title">Nuevo grupo</string>
+    <string name="contactsadv_groups_create">Crear</string>
+    <string name="contactsadv_groups_rename_title">Renombrar grupo</string>
+    <string name="contactsadv_groups_rename">Renombrar</string>
+    <string name="contactsadv_groups_name_label">Nombre del grupo</string>
+    <string name="contactsadv_groups_account_label">Cuenta</string>
+    <string name="contactsadv_groups_rename_desc">Renombrar %1$s</string>
+    <string name="contactsadv_groups_delete_desc">Eliminar %1$s</string>
+    <string name="contactsadv_groups_delete_title">¿Eliminar el grupo?</string>
+    <string name="contactsadv_groups_delete_message">Se eliminará el grupo %1$s. Los contactos que contiene se conservan.</string>
+    <string name="contactsadv_groups_failed">No se pudo guardar el grupo</string>
+    <string name="contactsadv_detail_groups">Grupos</string>
+    <string name="contactsadv_detail_groups_none">No está en ningún grupo</string>
+    <string name="contactsadv_detail_edit_groups">Editar grupos</string>
+    <string name="contactsadv_detail_groups_dialog">Grupos de este contacto</string>
+    <string name="contactsadv_detail_group_other_account">Este contacto no está guardado en la cuenta de este grupo</string>
+    <string name="contactsadv_detail_group_failed">No se pudo cambiar el grupo</string>
+
+    <!-- Duplicados -->
+    <string name="contactsadv_dup_title">Buscar duplicados</string>
+    <string name="contactsadv_dup_empty">No se han encontrado duplicados</string>
+    <string name="contactsadv_dup_count">Posibles duplicados: %1$d</string>
+    <string name="contactsadv_dup_ignore_all">Ignorar todos</string>
+    <string name="contactsadv_dup_members">%1$d contactos</string>
+    <string name="contactsadv_dup_reason_number">Mismo número</string>
+    <string name="contactsadv_dup_reason_email">Mismo correo</string>
+    <string name="contactsadv_dup_reason_name">Nombre parecido</string>
+    <string name="contactsadv_dup_confidence_high">Confianza alta</string>
+    <string name="contactsadv_dup_confidence_medium">Confianza media</string>
+    <string name="contactsadv_msg_merged">Contactos fusionados</string>
+    <string name="contactsadv_msg_merge_failed">No se pudieron fusionar los contactos</string>
+    <string name="contactsadv_msg_ignored">No se volverán a sugerir</string>
+    <string name="contactsadv_msg_load_failed">No se pudieron cargar estos contactos</string>
+
+    <!-- Revisión de la fusión -->
+    <string name="contactsadv_review_title">Revisar fusión</string>
+    <string name="contactsadv_review_nothing_deleted">No se elimina nada. Los contactos se unen en uno que conserva todos los números de teléfono y correos. Desmarca un contacto para dejarlo fuera.</string>
+    <string name="contactsadv_review_include">Incluir a %1$s en la fusión</string>
+    <string name="contactsadv_review_result">El contacto fusionado tendrá</string>
+    <string name="contactsadv_review_need_two">Deja al menos dos contactos marcados para fusionar.</string>
+    <string name="contactsadv_review_merge">Fusionar</string>
+    <string name="contactsadv_review_not_dups">No son duplicados</string>
+    <string name="contactsadv_review_confirm_title">¿Fusionar estos contactos?</string>
+    <string name="contactsadv_review_confirm_message">%1$d contactos se unirán en %2$s. No se elimina nada y podrás separarlos de nuevo en cualquier app de contactos.</string>
+    <string name="contactsadv_field_phones">Teléfonos</string>
+    <string name="contactsadv_field_emails">Correos electrónicos</string>
+    <string name="contactsadv_field_organization">Organización</string>
+    <string name="contactsadv_field_other_organizations">Otras organizaciones (se conservan)</string>
+    <string name="contactsadv_field_birthday">Cumpleaños</string>
+    <string name="contactsadv_field_other_birthdays">Otros cumpleaños (se conservan)</string>
+    <string name="contactsadv_field_notes">Notas</string>
+    <string name="contactsadv_field_account">Cuenta</string>
+    <string name="contactsadv_field_photo">Foto</string>
+    <string name="contactsadv_field_favorite">Favorito</string>
+    <string name="contactsadv_field_other_names">También conocido como</string>
+    <string name="contactsadv_photo_yes">Tiene foto</string>
+    <string name="contactsadv_photo_no">Sin foto</string>
+    <string name="contactsadv_photo_from">Foto de %1$s</string>
+
+    <!-- Importar vCard -->
+    <string name="contactsadv_import_title">Importar vCard</string>
+    <string name="contactsadv_import_pick">Elegir un archivo .vcf</string>
+    <string name="contactsadv_import_reading">Leyendo el archivo…</string>
+    <string name="contactsadv_import_importing">Importando contactos…</string>
+    <string name="contactsadv_import_read_failed">No se pudo leer el archivo</string>
+    <string name="contactsadv_import_none">No se encontraron contactos en este archivo</string>
+    <string name="contactsadv_import_found">%1$d contactos encontrados</string>
+    <string name="contactsadv_import_invalid">%1$d entradas no se pudieron leer y se omitirán</string>
+    <string name="contactsadv_import_dups">%1$d se parecen a contactos que ya tienes</string>
+    <string name="contactsadv_import_skip_dups">Omitir los contactos que ya tengo</string>
+    <string name="contactsadv_import_account">Importar en</string>
+    <string name="contactsadv_import_action">Importar %1$d contactos</string>
+    <string name="contactsadv_import_done_title">Importación terminada</string>
+    <string name="contactsadv_import_done_imported">Importados: %1$d</string>
+    <string name="contactsadv_import_done_dups">Omitidos, ya estaban en tus contactos: %1$d</string>
+    <string name="contactsadv_import_done_invalid">Entradas ilegibles omitidas: %1$d</string>
+    <string name="contactsadv_import_done_failed">No se pudieron guardar: %1$d</string>
+    <string name="contactsadv_import_close">Cerrar</string>
+</resources>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Contacts list: menu, selection, group filter, export -->
+    <string name="contactsadv_menu_more">More options</string>
+    <string name="contactsadv_menu_groups">Groups</string>
+    <string name="contactsadv_menu_duplicates">Find duplicates</string>
+    <string name="contactsadv_menu_import">Import vCard</string>
+    <string name="contactsadv_menu_export_all">Export all contacts</string>
+    <string name="contactsadv_selection_count">%1$d selected</string>
+    <string name="contactsadv_selection_clear">Clear selection</string>
+    <string name="contactsadv_select_action">Select</string>
+    <string name="contactsadv_export_selected">Export selected contacts</string>
+    <string name="contactsadv_export_one">Export as vCard file</string>
+    <string name="contactsadv_export_done">Exported %1$d contacts</string>
+    <string name="contactsadv_export_one_done">Contact exported</string>
+    <string name="contactsadv_export_failed">The file could not be written</string>
+    <string name="contactsadv_filter_label">Filter by group</string>
+    <string name="contactsadv_filter_all">All</string>
+    <string name="contactsadv_done">Done</string>
+    <string name="contactsadv_yes">Yes</string>
+
+    <!-- Groups -->
+    <string name="contactsadv_groups_title">Groups</string>
+    <string name="contactsadv_groups_empty">No groups yet. Create one to organize your contacts.</string>
+    <string name="contactsadv_groups_members">%1$d contacts</string>
+    <string name="contactsadv_groups_read_only">managed by its account</string>
+    <string name="contactsadv_groups_add">New group</string>
+    <string name="contactsadv_groups_create_title">New group</string>
+    <string name="contactsadv_groups_create">Create</string>
+    <string name="contactsadv_groups_rename_title">Rename group</string>
+    <string name="contactsadv_groups_rename">Rename</string>
+    <string name="contactsadv_groups_name_label">Group name</string>
+    <string name="contactsadv_groups_account_label">Account</string>
+    <string name="contactsadv_groups_rename_desc">Rename %1$s</string>
+    <string name="contactsadv_groups_delete_desc">Delete %1$s</string>
+    <string name="contactsadv_groups_delete_title">Delete group?</string>
+    <string name="contactsadv_groups_delete_message">The group %1$s will be deleted. The contacts in it are kept.</string>
+    <string name="contactsadv_groups_failed">The group could not be saved</string>
+    <string name="contactsadv_detail_groups">Groups</string>
+    <string name="contactsadv_detail_groups_none">Not in any group</string>
+    <string name="contactsadv_detail_edit_groups">Edit groups</string>
+    <string name="contactsadv_detail_groups_dialog">Groups of this contact</string>
+    <string name="contactsadv_detail_group_other_account">This contact is not stored in the account of this group</string>
+    <string name="contactsadv_detail_group_failed">The group could not be changed</string>
+
+    <!-- Duplicates -->
+    <string name="contactsadv_dup_title">Find duplicates</string>
+    <string name="contactsadv_dup_empty">No duplicates found</string>
+    <string name="contactsadv_dup_count">Possible duplicates: %1$d</string>
+    <string name="contactsadv_dup_ignore_all">Ignore all</string>
+    <string name="contactsadv_dup_members">%1$d contacts</string>
+    <string name="contactsadv_dup_reason_number">Same number</string>
+    <string name="contactsadv_dup_reason_email">Same email</string>
+    <string name="contactsadv_dup_reason_name">Similar name</string>
+    <string name="contactsadv_dup_confidence_high">High confidence</string>
+    <string name="contactsadv_dup_confidence_medium">Medium confidence</string>
+    <string name="contactsadv_msg_merged">Contacts merged</string>
+    <string name="contactsadv_msg_merge_failed">The contacts could not be merged</string>
+    <string name="contactsadv_msg_ignored">They will not be suggested again</string>
+    <string name="contactsadv_msg_load_failed">These contacts could not be loaded</string>
+
+    <!-- Merge review -->
+    <string name="contactsadv_review_title">Review merge</string>
+    <string name="contactsadv_review_nothing_deleted">Nothing is deleted. The contacts are joined into one that keeps every phone number and email address. Untick a contact to leave it out.</string>
+    <string name="contactsadv_review_include">Include %1$s in the merge</string>
+    <string name="contactsadv_review_result">The merged contact will contain</string>
+    <string name="contactsadv_review_need_two">Keep at least two contacts ticked to merge.</string>
+    <string name="contactsadv_review_merge">Merge</string>
+    <string name="contactsadv_review_not_dups">Not duplicates</string>
+    <string name="contactsadv_review_confirm_title">Merge these contacts?</string>
+    <string name="contactsadv_review_confirm_message">%1$d contacts will be joined into %2$s. Nothing is deleted, and you can separate them again in any contacts app.</string>
+    <string name="contactsadv_field_phones">Phone numbers</string>
+    <string name="contactsadv_field_emails">Email addresses</string>
+    <string name="contactsadv_field_organization">Organization</string>
+    <string name="contactsadv_field_other_organizations">Other organizations (kept)</string>
+    <string name="contactsadv_field_birthday">Birthday</string>
+    <string name="contactsadv_field_other_birthdays">Other birthdays (kept)</string>
+    <string name="contactsadv_field_notes">Notes</string>
+    <string name="contactsadv_field_account">Account</string>
+    <string name="contactsadv_field_photo">Photo</string>
+    <string name="contactsadv_field_favorite">Favorite</string>
+    <string name="contactsadv_field_other_names">Also known as</string>
+    <string name="contactsadv_photo_yes">Has a photo</string>
+    <string name="contactsadv_photo_no">No photo</string>
+    <string name="contactsadv_photo_from">Photo of %1$s</string>
+
+    <!-- vCard import -->
+    <string name="contactsadv_import_title">Import vCard</string>
+    <string name="contactsadv_import_pick">Choose a .vcf file</string>
+    <string name="contactsadv_import_reading">Reading the file…</string>
+    <string name="contactsadv_import_importing">Importing contacts…</string>
+    <string name="contactsadv_import_read_failed">The file could not be read</string>
+    <string name="contactsadv_import_none">No contacts were found in this file</string>
+    <string name="contactsadv_import_found">%1$d contacts found</string>
+    <string name="contactsadv_import_invalid">%1$d entries could not be read and will be skipped</string>
+    <string name="contactsadv_import_dups">%1$d look like contacts you already have</string>
+    <string name="contactsadv_import_skip_dups">Skip contacts I already have</string>
+    <string name="contactsadv_import_account">Import into</string>
+    <string name="contactsadv_import_action">Import %1$d contacts</string>
+    <string name="contactsadv_import_done_title">Import finished</string>
+    <string name="contactsadv_import_done_imported">Imported: %1$d</string>
+    <string name="contactsadv_import_done_dups">Skipped, already in your contacts: %1$d</string>
+    <string name="contactsadv_import_done_invalid">Unreadable entries skipped: %1$d</string>
+    <string name="contactsadv_import_done_failed">Could not be saved: %1$d</string>
+    <string name="contactsadv_import_close">Close</string>
+</resources>

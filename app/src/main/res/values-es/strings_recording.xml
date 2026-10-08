@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notificaciones y aviso -->
+    <string name="recording_channel">Grabación de llamadas</string>
+    <string name="recording_notification_title">Grabando la llamada</string>
+    <string name="recording_notification_text">Toca para abrir la llamada. Detener termina la grabación.</string>
+    <string name="recording_prompt_title">La grabación no empezó sola</string>
+    <string name="recording_prompt_text">Android solo deja empezar a grabar mientras la pantalla de llamada está visible. Toca Grabar para empezar ahora.</string>
+    <string name="recording_announcement">Esta llamada se está grabando.</string>
+    <string name="recording_record">Grabar</string>
+    <string name="recording_stop">Detener</string>
+    <string name="recording_stop_description">Detener la grabación</string>
+    <string name="recording_dismiss">Descartar</string>
+
+    <!-- Pantalla de llamada -->
+    <string name="recording_indicator_description">Grabando, %1$s</string>
+    <string name="recording_mic_warning_title">Solo micrófono</string>
+    <string name="recording_mic_warning_text">En este teléfono la app solo puede grabar tu micrófono. Activa el altavoz para captar a la otra persona.</string>
+    <string name="recording_mic_warning_ok">Entendido</string>
+    <string name="recording_error_setup">La grabación no está configurada. Abre Ajustes, Grabación de llamadas.</string>
+    <string name="recording_error_no_folder">Elige una carpeta de grabaciones en Ajustes, Grabación de llamadas.</string>
+    <string name="recording_error_permission">Permite el micrófono en Ajustes, Grabación de llamadas.</string>
+    <string name="recording_error_no_microphone">Este teléfono no tiene un micrófono utilizable.</string>
+    <string name="recording_error_foreground">Android no dejó empezar la grabación en segundo plano. Abre la pantalla de llamada y toca Grabar.</string>
+    <string name="recording_error_source">No se pudo abrir el micrófono. Puede que otra app lo esté usando.</string>
+    <string name="recording_error_storage">No se pudo escribir en la carpeta de grabaciones.</string>
+    <string name="recording_error_no_audio">No se grabó nada.</string>
+    <string name="recording_error_capture">La grabación se detuvo por un error.</string>
+
+    <!-- Ajustes > Grabación de llamadas -->
+    <string name="recording_row_title">Grabación de llamadas</string>
+    <string name="recording_row_summary">Graba llamadas en una carpeta que elijas</string>
+    <string name="recording_title">Grabación de llamadas</string>
+    <string name="recording_back">Atrás</string>
+    <string name="recording_enable">Grabar llamadas</string>
+    <string name="recording_why_disabled">La grabación está desactivada.</string>
+    <string name="recording_why_legal">Lee y acepta el aviso para activar la grabación.</string>
+    <string name="recording_why_folder">La grabación está desactivada hasta que elijas una carpeta para las grabaciones.</string>
+    <string name="recording_why_permission">Permite el micrófono para poder grabar.</string>
+    <string name="recording_why_no_microphone">Este teléfono no tiene un micrófono utilizable, así que no se pueden grabar llamadas.</string>
+    <string name="recording_ready">Listo. Usa Grabar en la pantalla de llamada.</string>
+    <string name="recording_ready_auto">Listo. Usa Grabar en la pantalla de llamada, o deja que la app empiece sola.</string>
+    <string name="recording_allow_microphone">Permitir el micrófono</string>
+
+    <string name="recording_legal_title">Antes de grabar llamadas</string>
+    <string name="recording_legal_text">Grabar una llamada puede requerir el consentimiento de la otra persona, según el país y la situación. En algunos lugares es ilegal grabar a alguien sin avisarle. Eres responsable de cumplir la ley allí donde estéis tú y la otra persona.\n\nPuedes hacer que la app diga en voz alta que la llamada se está grabando.</string>
+    <string name="recording_legal_accept">Lo entiendo y acepto</string>
+    <string name="recording_legal_cancel">Cancelar</string>
+
+    <string name="recording_capability_title">Qué puede grabar este teléfono</string>
+    <string name="recording_capability_unknown">Aún no se ha comprobado. La primera vez que grabes una llamada, la app prueba si este teléfono le deja grabar la línea de la llamada. Si no, graba solo el micrófono.</string>
+    <string name="recording_capability_line">Este teléfono deja a la app grabar la línea de la llamada, así que se graba a las dos personas.</string>
+    <string name="recording_capability_mic">En este teléfono la app solo puede grabar tu micrófono; usa el altavoz para captar a la otra persona.</string>
+    <string name="recording_capability_none">Este teléfono no tiene un micrófono utilizable.</string>
+    <string name="recording_capability_recheck">Volver a comprobar en la próxima grabación</string>
+    <string name="recording_auto_note">La grabación automática necesita que la pantalla de llamada esté visible en esta versión de Android. Si no lo está, una notificación ofrece un botón Grabar.</string>
+    <string name="recording_auto_blocked">Ya ocurrió en este teléfono: una grabación automática no pudo empezar en segundo plano.</string>
+
+    <string name="recording_folder_title">Carpeta de grabaciones</string>
+    <string name="recording_folder_none">No hay carpeta elegida.</string>
+    <string name="recording_folder_lost">La carpeta elegida ya no está disponible. Elígela de nuevo.</string>
+    <string name="recording_folder_choose">Elegir carpeta</string>
+    <string name="recording_folder_change">Cambiar carpeta</string>
+
+    <string name="recording_mode_title">Grabar automáticamente</string>
+    <string name="recording_mode_off">Solo cuando toque Grabar</string>
+    <string name="recording_mode_all">Todas las llamadas</string>
+    <string name="recording_mode_unknown">Llamadas de números que no están en mis contactos</string>
+    <string name="recording_mode_selected">Llamadas de los números que elija</string>
+    <string name="recording_selected_manage">Elegir números (%1$d)</string>
+    <string name="recording_selected_title">Números a grabar</string>
+    <string name="recording_selected_label">Número de teléfono</string>
+    <string name="recording_selected_add">Añadir</string>
+    <string name="recording_selected_empty">Aún no hay números.</string>
+    <string name="recording_selected_remove">Quitar %1$s</string>
+    <string name="recording_selected_done">Hecho</string>
+
+    <string name="recording_format_title">Formato de archivo</string>
+    <string name="recording_format_m4a">AAC en .m4a (se reproduce en todas partes)</string>
+    <string name="recording_format_ogg">Opus en .ogg (archivos más pequeños)</string>
+
+    <string name="recording_options_title">Opciones</string>
+    <string name="recording_contact_name">Poner el nombre del contacto en los nombres de archivo</string>
+    <string name="recording_contact_name_summary">Desactivado: los nombres solo llevan la fecha y las tres últimas cifras del número.</string>
+    <string name="recording_auto_speaker">Activar el altavoz al grabar</string>
+    <string name="recording_auto_speaker_summary">Hace falta para captar a la otra persona cuando solo se puede grabar el micrófono.</string>
+    <string name="recording_announce">Anunciar la grabación</string>
+    <string name="recording_announce_summary">Dice en voz alta que la llamada se está grabando. La otra persona solo lo oye con el altavoz activado.</string>
+
+    <string name="recording_test_title">Prueba</string>
+    <string name="recording_test">Probar el micrófono</string>
+    <string name="recording_testing">Grabando 3 segundos. Di algo.</string>
+    <string name="recording_test_ok">El micrófono funciona. Sonido más fuerte: %1$d de 32767.</string>
+    <string name="recording_test_silent">El micrófono arrancó pero solo captó silencio (pico 0).</string>
+    <string name="recording_test_failed">No se pudo abrir el micrófono.</string>
+    <string name="recording_test_busy">Hay una grabación en curso.</string>
+
+    <!-- Lista de grabaciones -->
+    <string name="recording_list_row">Grabaciones</string>
+    <string name="recording_list_row_summary">Reproducir, compartir, renombrar o borrar</string>
+    <string name="recording_list_title">Grabaciones</string>
+    <string name="recording_list_empty">Aún no hay grabaciones.</string>
+    <string name="recording_list_no_folder">Elige primero una carpeta de grabaciones.</string>
+    <string name="recording_item_incoming">Entrante · %1$s</string>
+    <string name="recording_item_outgoing">Saliente · %1$s</string>
+    <string name="recording_item_subtitle">%1$s · %2$s · %3$s</string>
+    <string name="recording_item_subtitle_no_duration">%1$s · %2$s</string>
+    <string name="recording_play">Reproducir</string>
+    <string name="recording_pause">Pausar</string>
+    <string name="recording_share">Compartir</string>
+    <string name="recording_share_chooser">Compartir grabación</string>
+    <string name="recording_rename">Renombrar</string>
+    <string name="recording_delete">Borrar</string>
+    <string name="recording_position">Posición</string>
+    <string name="recording_player_time">%1$s de %2$s</string>
+    <string name="recording_play_failed">No se pudo reproducir esta grabación.</string>
+    <string name="recording_share_failed">Ninguna app puede recibir esta grabación.</string>
+    <string name="recording_cancel">Cancelar</string>
+    <string name="recording_delete_title">¿Borrar esta grabación?</string>
+    <string name="recording_delete_message">%1$s se borrará para siempre.</string>
+    <string name="recording_delete_failed">No se pudo borrar la grabación.</string>
+    <string name="recording_rename_title">Renombrar grabación</string>
+    <string name="recording_rename_label">Nombre</string>
+    <string name="recording_rename_confirm">Renombrar</string>
+    <string name="recording_rename_failed">La carpeta no permitió renombrar esta grabación.</string>
+</resources>

@@ -79,3 +79,28 @@ Each entry: what the spec says, what reality requires, what was done instead.
 - **Reality:** `HttpURLConnection` cannot send PROPFIND or MKCOL. OkHttp 4.12 (Apache-2.0, no Google code) is used with
   redirects handled by the app because OkHttp turns a redirected PUT into a GET; `Authorization` never leaves the
   configured host and plain `http` is refused, including through redirects.
+
+## D-012 · Call recording is microphone capture; line capture is detected at run time, not assumed
+- **Spec (03, F9; 05, spike):** the scope of recording depends on the Phase 0 spike.
+- **Reality (spike-results.md, realme RMX5210, Android 16):** `MIC` and `VOICE_RECOGNITION` capture sound,
+  `VOICE_COMMUNICATION` captured silence, and `VOICE_CALL`, `VOICE_DOWNLINK` and `VOICE_UPLINK` failed with "start
+  failed". Those three were only probed outside a call, so line capture is not ruled out on every phone.
+- **Done:** the product does not promise to record the other person. Recording captures the microphone and, with the
+  speaker on, the other person through the air (the speaker can be switched on automatically). On the first recording the
+  app tries `VOICE_CALL`, then `VOICE_DOWNLINK`, inside a try/catch and uses a source only if it starts and returns
+  non-silent audio within a few seconds. The result (`LINE_CAPTURE`, `MICROPHONE_ONLY`, `UNAVAILABLE`) is kept in
+  DataStore together with the system build, so a system update re-checks. A source that starts but is silent may just
+  have caught a quiet moment, so that is only believed after three recordings; a source that cannot start is final at
+  once. Settings > Call recording states the result plainly ("On this phone the app can only record your microphone; use
+  speaker to capture the other person").
+- **Limits:** `VOICE_DOWNLINK` is recorded on its own (the other person only): mixing it with `VOICE_UPLINK` needs raw
+  PCM mixing and an own encoder, which is not worth the risk for a source normal apps cannot open. The microphone service
+  (`foregroundServiceType="microphone"`) can only be started while the call screen is visible or after a tap on a
+  notification; an automatic start from the background is caught, reported in Settings, and replaced by a notification
+  with a Record button. Files are written through `DocumentsContract` and the content resolver (the layer under
+  `DocumentFile`, without an extra dependency) into the folder the user picked, and are created with a generic MIME type
+  so providers keep the `.m4a`/`.ogg` name as given. File names hold the date, the direction and the last three digits of
+  the number only; the contact name is added only if the user turns that on.
+- **Not verified on a device:** everything that depends on the framework (`MediaRecorder` sources during a call,
+  foreground service start rules, the SAF provider of a given phone) was reasoned from the documentation and is
+  unit-tested only in its pure parts.

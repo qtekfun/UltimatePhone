@@ -50,15 +50,28 @@ import kotlinx.coroutines.withContext
  * [ContactsManager] on top of ContactsContract. Reads need READ_CONTACTS (without it everything is empty/null), writes
  * need WRITE_CONTACTS. Phone numbers are never logged.
  *
+ * Groups, duplicates/merging and vCard transfer are implemented in their own classes and delegated to.
+ *
  * @param regionProvider ISO region used to read numbers without a country code.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class SystemContactsRepository(
+class SystemContactsRepository private constructor(
     context: Context,
     private val normalizer: PhoneNormalizer,
     private val regionProvider: () -> String,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
-) : ContactsManager {
+    private val ioDispatcher: CoroutineDispatcher,
+    tools: ProviderAccess
+) : ContactsManager,
+    ContactGroups by SystemContactGroups(tools),
+    ContactDuplicates by SystemContactDuplicates(tools),
+    ContactVCards by SystemContactVCards(tools) {
+    constructor(
+        context: Context,
+        normalizer: PhoneNormalizer,
+        regionProvider: () -> String,
+        ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    ) : this(context, normalizer, regionProvider, ioDispatcher, ProviderAccess(context, ioDispatcher))
+
     private val appContext = context.applicationContext
     private val resolver: ContentResolver = appContext.contentResolver
 
@@ -235,12 +248,16 @@ class SystemContactsRepository(
         fun add(rawId: Long, mime: String?, data1: String?, type: Int, label: String?) {
             val text = data1?.takeIf { it.isNotBlank() } ?: return
             when (mime) {
+                // Merged contacts hold the same number or address in several raw contacts; it is shown once. Rows come in
+                // raw-contact order and the primary raw contact is the first, so the primary's own copy is the one kept.
                 Phone.CONTENT_ITEM_TYPE ->
-                    phones +=
-                        StoredValue(LabeledValue(text, type, label), Phone.getTypeLabel(appContext.resources, type, label).toString(), rawId)
+                    if (phones.none { sameNumber(it.value.value, text) }) {
+                        phones += StoredValue(LabeledValue(text, type, label), Phone.getTypeLabel(appContext.resources, type, label).toString(), rawId)
+                    }
                 Email.CONTENT_ITEM_TYPE ->
-                    emails +=
-                        StoredValue(LabeledValue(text, type, label), Email.getTypeLabel(appContext.resources, type, label).toString(), rawId)
+                    if (emails.none { it.value.value.trim().equals(text.trim(), ignoreCase = true) }) {
+                        emails += StoredValue(LabeledValue(text, type, label), Email.getTypeLabel(appContext.resources, type, label).toString(), rawId)
+                    }
                 StructuredName.CONTENT_ITEM_TYPE -> if (rawId == primary?.id && editableName.isEmpty()) editableName = text
                 Organization.CONTENT_ITEM_TYPE -> if (organization.isEmpty()) organization = text
                 Note.CONTENT_ITEM_TYPE -> if (notes.isEmpty()) notes = text
@@ -263,6 +280,12 @@ class SystemContactsRepository(
             primaryRawContactId = primary?.id,
             account = primary?.account
         )
+    }
+
+    /** Same digits (formatting aside); "+34 600 1" and "6001" differ, which is the safe side for display. */
+    private fun sameNumber(a: String, b: String): Boolean {
+        val digits = T9.digitsOf(a)
+        return digits.isNotEmpty() && digits == T9.digitsOf(b)
     }
 
     private fun rawContacts(contactId: Long): List<RawContact> {

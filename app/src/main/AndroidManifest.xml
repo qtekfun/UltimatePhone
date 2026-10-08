@@ -17,8 +17,19 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Call recording: the microphone, kept running by a foreground service while the screen is off. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <!-- Data packs, spam sources and the user's WebDAV only. Never used during a call. -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Lets the app find a text-to-speech engine to announce a recording. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 
     <application
         android:name=".UltimatePhoneApp"
@@ -76,6 +87,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Keeps the microphone available while a call is recorded with the screen off. -->
+        <service
+            android:name=".recording.RecordingService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <!-- Call screening: only bound by the system when the user gave this app the call screening role. -->
         <service

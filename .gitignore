@@ -13,3 +13,4 @@ captures/
 core.[0-9]*
 .cxx/
 .work/
+.tmp/

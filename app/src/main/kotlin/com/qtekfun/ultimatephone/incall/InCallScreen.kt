@@ -84,6 +84,7 @@ import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
 import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
 import com.qtekfun.ultimatephone.feature.spam.CallSpamPanel
 import com.qtekfun.ultimatephone.feature.spam.CallSpamUi
+import com.qtekfun.ultimatephone.recording.RecordingUi
 import kotlinx.coroutines.delay
 
 private const val ENDED_DELAY_MS = 1500L
@@ -108,6 +109,7 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
     val calls by viewModel.calls.collectAsStateWithLifecycle()
     val audio by viewModel.audio.collectAsStateWithLifecycle()
     val spam by viewModel.spam.collectAsStateWithLifecycle()
+    val recording by viewModel.recordingUi.collectAsStateWithLifecycle()
     var showKeypad by remember { mutableStateOf(false) }
 
     // Once nothing is left, show "call ended" for a moment and close.
@@ -146,7 +148,10 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                             onNotSpam = { viewModel.notSpam(primary) },
                             onMarkSpam = { viewModel.markSpam(primary) },
                             onDtmfDown = { viewModel.dtmfDown(primary, it) },
-                            onDtmfUp = { viewModel.dtmfUp(primary) }
+                            onDtmfUp = { viewModel.dtmfUp(primary) },
+                            recordingStatus = {
+                                RecordingStatus(recording, viewModel::stopRecording, viewModel::dismissMicWarning, viewModel::dismissRecordingFailure)
+                            }
                         )
                     }
                     val controls: @Composable (Modifier) -> Unit = { modifier ->
@@ -168,6 +173,8 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                                 onHold = { viewModel.toggleHold(primary) },
                                 onAddCall = onAddCall,
                                 onMerge = viewModel::merge,
+                                recording = recording,
+                                onRecord = { viewModel.toggleRecording(primary) },
                                 onHangup = { viewModel.hangup(primary) }
                             )
                         }
@@ -203,12 +210,14 @@ private fun InfoPane(
     onNotSpam: () -> Unit,
     onMarkSpam: () -> Unit,
     onDtmfDown: (Char) -> Unit,
-    onDtmfUp: () -> Unit
+    onDtmfUp: () -> Unit,
+    recordingStatus: @Composable () -> Unit
 ) {
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        recordingStatus()
         if (other != null) OtherCallCard(other, onSwap = onSwap)
         CallHeader(call, layout, showAvatar = !showKeypad)
         CallSpamPanel(ui = spam, ringing = call.status == CallStatus.RINGING, onNotSpam = onNotSpam, onMarkSpam = onMarkSpam)
@@ -334,6 +343,8 @@ private fun OngoingControls(
     onHold: () -> Unit,
     onAddCall: () -> Unit,
     onMerge: () -> Unit,
+    recording: RecordingUi,
+    onRecord: () -> Unit,
     onHangup: () -> Unit
 ) {
     val size = layout.actionSize
@@ -377,6 +388,9 @@ private fun OngoingControls(
                 ToggleAction(Icons.Filled.PersonAdd, stringResource(R.string.incall_add_call), false, onAddCall, size = size, modifier = Modifier.weight(1f))
             }
         )
+        if (recording.available || recording.isBusy) {
+            add(CallAction("record") { RecordAction(recording, onRecord, size, Modifier.weight(1f)) })
+        }
         if (hasOtherCall || call.canMerge || call.isConference) {
             add(
                 CallAction("merge") {
@@ -428,7 +442,7 @@ private fun HangupButton(height: Dp, onClick: () -> Unit) {
 }
 
 @Composable
-private fun ToggleAction(
+internal fun ToggleAction(
     icon: ImageVector,
     description: String,
     checked: Boolean,

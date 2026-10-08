@@ -12,16 +12,21 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Call
@@ -43,15 +48,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -61,6 +68,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.designsystem.Avatar
+import com.qtekfun.ultimatephone.core.designsystem.callColors
 import com.qtekfun.ultimatephone.data.BusinessCategories
 import com.qtekfun.ultimatephone.data.BusinessHit
 import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
@@ -99,15 +107,25 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
+    val onKey: (Char) -> Unit = { char ->
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        tones.play(char)
+        viewModel.press(char)
+    }
+    val onLongZero = {
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        viewModel.pressPlus()
+    }
+    val suggestions: @Composable (Modifier) -> Unit = { modifier ->
         Suggestions(
             suggestions = state.suggestions,
             businesses = state.businessSuggestions,
-            modifier = Modifier.weight(1f).fillMaxWidth(),
+            modifier = modifier,
             onClick = { suggestion -> placeCall { viewModel.callSuggestion(suggestion) } },
             onBusinessClick = { hit -> placeCall { viewModel.callBusiness(hit) } }
         )
+    }
+    val numberAndSims: @Composable () -> Unit = {
         NumberField(
             text = state.displayNumber,
             onBackspace = { viewModel.backspace() },
@@ -125,24 +143,57 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
                 }
             }
         }
-        Keypad(
-            onKey = { char ->
-                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                tones.play(char)
-                viewModel.press(char)
-            },
-            onLongZero = {
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                viewModel.pressPlus()
+    }
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // The keypad and the call button never give way: the suggestions are what shrinks (down to nothing) on a short screen.
+        val landscape = maxWidth > maxHeight
+        val compact = maxHeight < COMPACT_HEIGHT
+        val keyHeight = if (compact) 52.dp else 64.dp
+        val callSize = if (compact) 64.dp else 72.dp
+        if (landscape) {
+            Row(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(modifier = Modifier.weight(1f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
+                    suggestions(Modifier.weight(1f).fillMaxWidth())
+                    numberAndSims()
+                }
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Keypad(keyHeight = 48.dp, onKey = onKey, onLongZero = onLongZero)
+                    CallButton(size = callSize) { placeCall { viewModel.call() } }
+                }
             }
-        )
-        FilledIconButton(
-            onClick = { placeCall { viewModel.call() } },
-            modifier = Modifier.padding(vertical = 12.dp).size(72.dp),
-            colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(CALL_GREEN), contentColor = Color.White)
-        ) {
-            Icon(Icons.Filled.Call, contentDescription = stringResource(R.string.dialer_call), modifier = Modifier.size(32.dp))
+        } else {
+            // With very large text the whole screen scrolls instead of squeezing the keypad.
+            val bigText = LocalDensity.current.fontScale >= BIG_FONT_SCALE
+            Column(
+                modifier = Modifier.fillMaxSize().then(if (bigText) Modifier.verticalScroll(rememberScrollState()) else Modifier).padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
+                suggestions(if (bigText) Modifier.fillMaxWidth().heightIn(max = 120.dp) else Modifier.weight(1f).fillMaxWidth())
+                numberAndSims()
+                Keypad(keyHeight = keyHeight, onKey = onKey, onLongZero = onLongZero)
+                CallButton(size = callSize) { placeCall { viewModel.call() } }
+            }
         }
+    }
+}
+
+@Composable
+private fun CallButton(size: Dp, onClick: () -> Unit) {
+    val colors = callColors()
+    FilledIconButton(
+        onClick = onClick,
+        modifier = Modifier.padding(vertical = 8.dp).size(width = size * 2, height = size),
+        shape = RoundedCornerShape(size / 2),
+        colors = IconButtonDefaults.filledIconButtonColors(containerColor = colors.answer, contentColor = colors.onAnswer)
+    ) {
+        Icon(Icons.Filled.Call, contentDescription = stringResource(R.string.dialer_call), modifier = Modifier.size(32.dp))
     }
 }
 
@@ -205,7 +256,7 @@ private fun Suggestions(
 @Composable
 private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Unit, onPaste: (String) -> Unit) {
     val context = LocalContext.current
-    Row(modifier = Modifier.fillMaxWidth().height(64.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier.weight(1f).combinedClickable(onClick = {}, onLongClick = {
                 val clip = context.getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
@@ -213,11 +264,12 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
             }),
             contentAlignment = Alignment.Center
         ) {
+            // Long numbers shrink, and if they still do not fit the start is cut, so the last digits stay visible.
             Text(
                 text = text,
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 32.sp),
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = numberFontSizeSp(text.length).sp),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                overflow = TextOverflow.StartEllipsis,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { contentDescription = text }
             )
@@ -234,7 +286,7 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun Keypad(onKey: (Char) -> Unit, onLongZero: () -> Unit) {
+private fun Keypad(keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         KEYS.forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -242,7 +294,8 @@ private fun Keypad(onKey: (Char) -> Unit, onLongZero: () -> Unit) {
                     Surface(
                         shape = RoundedCornerShape(28.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).height(64.dp).combinedClickable(
+                        modifier = Modifier.weight(1f).heightIn(min = keyHeight).combinedClickable(
+                            role = Role.Button,
                             onClick = { onKey(key.char) },
                             onLongClick = { if (key.char == '0') onLongZero() else onKey(key.char) }
                         )
@@ -287,4 +340,5 @@ private fun rememberDtmfTones(): DtmfTones {
 }
 
 private const val TONE_VOLUME = 80
-private const val CALL_GREEN = 0xFF2E7D32
+private val COMPACT_HEIGHT = 640.dp
+private const val BIG_FONT_SCALE = 1.5f

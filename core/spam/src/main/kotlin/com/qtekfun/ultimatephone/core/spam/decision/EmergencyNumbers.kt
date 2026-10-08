@@ -21,8 +21,10 @@ object LibEmergencyNumbers : EmergencyNumbers {
         if (text.isEmpty() || text.any { it.isLetter() }) return false
         val digits = text.filter { it.isDigit() || it == '+' }
         if (digits in universal) return true
-        val regions = listOfNotNull(region?.uppercase(), (number as? NormalizedNumber.Valid)?.region).distinct()
         val info = ShortNumberInfo.getInstance()
-        return regions.any { info.isEmergencyNumber(digits, it) }
+        val own = region?.uppercase()
+        val numberRegion = (number as? NormalizedNumber.Valid)?.region
+        return (own != null && info.isEmergencyNumber(digits, own)) ||
+            (numberRegion != null && numberRegion != own && info.isEmergencyNumber(digits, numberRegion))
     }
 }

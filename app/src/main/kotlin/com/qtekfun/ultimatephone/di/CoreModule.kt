@@ -41,7 +41,7 @@ object CoreModule {
 
     @Provides
     @Singleton
-    fun phoneNormalizer(): PhoneNormalizer = LibPhoneNormalizer()
+    fun phoneNormalizer(): PhoneNormalizer = LibPhoneNormalizer.shared
 
     @Provides
     @Singleton

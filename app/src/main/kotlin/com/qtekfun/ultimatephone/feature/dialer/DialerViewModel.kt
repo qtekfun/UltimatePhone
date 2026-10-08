@@ -22,11 +22,15 @@ import com.qtekfun.ultimatephone.settings.SimChooser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -44,7 +48,7 @@ data class DialerUiState(
     val needsDefaultPhoneApp: Boolean = false
 )
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class DialerViewModel @Inject constructor(
     private val contacts: ContactsRepository,
@@ -65,7 +69,10 @@ class DialerViewModel @Inject constructor(
 
     private class Suggested(val contacts: List<DialerSuggestion> = emptyList(), val businesses: List<BusinessHit> = emptyList())
 
-    private val suggestions = number.mapLatest { typed ->
+    // Typing is bursty: wait a moment so a fast burst of keys searches once, and a newer key cancels the search in flight
+    // (mapLatest). The contacts index is built once and kept (SystemContactsRepository), the business search is one FTS
+    // query per pack; both are bounded in size, and everything runs off the main thread.
+    private val suggestions = number.debounce { if (it.isEmpty()) 0L else SUGGEST_DEBOUNCE_MS }.mapLatest { typed ->
         val digits = DialerInput.searchDigits(typed)
         if (digits.isEmpty() || typed.any { it == '*' || it == '#' }) {
             Suggested()
@@ -75,7 +82,7 @@ class DialerViewModel @Inject constructor(
             val businesses = BusinessSuggestions.withoutContacts(businessSearch.searchT9(digits, MAX_BUSINESS_SUGGESTIONS), found.map { it.number })
             Suggested(found, businesses)
         }
-    }
+    }.flowOn(Dispatchers.Default)
 
     val state: StateFlow<DialerUiState> = combine(number, suggestions, sims, explicitSimKey, settings.settings) {
             typed,
@@ -95,6 +102,8 @@ class DialerViewModel @Inject constructor(
             selectedSimKey = if (available.size > 1) SimChooser.choose(explicit, remembered, prefs.defaultSimKey, available.map { it.key }.toSet()) else null
         )
     }.combine(needsRole) { ui, role -> ui.copy(needsDefaultPhoneApp = role) }
+        // Normalising and formatting the typed number is libphonenumber work: not on the main thread.
+        .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), DialerUiState())
 
     init {
@@ -103,8 +112,11 @@ class DialerViewModel @Inject constructor(
 
     /** Re-reads what can change while the app is away: SIMs (permission granted) and the phone role. */
     fun refresh() {
-        sims.value = simRepository.accounts()
-        needsRole.value = roles.isDialerRoleAvailable() && !roles.isDefaultDialer()
+        // Both calls are binder round trips to system services, so they do not run on the main thread.
+        viewModelScope.launch(Dispatchers.Default) {
+            sims.value = simRepository.accounts()
+            needsRole.value = roles.isDialerRoleAvailable() && !roles.isDefaultDialer()
+        }
     }
 
     fun setNumber(value: String) {
@@ -166,6 +178,7 @@ class DialerViewModel @Inject constructor(
     private companion object {
         const val MAX_BUSINESS_SUGGESTIONS = 5
         const val STOP_TIMEOUT_MS = 5_000L
+        const val SUGGEST_DEBOUNCE_MS = 60L
         const val MIN_FORMAT_LENGTH = 4
     }
 }

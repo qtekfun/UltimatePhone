@@ -7,6 +7,7 @@ import com.qtekfun.ultimatephone.core.spam.lists.RoomSpamListsRepository
 import com.qtekfun.ultimatephone.core.spam.lists.SpamDatabase
 import com.qtekfun.ultimatephone.core.spam.lists.SpamListsRepository
 import com.qtekfun.ultimatephone.core.spam.prefix.BuiltInRules
+import com.qtekfun.ultimatephone.core.spam.prefix.LazyPrefixRules
 import com.qtekfun.ultimatephone.core.spam.prefix.PrefixRuleSet
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.RoleController
@@ -28,9 +29,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
 
 /** Spam filtering: the database, the user's lists and settings, and the decision engine shared by every caller. */
 @Module
@@ -48,10 +49,15 @@ object SpamModule {
     @Provides
     @Singleton
     fun spamLists(database: SpamDatabase, settings: SpamSettingsRepository): SpamListsRepository {
-        // One tiny DataStore read, the first time the lists are needed; after that the id is fixed for this repository.
-        val deviceId = runBlocking { settings.deviceId() }
-        return RoomSpamListsRepository(database.listEntryDao(), deviceId)
+        // The id is read (one tiny DataStore read) by the first change to a list, never while the graph is built.
+        val deviceId = AtomicReference<String?>(null)
+        return RoomSpamListsRepository(database.listEntryDao(), { deviceId.get() ?: settings.deviceId().also(deviceId::set) })
     }
+
+    /** The compiled-in rules, parsed and compiled on first use or by the start-up warm-up, not while the graph is built. */
+    @Provides
+    @Singleton
+    fun builtInPrefixRules(): LazyPrefixRules = LazyPrefixRules { PrefixRuleSet(BuiltInRules.load().rules) }
 
     @Provides
     @Singleton
@@ -72,12 +78,13 @@ object SpamModule {
         normalizer: PhoneNormalizer,
         regions: RegionProvider,
         store: DecisionStore,
+        builtInRules: LazyPrefixRules,
         @ApplicationScope scope: CoroutineScope
     ): DecisionEngine = DecisionEngine(
         contacts = contacts,
         lists = lists,
         packs = packs,
-        builtInRules = PrefixRuleSet(BuiltInRules.load().rules),
+        builtInRules = builtInRules,
         settings = settings,
         normalizer = normalizer,
         regions = regions,

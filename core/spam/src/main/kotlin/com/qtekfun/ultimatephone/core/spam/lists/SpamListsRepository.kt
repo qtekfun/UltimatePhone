@@ -35,25 +35,36 @@ interface SpamListsRepository {
     suspend fun importJsonLines(list: ListType, lines: Sequence<String>): ImportResult
 }
 
+/**
+ * @param deviceIdProvider id of this installation, written into every change. Read when a change is made (the writes are
+ * suspending), never when the repository is built, so creating it costs no disk access on the main thread.
+ */
 class RoomSpamListsRepository(
     private val dao: ListEntryDao,
-    private val deviceId: String,
+    private val deviceIdProvider: suspend () -> String,
     private val clock: () -> Long = System::currentTimeMillis,
     private val newId: () -> String = { UUID.randomUUID().toString() }
 ) : SpamListsRepository {
+    constructor(
+        dao: ListEntryDao,
+        deviceId: String,
+        clock: () -> Long = System::currentTimeMillis,
+        newId: () -> String = { UUID.randomUUID().toString() }
+    ) : this(dao, { deviceId }, clock, newId)
+
     override fun observe(list: ListType): Flow<List<ListEntry>> = dao.observeLive(list.name).map { rows -> rows.map { it.toEntry() } }
 
     override suspend fun add(list: ListType, kind: EntryKind, value: String, label: String?, note: String?): ListEntry {
         require(EntryValues.isValid(kind, value)) { "Not a valid ${kind.name.lowercase()}" }
         val existing = dao.find(list.name, kind.name, value)
-        val entry = ListEntry(existing?.id ?: newId(), kind, value, label, note, clock(), deviceId, deleted = false)
+        val entry = ListEntry(existing?.id ?: newId(), kind, value, label, note, clock(), deviceIdProvider(), deleted = false)
         dao.upsert(entry.toEntity(list))
         return entry
     }
 
     override suspend fun remove(list: ListType, id: String): Boolean {
         val row = dao.byIds(listOf(id)).firstOrNull { it.list == list.name && !it.deleted } ?: return false
-        dao.upsert(row.copy(deleted = true, updatedAt = clock(), deviceId = deviceId))
+        dao.upsert(row.copy(deleted = true, updatedAt = clock(), deviceId = deviceIdProvider()))
         return true
     }
 

@@ -60,6 +60,21 @@ class DecisionEngine(
     suspend fun decide(raw: String?, record: Boolean = true): SpamVerdict? {
         val region = regions.defaultRegion()
         val valid = normalizer.normalize(raw, region) as? NormalizedNumber.Valid ?: return null
+        return decideValid(raw, valid, region, record)
+    }
+
+    /**
+     * Touches everything the first decision needs (the built-in rules, the installed packs, the lists database and the
+     * stored settings) so that it is paid for in the background rather than while a call rings. Optional: a decision
+     * taken before it has finished builds the same state on demand.
+     */
+    suspend fun warmUp() {
+        rules.match(WARM_UP_NUMBER, null)
+        lists.isWhitelisted(WARM_UP_NUMBER)
+        settings.current()
+    }
+
+    private suspend fun decideValid(raw: String?, valid: NormalizedNumber.Valid, region: String?, record: Boolean): SpamVerdict {
         val e164 = valid.e164
         val isContact = contacts.lookupByNumber(raw?.takeIf { it.isNotBlank() } ?: e164) != null
         val whitelisted = !isContact && lists.isWhitelisted(e164)
@@ -88,8 +103,10 @@ class DecisionEngine(
      * (so the work is done once per call), else a new one.
      */
     suspend fun verdictForCall(raw: String?): SpamVerdict? {
-        val e164 = (normalizer.normalize(raw, regions.defaultRegion()) as? NormalizedNumber.Valid)?.e164 ?: return null
-        return store.live(e164, clock()) ?: decide(raw)
+        val region = regions.defaultRegion()
+        val valid = normalizer.normalize(raw, region) as? NormalizedNumber.Valid ?: return null
+        // Normalised once for both the live lookup and, on a miss, the decision.
+        return store.live(valid.e164, clock()) ?: decideValid(raw, valid, region, record = true)
     }
 
     /** Makes [verdict] visible to the in-call screen right away. */
@@ -105,5 +122,10 @@ class DecisionEngine(
         this
     } else {
         copy(policy = ActionPolicy(policy.byLevel, policy.byRuleId + (rule.ruleId to SpamAction.WARN)))
+    }
+
+    private companion object {
+        /** A well formed number nobody owns; only used to make the lookups load their state. */
+        const val WARM_UP_NUMBER = "+10000000000"
     }
 }

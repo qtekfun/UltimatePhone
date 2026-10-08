@@ -26,8 +26,11 @@ object TelecomCalls : CallController {
     private val ids = java.util.IdentityHashMap<Call, String>()
     private val nextId = java.util.concurrent.atomic.AtomicLong()
     private val labels = ConcurrentHashMap<String, CallerLabel>()
+
+    /** Display form of each live call's number, formatted once per call instead of on every state change. */
+    private val displays = ConcurrentHashMap<String, String>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val normalizer: PhoneNormalizer = LibPhoneNormalizer()
+    private val normalizer: PhoneNormalizer = LibPhoneNormalizer.shared
     private val callsState = MutableStateFlow<List<CallInfo>>(emptyList())
     private val audioState = MutableStateFlow(AudioState.Default)
 
@@ -82,6 +85,7 @@ object TelecomCalls : CallController {
             ids.remove(call)
         }
         labels.remove(id)
+        displays.remove(id)
         rebuild()
     }
 
@@ -104,13 +108,12 @@ object TelecomCalls : CallController {
     private fun toInfo(id: String, call: Call): CallInfo {
         val details = call.details
         val number = details.handle?.schemeSpecificPart
-        val region = regions?.defaultRegion()
         val label = labels[id]
         return CallInfo(
             id = id,
             status = CallStatusMapper.fromState(details.state),
             number = number,
-            displayNumber = number?.let { normalizer.formatForDisplay(it, region) }.orEmpty(),
+            displayNumber = number?.let { displays.getOrPut(id) { normalizer.formatForDisplay(it, regions?.defaultRegion()) } }.orEmpty(),
             incoming = details.callDirection == Call.Details.DIRECTION_INCOMING,
             sim = sims?.find(details.accountHandle),
             connectedAtMillis = details.connectTimeMillis,

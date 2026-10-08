@@ -100,9 +100,13 @@ class DefaultInstalledPackLookups(
     override suspend fun searchT9(digits: String, limit: Int): List<BusinessHit> =
         withContext(io) { guarded { current().nameSearch.searchT9(digits, limit) } ?: emptyList() }
 
-    /** The snapshot, built on the calling thread if nobody has yet. Rare: the app warms it up at start. */
-    private fun current(): Snapshot = snapshot ?: synchronized(this) {
-        snapshot ?: runBlocking(io) { build() }.also { snapshot = it }
+    /**
+     * The snapshot. Normally it is already there (the app warms it up at start). If a call is faster than the warm-up,
+     * the caller (a screening thread, never the main one) waits for the build that is running, because [reload] holds
+     * the same mutex while it builds; only when nobody is building does it build one itself. Either way it is built once.
+     */
+    private fun current(): Snapshot = snapshot ?: runBlocking {
+        reloadMutex.withLock { snapshot ?: withContext(io) { build() }.also { snapshot = it } }
     }
 
     private inline fun <T> guarded(block: () -> T): T? = try {

@@ -32,10 +32,13 @@ class PrefixRuleSet(rules: List<PrefixRule>, private val util: PhoneNumberUtil =
 
     override fun match(e164: String, region: String?): RuleMatch? {
         if (byPrefix.isEmpty()) return null
-        val candidates = listOf(e164) + PrefixCandidates.of(e164)
-        for (candidate in candidates) {
-            val hit = byPrefix[candidate]?.firstOrNull { applies(it.rule, region) } ?: continue
-            return RuleMatch(hit.rule.id, hit.rule.level, hit.rule.informational, hit.rule.source)
+        // The number itself first, then each shorter prefix. Only the substrings that are really looked up are created.
+        var length = e164.length
+        while (length >= PrefixCandidates.MIN_LENGTH) {
+            val candidate = if (length == e164.length) e164 else e164.substring(0, length)
+            val hit = byPrefix[candidate]?.firstOrNull { applies(it.rule, region) }
+            if (hit != null) return RuleMatch(hit.rule.id, hit.rule.level, hit.rule.informational, hit.rule.source)
+            length--
         }
         return null
     }
@@ -53,4 +56,16 @@ class PrefixRuleSet(rules: List<PrefixRule>, private val util: PhoneNumberUtil =
         }
         return international?.let { Compiled(rule, it) }
     }
+}
+
+/** Builds the rules on first use (parsing the built-in file and loading libphonenumber), so creating the holder is free. */
+class LazyPrefixRules(create: () -> PrefixRules) : PrefixRules {
+    private val delegate by lazy(create)
+
+    /** Forces the build now; for a background warm-up. */
+    fun warmUp() {
+        delegate
+    }
+
+    override fun match(e164: String, region: String?): RuleMatch? = delegate.match(e164, region)
 }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Backup -->
+    <string name="backup_row_title">Backup and restore</string>
+    <string name="backup_row_summary">Save your settings to an encrypted file</string>
+    <string name="backup_title">Backup</string>
+    <string name="backup_back">Back</string>
+    <string name="backup_warning_title">Keep this file safe</string>
+    <string name="backup_warning">The backup contains your settings, your spam lists and your Nextcloud account details, including the app password. It is protected only by the password you choose. Anyone who has the file and the password can read it, and a lost password cannot be recovered.</string>
+    <string name="backup_export_title">Export</string>
+    <string name="backup_export_summary">Save everything to a file you choose, for example to move to a new phone.</string>
+    <string name="backup_export_action">Export to file</string>
+    <string name="backup_export_password_title">Choose a password</string>
+    <string name="backup_password">Password</string>
+    <string name="backup_password_repeat">Repeat the password</string>
+    <string name="backup_password_short">Use at least %1$d characters.</string>
+    <string name="backup_password_mismatch">The passwords do not match.</string>
+    <string name="backup_continue">Continue</string>
+    <string name="backup_cancel">Cancel</string>
+    <string name="backup_working">Working…</string>
+    <string name="backup_export_done">Backup saved.</string>
+    <string name="backup_export_failed">The backup could not be saved.</string>
+    <string name="backup_import_title">Import</string>
+    <string name="backup_import_summary">Restore from a backup file. You choose what to restore.</string>
+    <string name="backup_import_action">Import from file</string>
+    <string name="backup_import_password_title">Enter the backup password</string>
+    <string name="backup_open">Open</string>
+    <string name="backup_import_wrong">Wrong password, or the file was changed. Nothing was imported.</string>
+    <string name="backup_import_not_backup">This file is not an UltimatePhone backup. Nothing was imported.</string>
+    <string name="backup_import_newer">This backup was made by a newer version of the app. Update the app to import it.</string>
+    <string name="backup_import_corrupt">The file is damaged. Nothing was imported.</string>
+    <string name="backup_import_unreadable">The file could not be read.</string>
+    <string name="backup_import_choose">Choose what to restore</string>
+    <string name="backup_import_created">Backup made on %1$s</string>
+    <string name="backup_import_merge_note">Spam lists are merged with the ones on this phone; the newest change to each number wins.</string>
+    <string name="backup_import_nothing">This backup has nothing that this version can restore.</string>
+    <string name="backup_restore">Restore</string>
+    <string name="backup_import_done">Restored: %1$s.</string>
+    <string name="backup_import_partial">Could not restore: %1$s.</string>
+    <string name="backup_import_invalid">A part of the backup is not valid. Nothing was imported.</string>
+    <string name="backup_section_app">App settings</string>
+    <string name="backup_section_spam_settings">Spam filter settings</string>
+    <string name="backup_section_spam_list">Your spam list</string>
+    <string name="backup_section_whitelist">Allowed numbers</string>
+    <string name="backup_section_nextcloud">Nextcloud account, including the app password</string>
+</resources>

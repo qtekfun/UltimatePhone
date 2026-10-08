@@ -57,3 +57,25 @@ Each entry: what the spec says, what reality requires, what was done instead.
 - Dialer suggestions for businesses use an FTS5 `MATCH` over the pack's `numbers_fts` table. FTS5 is present in Android's
   SQLite on supported releases; if it is not, business suggestions are empty and nothing else is affected. Not unit tested
   (needs Android's SQLite); to verify on a device with an installed business pack.
+
+## D-009 · Sync merge: duplicate numbers collapse into a tombstone that keeps its own stamp
+- **Spec (03, F7):** merge by `id`, newest `updatedAt` wins, ties by `deviceId`.
+- **Reality:** two devices can add the same number independently, giving two ids for one kind and value. Stamping the
+  losing id with the winner's time makes the merge order-dependent.
+- **Done:** the greatest of the live ids (`updatedAt`, `deviceId`, `id`) stays; the others become tombstones that keep
+  their own `updatedAt`/`deviceId` and win a tie against their live form, so collapsing only moves an id up in the per-id
+  order. The merge is commutative and idempotent, and every device reaches the same state. If one of the two ids is
+  deleted at the same time, which one survives can depend on the sync order, but all devices still agree.
+
+## D-010 · Settings export uses Argon2id from Bouncy Castle, and leaves device-specific values out
+- **Spec (03, F8):** Argon2id if a suitable library exists, else PBKDF2.
+- **Done:** Argon2id (32 MiB, 4 passes, 1 lane, parameters stored in the authenticated header, upper limits enforced when
+  reading) through `Argon2BytesGenerator` of `bcprov`, which the app already ships for Ed25519; AES-256-GCM, header as AAD.
+  The export holds theme and region, spam settings, both lists, and the Nextcloud account. It does not hold the
+  per-number SIM choices or the default SIM (SIM keys belong to one phone's SIM cards) or the sync `deviceId` (it must
+  stay unique per phone). Importing the lists merges (newest change wins) instead of replacing.
+
+## D-011 · WebDAV with OkHttp
+- **Reality:** `HttpURLConnection` cannot send PROPFIND or MKCOL. OkHttp 4.12 (Apache-2.0, no Google code) is used with
+  redirects handled by the app because OkHttp turns a redirected PUT into a GET; `Authorization` never leaves the
+  configured host and plain `http` is refused, including through redirects.

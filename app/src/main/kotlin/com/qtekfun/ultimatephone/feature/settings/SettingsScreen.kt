@@ -35,8 +35,10 @@ import com.qtekfun.ultimatephone.BuildConfig
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.designsystem.ThemeMode
 import com.qtekfun.ultimatephone.navigation.ONBOARDING_ROUTE
+import com.qtekfun.ultimatephone.navigation.SETTINGS_BACKUP_ROUTE
 import com.qtekfun.ultimatephone.navigation.SETTINGS_DATA_ROUTE
 import com.qtekfun.ultimatephone.navigation.SETTINGS_SPAM_ROUTE
+import com.qtekfun.ultimatephone.navigation.SETTINGS_SYNC_ROUTE
 import java.util.Locale
 
 @Composable
@@ -70,6 +72,8 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
         NavRow(R.string.settings_spam_title, R.string.settings_spam_summary) { onOpen(SETTINGS_SPAM_ROUTE) }
         NavRow(R.string.settings_data_title, R.string.settings_data_summary) { onOpen(SETTINGS_DATA_ROUTE) }
         NavRow(R.string.onboarding_settings_title, R.string.onboarding_settings_summary) { onOpen(ONBOARDING_ROUTE) }
+        NavRow(R.string.sync_row_title, R.string.sync_row_summary) { onOpen(SETTINGS_SYNC_ROUTE) }
+        NavRow(R.string.backup_row_title, R.string.backup_row_summary) { onOpen(SETTINGS_BACKUP_ROUTE) }
 
         Section(R.string.settings_appearance)
         ThemeMode.entries.forEach { mode ->

@@ -48,6 +48,17 @@ class RepositoryTest {
     private val repo = RoomSpamListsRepository(dao, "device-a", { now++ }, { "id-${counter++}" })
 
     @Test
+    fun deviceIdIsReadWhenAChangeIsMadeNotWhenTheRepositoryIsBuilt() = runTest {
+        var reads = 0
+        val lazy = RoomSpamListsRepository(FakeDao(), { "device-${++reads}" }, { now++ }, { "id-${counter++}" })
+        assertEquals(0, reads)
+        assertFalse(lazy.isWhitelisted("+34612345678"))
+        assertEquals(0, reads)
+        val entry = lazy.add(ListType.OWN, EntryKind.NUMBER, "+34612345678")
+        assertEquals("device-1", entry.deviceId)
+    }
+
+    @Test
     fun addedNumberMatchesExactlyAndNotNeighbours() = runTest {
         repo.add(ListType.OWN, EntryKind.NUMBER, "+34612345678", "robocall")
         assertEquals("robocall", repo.matchOwn("+34612345678")?.label)

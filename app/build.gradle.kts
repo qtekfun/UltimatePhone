@@ -94,6 +94,16 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+
+    packaging {
+        resources {
+            // R8 already strips the unused Bouncy Castle classes (about 20 remain: Ed25519, Argon2 and their helpers);
+            // what it cannot strip are the library's own message tables, which only certificate path code reads.
+            excludes += "org/bouncycastle/**"
+            // Debug probes of kotlinx.coroutines, only read by the debugger agent.
+            excludes += "DebugProbesKt.bin"
+        }
+    }
 }
 
 kotlin {

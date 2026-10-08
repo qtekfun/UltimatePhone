@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Nextcloud sync -->
+    <string name="sync_row_title">Nextcloud sync</string>
+    <string name="sync_row_summary">Keep your spam list the same on all your phones</string>
+    <string name="sync_title">Nextcloud sync</string>
+    <string name="sync_back">Back</string>
+    <string name="sync_intro">Keep your spam list and allowed numbers the same on all your phones, using your own Nextcloud. Only those two lists are uploaded, to a folder called UltimatePhone.</string>
+    <string name="sync_server_label">Server address</string>
+    <string name="sync_server_placeholder">https://cloud.example.com</string>
+    <string name="sync_server_help">Only https addresses are accepted, so your password is never sent unencrypted.</string>
+    <string name="sync_user_label">User name</string>
+    <string name="sync_password_label">App password</string>
+    <string name="sync_password_saved">An app password is saved. Leave this empty to keep it.</string>
+    <string name="sync_password_help">Do not use your normal password. In Nextcloud open Settings, Security, Devices and sessions, type a name such as UltimatePhone, choose Create new app password and paste it here.</string>
+    <string name="sync_test">Test connection</string>
+    <string name="sync_testing">Testing…</string>
+    <string name="sync_test_ok">The connection works.</string>
+    <string name="sync_save">Save</string>
+    <string name="sync_saved">Saved.</string>
+    <string name="sync_connect">Connect</string>
+    <string name="sync_skip">Not now</string>
+    <string name="sync_setup_title">Connect your Nextcloud</string>
+    <string name="sync_setup_intro">Optional. You can also do this later in Settings.</string>
+    <string name="sync_enable">Sync automatically</string>
+    <string name="sync_enable_summary">Every few hours, and shortly after you change a list, when you are online.</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_syncing">Syncing…</string>
+    <string name="sync_last_sync">Last sync: %1$s</string>
+    <string name="sync_never">Not synced yet</string>
+    <string name="sync_pending">Changes are waiting to be uploaded.</string>
+    <string name="sync_result">Done. %1$d received, %2$d sent.</string>
+    <string name="sync_bad_lines">%1$d unreadable lines in the remote files were skipped.</string>
+    <string name="sync_forget">Forget account</string>
+    <string name="sync_forget_title">Forget the Nextcloud account?</string>
+    <string name="sync_forget_message">The account and the saved app password are removed from this phone and sync stops. Your lists and the files in Nextcloud are not changed.</string>
+    <string name="sync_forget_confirm">Forget</string>
+    <string name="sync_cancel">Cancel</string>
+    <string name="sync_error_title">Last problem</string>
+    <string name="sync_error_not_configured">Enter the server, user name and app password first.</string>
+    <string name="sync_error_invalid_url">That does not look like a server address.</string>
+    <string name="sync_error_insecure_url">Only https addresses are allowed. Your password is never sent over plain http.</string>
+    <string name="sync_error_auth">The server refused the user name or app password. Create a new app password in Nextcloud.</string>
+    <string name="sync_error_network">The server could not be reached. It will be tried again when you are online.</string>
+    <string name="sync_error_tls">The security certificate of the server was not accepted.</string>
+    <string name="sync_error_conflict">The files kept changing on the server. It will be tried again later.</string>
+    <string name="sync_error_server_old">This server does not offer what sync needs (WebDAV with ETag support).</string>
+    <string name="sync_error_remote_corrupt">A file in the UltimatePhone folder is not a valid list. It was left untouched.</string>
+    <string name="sync_error_credentials">The saved password can no longer be read, because the secure key was lost. Enter the app password again.</string>
+    <string name="sync_error_unknown">Something went wrong.</string>
+</resources>

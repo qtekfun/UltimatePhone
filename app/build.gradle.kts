@@ -118,6 +118,8 @@ dependencies {
     implementation(project(":core:calllog"))
     implementation(project(":core:datapacks"))
     implementation(project(":core:spam"))
+    implementation(project(":core:sync"))
+    implementation(project(":core:settings"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -127,6 +129,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.work.runtime)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
 

@@ -47,8 +47,11 @@ interface ListEntryDao {
     @Query("SELECT * FROM list_entry WHERE id IN (:ids)")
     suspend fun byIds(ids: List<String>): List<ListEntryEntity>
 
-    /** The row for a kind and value in any state, so a re-add revives the tombstone and keeps its id. */
-    @Query("SELECT * FROM list_entry WHERE list = :list AND kind = :kind AND value = :value LIMIT 1")
+    /**
+     * The row for a kind and value in any state, so a re-add revives the tombstone and keeps its id. A live row is
+     * preferred, because sync can leave a tombstone next to the live row it collapsed into.
+     */
+    @Query("SELECT * FROM list_entry WHERE list = :list AND kind = :kind AND value = :value ORDER BY deleted ASC, updatedAt DESC LIMIT 1")
     suspend fun find(list: String, kind: String, value: String): ListEntryEntity?
 
     /** Live rows whose value is the number or one of its prefixes; one indexed query. */
@@ -57,6 +60,10 @@ interface ListEntryDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entry: ListEntryEntity)
+
+    /** Physical delete, only for tombstones that sync dropped after their retention. */
+    @Query("DELETE FROM list_entry WHERE id IN (:ids) AND deleted = 1")
+    suspend fun deleteTombstones(ids: List<String>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(entries: List<ListEntryEntity>)

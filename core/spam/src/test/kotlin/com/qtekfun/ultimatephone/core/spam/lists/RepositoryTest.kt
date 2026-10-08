@@ -32,6 +32,10 @@ private class FakeDao : ListEntryDao {
         rows.value = rows.value + (entry.id to entry)
     }
 
+    override suspend fun deleteTombstones(ids: List<String>) {
+        rows.value = rows.value.filterValues { !(it.id in ids && it.deleted) }
+    }
+
     override suspend fun upsertAll(entries: List<ListEntryEntity>) {
         rows.value = rows.value + entries.associateBy { it.id }
     }

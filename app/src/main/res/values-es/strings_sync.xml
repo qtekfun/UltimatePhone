@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes > Sincronización con Nextcloud -->
+    <string name="sync_row_title">Sincronización con Nextcloud</string>
+    <string name="sync_row_summary">Mantén tu lista de spam igual en todos tus móviles</string>
+    <string name="sync_title">Sincronización con Nextcloud</string>
+    <string name="sync_back">Atrás</string>
+    <string name="sync_intro">Mantén tu lista de spam y tus números permitidos iguales en todos tus móviles, usando tu propio Nextcloud. Solo se suben esas dos listas, a una carpeta llamada UltimatePhone.</string>
+    <string name="sync_server_label">Dirección del servidor</string>
+    <string name="sync_server_placeholder">https://nube.ejemplo.com</string>
+    <string name="sync_server_help">Solo se aceptan direcciones https, así que tu contraseña nunca viaja sin cifrar.</string>
+    <string name="sync_user_label">Nombre de usuario</string>
+    <string name="sync_password_label">Contraseña de aplicación</string>
+    <string name="sync_password_saved">Hay una contraseña de aplicación guardada. Déjalo vacío para conservarla.</string>
+    <string name="sync_password_help">No uses tu contraseña normal. En Nextcloud abre Ajustes, Seguridad, Dispositivos y sesiones, escribe un nombre como UltimatePhone, elige Crear nueva contraseña de aplicación y pégala aquí.</string>
+    <string name="sync_test">Probar conexión</string>
+    <string name="sync_testing">Probando…</string>
+    <string name="sync_test_ok">La conexión funciona.</string>
+    <string name="sync_save">Guardar</string>
+    <string name="sync_saved">Guardado.</string>
+    <string name="sync_connect">Conectar</string>
+    <string name="sync_skip">Ahora no</string>
+    <string name="sync_setup_title">Conecta tu Nextcloud</string>
+    <string name="sync_setup_intro">Es opcional. También puedes hacerlo más tarde en Ajustes.</string>
+    <string name="sync_enable">Sincronizar automáticamente</string>
+    <string name="sync_enable_summary">Cada pocas horas y poco después de cambiar una lista, cuando haya conexión.</string>
+    <string name="sync_now">Sincronizar ahora</string>
+    <string name="sync_syncing">Sincronizando…</string>
+    <string name="sync_last_sync">Última sincronización: %1$s</string>
+    <string name="sync_never">Aún sin sincronizar</string>
+    <string name="sync_pending">Hay cambios pendientes de subir.</string>
+    <string name="sync_result">Hecho. %1$d recibidos, %2$d enviados.</string>
+    <string name="sync_bad_lines">Se omitieron %1$d líneas ilegibles de los ficheros remotos.</string>
+    <string name="sync_forget">Olvidar cuenta</string>
+    <string name="sync_forget_title">¿Olvidar la cuenta de Nextcloud?</string>
+    <string name="sync_forget_message">La cuenta y la contraseña de aplicación guardada se borran de este móvil y la sincronización se detiene. Tus listas y los ficheros de Nextcloud no cambian.</string>
+    <string name="sync_forget_confirm">Olvidar</string>
+    <string name="sync_cancel">Cancelar</string>
+    <string name="sync_error_title">Último problema</string>
+    <string name="sync_error_not_configured">Indica primero el servidor, el usuario y la contraseña de aplicación.</string>
+    <string name="sync_error_invalid_url">Eso no parece una dirección de servidor.</string>
+    <string name="sync_error_insecure_url">Solo se permiten direcciones https. Tu contraseña nunca se envía por http sin cifrar.</string>
+    <string name="sync_error_auth">El servidor rechazó el usuario o la contraseña de aplicación. Crea una contraseña de aplicación nueva en Nextcloud.</string>
+    <string name="sync_error_network">No se pudo contactar con el servidor. Se reintentará cuando haya conexión.</string>
+    <string name="sync_error_tls">No se aceptó el certificado de seguridad del servidor.</string>
+    <string name="sync_error_conflict">Los ficheros no dejaron de cambiar en el servidor. Se reintentará más tarde.</string>
+    <string name="sync_error_server_old">Este servidor no ofrece lo que necesita la sincronización (WebDAV con soporte de ETag).</string>
+    <string name="sync_error_remote_corrupt">Un fichero de la carpeta UltimatePhone no es una lista válida. Se ha dejado sin tocar.</string>
+    <string name="sync_error_credentials">La contraseña guardada ya no se puede leer porque se perdió la clave segura. Introduce de nuevo la contraseña de aplicación.</string>
+    <string name="sync_error_unknown">Algo salió mal.</string>
+</resources>

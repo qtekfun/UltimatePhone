@@ -1,0 +1,36 @@
+# Draft of the F-Droid metadata (for a merge request to gitlab.com/fdroid/fdroiddata).
+# Fill in `commit` with the release tag's commit and `AllowedAPKSigningKeys` with the SHA-256 of the
+# release certificate (see RELEASING.md), then submit once the first stable release is out.
+Categories:
+  - Phone & SMS
+License: GPL-3.0-or-later
+AuthorName: qtekfun
+SourceCode: https://github.com/qtekfun/UltimatePhone
+IssueTracker: https://github.com/qtekfun/UltimatePhone/issues
+Changelog: https://github.com/qtekfun/UltimatePhone/blob/HEAD/CHANGELOG.md
+
+AutoName: UltimatePhone
+
+RepoType: git
+Repo: https://github.com/qtekfun/UltimatePhone.git
+Binaries: https://github.com/qtekfun/UltimatePhone/releases/download/v%v/UltimatePhone-%v.apk
+
+Builds:
+  - versionName: 0.1.0-rc3
+    versionCode: 10003
+    commit: TODO_RELEASE_TAG_COMMIT
+    subdir: app
+    sudo:
+      - apt-get update
+      - apt-get install -y openjdk-21-jdk-headless
+      - update-java-alternatives -a
+    gradle:
+      - yes
+
+# Reproducible build: the signing certificate of the project.
+AllowedAPKSigningKeys: 5aec737a127944f96e5bde920b83d392c02765df823e827cd3eb0de5a32268ef
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$
+CurrentVersion: 0.1.0-rc3
+CurrentVersionCode: 10003

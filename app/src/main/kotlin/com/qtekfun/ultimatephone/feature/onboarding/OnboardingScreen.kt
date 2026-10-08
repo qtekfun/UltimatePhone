@@ -59,15 +59,9 @@ import com.qtekfun.ultimatephone.R
  * first and the last can be skipped, and nothing needs an account or a network.
  *
  * @param embedded true when shown inside the app's navigation (re-run from Settings), where the system bars are already handled.
- * @param onSetUpNextcloud hook for the Nextcloud step; null until that feature exists, which shows only "set up later".
  */
 @Composable
-fun OnboardingRoute(
-    onFinished: () -> Unit,
-    embedded: Boolean = false,
-    onSetUpNextcloud: (() -> Unit)? = null,
-    viewModel: OnboardingViewModel = hiltViewModel()
-) {
+fun OnboardingRoute(onFinished: () -> Unit, embedded: Boolean = false, viewModel: OnboardingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val flow = state.flow
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -108,7 +102,13 @@ fun OnboardingRoute(
                     OnboardingStep.ROLES -> RolesStep(state.roles, viewModel)
                     OnboardingStep.PERMISSIONS -> PermissionsStep()
                     OnboardingStep.DATA -> DataStep(state, viewModel)
-                    OnboardingStep.NEXTCLOUD -> NextcloudStep(onSetUpNextcloud, onLater = viewModel::skip)
+                    OnboardingStep.NEXTCLOUD -> NextcloudStep(
+                        formOpen = flow.nextcloudFormOpen,
+                        onOpenForm = viewModel::openNextcloudForm,
+                        onCloseForm = viewModel::closeNextcloudForm,
+                        onConnected = viewModel::next,
+                        onLater = viewModel::skip
+                    )
                     OnboardingStep.BATTERY -> BatteryStep(state)
                     OnboardingStep.SUMMARY -> SummaryStep(state, onFinish = { download -> viewModel.finish(download, onFinished) })
                 }

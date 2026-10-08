@@ -161,7 +161,12 @@ private fun CallDetailContent(state: CallDetailUiState, handlers: DetailHandlers
                         }
                     }
                 }
-                Text(text = title, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics { heading() }
+                )
                 business?.let { BusinessCategoryLine(it.category, it.iconName) }
                 if (caller != null && caller.displayName != null && caller.formattedNumber.isNotBlank()) {
                     Text(text = caller.formattedNumber, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -217,7 +222,7 @@ private fun StatsCard(stats: CallStats) {
 
 @Composable
 private fun StatLine(label: Int, value: String) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = stringResource(label), modifier = Modifier.weight(1f).padding(end = 8.dp))
         Text(text = value, style = MaterialTheme.typography.titleSmall)
     }
@@ -226,6 +231,8 @@ private fun StatLine(label: Int, value: String) {
 @Composable
 private fun CallEntryRow(entry: CallLogEntry) {
     ListItem(
+        // One item for TalkBack: type, date, SIM and duration.
+        modifier = Modifier.semantics(mergeDescendants = true) {},
         leadingContent = { CallTypeIcon(entry.type, Modifier.size(24.dp)) },
         supportingContent = {
             Column {

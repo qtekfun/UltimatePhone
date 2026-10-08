@@ -130,13 +130,21 @@ fun SyncRoute(onBack: () -> Unit, viewModel: SyncViewModel = hiltViewModel()) {
 
 /**
  * The Nextcloud account form with a Connect button, for the onboarding step. It tests the connection, saves the account,
- * turns sync on and calls [onDone]; "Not now" calls [onDone] too, without saving anything.
+ * turns sync on and calls [onDone]; "Not now" calls [onSkip] (by default [onDone]) without saving anything.
+ * [scrollable] is false when a parent already scrolls (a nested scroll would crash on unbounded height).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NextcloudSetupContent(onDone: () -> Unit, modifier: Modifier = Modifier, viewModel: SyncViewModel = hiltViewModel()) {
+fun NextcloudSetupContent(
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier,
+    onSkip: () -> Unit = onDone,
+    scrollable: Boolean = true,
+    viewModel: SyncViewModel = hiltViewModel()
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    Column(modifier = modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    val scrollModifier = if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier
+    Column(modifier = modifier.then(scrollModifier), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.sync_setup_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
         Text(stringResource(R.string.sync_setup_intro), style = MaterialTheme.typography.bodyMedium)
         Text(stringResource(R.string.sync_intro), style = MaterialTheme.typography.bodyMedium)
@@ -147,7 +155,7 @@ fun NextcloudSetupContent(onDone: () -> Unit, modifier: Modifier = Modifier, vie
                 onClick = { viewModel.connect(onDone) },
                 enabled = state.action != SyncAction.Testing && state.form.serverUrl.isNotBlank() && state.form.username.isNotBlank()
             ) { Text(stringResource(R.string.sync_connect)) }
-            TextButton(onClick = onDone) { Text(stringResource(R.string.sync_skip)) }
+            TextButton(onClick = onSkip) { Text(stringResource(R.string.sync_skip)) }
         }
     }
 }

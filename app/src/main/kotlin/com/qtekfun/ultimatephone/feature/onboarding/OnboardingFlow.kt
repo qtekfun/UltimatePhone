@@ -19,7 +19,9 @@ data class OnboardingState(
     val step: OnboardingStep = OnboardingStep.WELCOME,
     val skipped: Set<OnboardingStep> = emptySet(),
     val completed: Set<OnboardingStep> = emptySet(),
-    val finished: Boolean = false
+    val finished: Boolean = false,
+    /** The inline account form of the Nextcloud step is open. Always false on every other step. */
+    val nextcloudFormOpen: Boolean = false
 ) {
     val isFirst: Boolean get() = step == OnboardingStep.entries.first()
     val isLast: Boolean get() = step == OnboardingStep.entries.last()
@@ -37,7 +39,8 @@ object OnboardingFlow {
         return state.copy(
             step = OnboardingStep.entries[state.step.ordinal + 1],
             completed = state.completed + state.step,
-            skipped = state.skipped - state.step
+            skipped = state.skipped - state.step,
+            nextcloudFormOpen = false
         )
     }
 
@@ -47,14 +50,22 @@ object OnboardingFlow {
         return state.copy(
             step = OnboardingStep.entries[state.step.ordinal + 1],
             skipped = state.skipped + state.step,
-            completed = state.completed - state.step
+            completed = state.completed - state.step,
+            nextcloudFormOpen = false
         )
     }
 
     fun back(state: OnboardingState): OnboardingState {
         if (state.finished || state.isFirst) return state
-        return state.copy(step = OnboardingStep.entries[state.step.ordinal - 1])
+        return state.copy(step = OnboardingStep.entries[state.step.ordinal - 1], nextcloudFormOpen = false)
     }
+
+    /** Shows the account form inside the Nextcloud step. Ignored on other steps. */
+    fun openNextcloudForm(state: OnboardingState): OnboardingState =
+        if (!state.finished && state.step == OnboardingStep.NEXTCLOUD) state.copy(nextcloudFormOpen = true) else state
+
+    /** Hides the account form again ("Not now" inside it): the step stays, nothing is marked. */
+    fun closeNextcloudForm(state: OnboardingState): OnboardingState = state.copy(nextcloudFormOpen = false)
 
     /** Ends the flow. Only possible from the summary. */
     fun finish(state: OnboardingState): OnboardingState = if (state.isLast) state.copy(finished = true, completed = state.completed + state.step) else state
@@ -63,12 +74,14 @@ object OnboardingFlow {
     fun pendingForLater(state: OnboardingState): List<OnboardingStep> = OnboardingStep.entries.filter { it in state.skipped }
 
     /** Rebuilds a state saved as plain strings (process death); unknown names are ignored. */
-    fun restore(step: String?, skipped: Collection<String>, completed: Collection<String>): OnboardingState {
+    fun restore(step: String?, skipped: Collection<String>, completed: Collection<String>, nextcloudFormOpen: Boolean = false): OnboardingState {
         fun parse(name: String) = OnboardingStep.entries.firstOrNull { it.name == name }
+        val restoredStep = step?.let(::parse) ?: OnboardingStep.WELCOME
         return OnboardingState(
-            step = step?.let(::parse) ?: OnboardingStep.WELCOME,
+            step = restoredStep,
             skipped = skipped.mapNotNull(::parse).toSet(),
-            completed = completed.mapNotNull(::parse).toSet()
+            completed = completed.mapNotNull(::parse).toSet(),
+            nextcloudFormOpen = nextcloudFormOpen && restoredStep == OnboardingStep.NEXTCLOUD
         )
     }
 }

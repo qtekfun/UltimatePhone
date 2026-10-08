@@ -77,7 +77,8 @@ class OnboardingViewModel @Inject constructor(
         OnboardingFlow.restore(
             saved.get<String>(KEY_STEP),
             saved.get<ArrayList<String>>(KEY_SKIPPED).orEmpty(),
-            saved.get<ArrayList<String>>(KEY_COMPLETED).orEmpty()
+            saved.get<ArrayList<String>>(KEY_COMPLETED).orEmpty(),
+            saved.get<Boolean>(KEY_FORM_OPEN) ?: false
         )
     )
     private val roleState = MutableStateFlow(RolesState())
@@ -131,12 +132,17 @@ class OnboardingViewModel @Inject constructor(
 
     fun back() = move(OnboardingFlow::back)
 
+    fun openNextcloudForm() = move(OnboardingFlow::openNextcloudForm)
+
+    fun closeNextcloudForm() = move(OnboardingFlow::closeNextcloudForm)
+
     private fun move(transition: (OnboardingState) -> OnboardingState) {
         flow.update(transition)
         val now = flow.value
         saved[KEY_STEP] = now.step.name
         saved[KEY_SKIPPED] = ArrayList(now.skipped.map { it.name })
         saved[KEY_COMPLETED] = ArrayList(now.completed.map { it.name })
+        saved[KEY_FORM_OPEN] = now.nextcloudFormOpen
         refreshRoles()
         refreshNetwork()
     }
@@ -222,6 +228,7 @@ class OnboardingViewModel @Inject constructor(
         const val KEY_STEP = "step"
         const val KEY_SKIPPED = "skipped"
         const val KEY_COMPLETED = "completed"
+        const val KEY_FORM_OPEN = "nextcloud_form_open"
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }

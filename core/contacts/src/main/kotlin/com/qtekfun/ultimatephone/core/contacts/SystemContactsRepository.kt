@@ -161,9 +161,11 @@ class SystemContactsRepository(
             val seen = HashSet<String>()
             val out = ArrayList<SuggestionEntry>(c.count)
             while (c.moveToNext()) {
-                val key = c.getString(0) ?: continue
-                val number = c.getString(2)?.takeIf { it.isNotBlank() } ?: continue
-                if (seen.add(key + '|' + T9.digitsOf(number))) out += SuggestionEntry(key, c.getString(1).orEmpty(), number, c.getString(3))
+                val key = c.getString(0)
+                val number = c.getString(2)
+                if (key != null && !number.isNullOrBlank() && seen.add(key + '|' + T9.digitsOf(number))) {
+                    out += SuggestionEntry(key, c.getString(1).orEmpty(), number, c.getString(3))
+                }
             }
             out
         } ?: emptyList()
@@ -214,8 +216,12 @@ class SystemContactsRepository(
         fun add(rawId: Long, mime: String?, data1: String?, type: Int, label: String?) {
             val text = data1?.takeIf { it.isNotBlank() } ?: return
             when (mime) {
-                Phone.CONTENT_ITEM_TYPE -> phones += StoredValue(LabeledValue(text, type, label), Phone.getTypeLabel(appContext.resources, type, label).toString(), rawId)
-                Email.CONTENT_ITEM_TYPE -> emails += StoredValue(LabeledValue(text, type, label), Email.getTypeLabel(appContext.resources, type, label).toString(), rawId)
+                Phone.CONTENT_ITEM_TYPE ->
+                    phones +=
+                        StoredValue(LabeledValue(text, type, label), Phone.getTypeLabel(appContext.resources, type, label).toString(), rawId)
+                Email.CONTENT_ITEM_TYPE ->
+                    emails +=
+                        StoredValue(LabeledValue(text, type, label), Email.getTypeLabel(appContext.resources, type, label).toString(), rawId)
                 StructuredName.CONTENT_ITEM_TYPE -> if (rawId == primary?.id && editableName.isEmpty()) editableName = text
                 Organization.CONTENT_ITEM_TYPE -> if (organization.isEmpty()) organization = text
                 Note.CONTENT_ITEM_TYPE -> if (notes.isEmpty()) notes = text
@@ -242,7 +248,13 @@ class SystemContactsRepository(
 
     private fun rawContacts(contactId: Long): List<RawContact> {
         val projection = arrayOf(RawContacts._ID, RawContacts.ACCOUNT_NAME, RawContacts.ACCOUNT_TYPE)
-        return query(RawContacts.CONTENT_URI, projection, "${RawContacts.CONTACT_ID}=? AND ${RawContacts.DELETED}=0", arrayOf(contactId.toString()), "${RawContacts._ID} ASC") { c ->
+        return query(
+            RawContacts.CONTENT_URI,
+            projection,
+            "${RawContacts.CONTACT_ID}=? AND ${RawContacts.DELETED}=0",
+            arrayOf(contactId.toString()),
+            "${RawContacts._ID} ASC"
+        ) { c ->
             buildList { while (c.moveToNext()) add(RawContact(c.getLong(0), accountOf(c.getString(1), c.getString(2)))) }
         } ?: emptyList()
     }

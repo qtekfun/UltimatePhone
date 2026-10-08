@@ -1,28 +1,27 @@
 package com.qtekfun.ultimatephone.di
 
-import com.qtekfun.ultimatephone.core.contacts.ContactMatch
-import com.qtekfun.ultimatephone.core.contacts.ContactSummary
+import android.content.Context
+import com.qtekfun.ultimatephone.core.contacts.ContactsManager
 import com.qtekfun.ultimatephone.core.contacts.ContactsRepository
-import com.qtekfun.ultimatephone.core.contacts.DialerSuggestion
+import com.qtekfun.ultimatephone.core.contacts.SystemContactsRepository
+import com.qtekfun.ultimatephone.core.phonenumber.PhoneNormalizer
+import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
-/** Placeholder binding; the contacts feature replaces it with the ContactsContract implementation. */
+/** The ContactsContract-backed contacts implementation, exposed both as the shared read-only contract and as the full manager. */
 @Module
 @InstallIn(SingletonComponent::class)
 object ContactsModule {
     @Provides
     @Singleton
-    fun contactsRepository(): ContactsRepository = object : ContactsRepository {
-        override fun observeContacts(): Flow<List<ContactSummary>> = flowOf(emptyList())
+    fun contactsManager(@ApplicationContext context: Context, normalizer: PhoneNormalizer, regionProvider: RegionProvider): ContactsManager =
+        SystemContactsRepository(context, normalizer, regionProvider = { regionProvider.defaultRegion() })
 
-        override suspend fun lookupByNumber(number: String): ContactMatch? = null
-
-        override suspend fun suggest(query: String, limit: Int): List<DialerSuggestion> = emptyList()
-    }
+    @Provides
+    fun contactsRepository(manager: ContactsManager): ContactsRepository = manager
 }

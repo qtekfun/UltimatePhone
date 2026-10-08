@@ -8,7 +8,14 @@ class T9Test {
     @Test
     fun `every letter maps to its keypad digit`() {
         val expected = mapOf(
-            "abc" to '2', "def" to '3', "ghi" to '4', "jkl" to '5', "mno" to '6', "pqrs" to '7', "tuv" to '8', "wxyz" to '9'
+            "abc" to '2',
+            "def" to '3',
+            "ghi" to '4',
+            "jkl" to '5',
+            "mno" to '6',
+            "pqrs" to '7',
+            "tuv" to '8',
+            "wxyz" to '9'
         )
         expected.forEach { (letters, key) ->
             letters.forEach { assertEquals("letter $it", key, T9.keyOf(it)) }

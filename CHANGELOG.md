@@ -3,6 +3,11 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.0-rc2]
+
+- Fixed a crash when opening the app for the first time (the contacts observer was registered before the permission was granted).
+- New launcher icon, centred.
+
 ## [0.1.0-rc1]
 
 First release candidate. Not tested on a wide range of devices yet.

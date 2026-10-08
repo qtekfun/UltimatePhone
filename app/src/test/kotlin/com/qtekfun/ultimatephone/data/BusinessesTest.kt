@@ -167,8 +167,8 @@ class BusinessSearchTest {
         val query = BusinessQuery.matchForDigits("327")!!
         val terms = query.split(" OR ")
         assertEquals(3 * 3 * 4, terms.size)
-        assertTrue("\"far\"*" in terms)
-        assertTrue("\"ebs\"*" in terms)
+        assertTrue("far*" in terms)
+        assertTrue("ebs*" in terms)
     }
 
     @Test
@@ -187,7 +187,7 @@ class BusinessSearchTest {
 
     @Test
     fun keysZeroAndOneStayAsDigits() {
-        assertEquals("\"101\"*", BusinessQuery.matchForDigits("101"))
+        assertEquals("101*", BusinessQuery.matchForDigits("101"))
     }
 
     @Test

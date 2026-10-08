@@ -20,7 +20,7 @@ object NoBusinessNameSearch : BusinessNameSearch {
 }
 
 /**
- * Query building for the `numbers_fts` table of business packs (FTS5 over `name`). The keypad gives digits, FTS wants
+ * Query building for the `numbers_fts` table of business packs (an FTS4 index over `name`; Android's SQLite has no FTS5). The keypad gives digits, FTS wants
  * letters, so the first [MAX_EXPANDED_DIGITS] digits are expanded into every letter combination (at most 256 prefix
  * terms) and the rows that come back are filtered again with the full T9 code of the query.
  */
@@ -42,7 +42,7 @@ object BusinessQuery {
         '9' to "wxyz"
     )
 
-    /** The FTS5 MATCH expression for [digits], or null when the query is too short or has non-digit keys. */
+    /** The MATCH expression for [digits] (`far* OR fas* ...`, valid in FTS4 and FTS5), or null when the query is too short or has non-digit keys. */
     fun matchForDigits(digits: String): String? {
         if (digits.length < MIN_DIGITS || !digits.all { it in '0'..'9' }) return null
         val window = digits.take(MAX_EXPANDED_DIGITS)
@@ -51,7 +51,7 @@ object BusinessQuery {
             val letters = LETTERS.getValue(key)
             prefixes = prefixes.flatMap { prefix -> letters.map { prefix + it } }
         }
-        return prefixes.joinToString(" OR ") { "\"$it\"*" }
+        return prefixes.joinToString(" OR ") { "$it*" }
     }
 
     /** True when some word of [name] starts with the keypad code [digits]. */
@@ -75,7 +75,7 @@ object BusinessSuggestions {
     private fun tail(number: String) = T9.digitsOf(number).takeLast(TAIL_DIGITS)
 }
 
-/** FTS5 name search over the business packs, one read-only connection per pack. Needs Android's SQLite, so it is not unit tested. */
+/** FTS name search over the business packs, one read-only connection per pack. Needs Android's SQLite, so it is not unit tested. */
 class SqliteBusinessNameSearch(private val files: List<Pair<String, File>>) :
     BusinessNameSearch,
     Closeable {

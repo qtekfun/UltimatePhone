@@ -1,0 +1,6 @@
+version: 2
+# The only hits so far were a dummy password in a unit test and the word "password" in UI strings.
+secret:
+  ignored_paths:
+    - "**/src/test/**"
+    - "app/src/main/res/values*/strings_*.xml"

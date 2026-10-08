@@ -3,6 +3,20 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.0]
+
+First version. A phone app with contacts and a spam filter that decides on your device.
+
+- Phone: keypad with search by contact and business name, call screen (answer, decline, mute, keypad, speaker and Bluetooth, hold, merge), dual SIM with a SIM per number, call history with filters and details.
+- Contacts: create, edit, favourites, accounts such as DAVx5, duplicates with a safe merge, groups, vCard import and export.
+- Spam filter: your own list, allowed numbers, sources by URL, prefix rules (Spain 400 is shown as a commercial call, not spam), decided before the call rings, with an explanation of why a call was flagged.
+- Data packs from UltimatePhone-data (OpenStreetMap businesses for Spain, Germany and Austria), signed and verified before use.
+- Optional Nextcloud sync of the spam list and allowed numbers, and encrypted export and import of settings.
+- Call recording from the microphone (the other person is recorded only through the speaker unless the phone allows line capture), with a legal notice and a folder of your choice.
+- Setup guide with battery and auto-start help for each manufacturer. English and Spanish. No Google services, no analytics.
+
+Known limits: tried on few devices so far; the cold start and call-screening times are not yet measured on a phone; call recording and the lock-screen call UI need real-device testing.
+
 ## [0.1.0-rc4]
 
 - Faster start: heavy work moved off the main thread; the first call after opening the app is still handled.

@@ -1,0 +1,1 @@
+First version: phone, contacts, local spam filter, business data packs, Nextcloud sync, encrypted backup and call recording.

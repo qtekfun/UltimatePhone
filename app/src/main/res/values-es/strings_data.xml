@@ -2,6 +2,7 @@
 <resources>
     <string name="data_title">Datos</string>
     <string name="data_back">Atrás</string>
+    <string name="data_pack_action">%1$s: %2$s</string>
     <string name="data_cancel">Cancelar</string>
     <string name="data_retry">Reintentar</string>
 
@@ -85,8 +86,11 @@
     <string name="data_level_rule">Regla</string>
     <string name="data_source_test">Probar descarga</string>
     <string name="data_source_testing">Probando…</string>
-    <string name="data_source_test_ok">Se encontraron %1$d números válidos (%2$d no válidos, %3$d repetidos).</string>
-    <string name="data_source_updated">Actualizada %1$s · %2$d números</string>
+    <string name="data_source_test_ok">Números válidos encontrados: %1$d (no válidos: %2$d, repetidos: %3$d).</string>
+    <plurals name="data_source_updated">
+        <item quantity="one">Actualizada %1$s · %2$d número</item>
+        <item quantity="other">Actualizada %1$s · %2$d números</item>
+    </plurals>
     <string name="data_source_never">Aún sin descargar</string>
     <string name="data_source_refresh">Actualizar</string>
     <string name="data_source_remove_title">¿Quitar esta fuente?</string>

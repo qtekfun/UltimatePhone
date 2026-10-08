@@ -1,12 +1,17 @@
 package com.qtekfun.ultimatephone.feature.data
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -25,8 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -82,32 +92,46 @@ internal fun CustomSourcesSection(state: DataUiState, viewModel: DataViewModel) 
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SourceCard(source: CustomSource, onEnabled: (Boolean) -> Unit, onRefresh: () -> Unit, onRemove: () -> Unit) {
     Card {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(value = source.enabled, role = Role.Switch, onValueChange = onEnabled),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(source.name, style = MaterialTheme.typography.titleMedium)
                     Text(source.url, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
                 }
-                Switch(checked = source.enabled, onCheckedChange = onEnabled)
+                Switch(checked = source.enabled, onCheckedChange = null)
             }
             val updated = source.lastUpdateMillis
             Text(
                 if (updated !=
                     null
                 ) {
-                    stringResource(R.string.data_source_updated, dateTimeText(updated), source.entries)
+                    pluralStringResource(R.plurals.data_source_updated, source.entries, dateTimeText(updated), source.entries)
                 } else {
                     stringResource(R.string.data_source_never)
                 },
                 style = MaterialTheme.typography.bodySmall
             )
             source.lastError?.let { Text(errorText(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
-            Row {
-                TextButton(onClick = onRefresh, enabled = source.enabled) { Text(stringResource(R.string.data_source_refresh)) }
-                TextButton(onClick = onRemove) { Text(stringResource(R.string.data_remove)) }
+            FlowRow {
+                // The name is part of what TalkBack says, so several sources can be told apart.
+                val refreshLabel = stringResource(R.string.data_pack_action, stringResource(R.string.data_source_refresh), source.name)
+                val removeLabel = stringResource(R.string.data_pack_action, stringResource(R.string.data_remove), source.name)
+                TextButton(onClick = onRefresh, enabled = source.enabled, modifier = Modifier.semantics { contentDescription = refreshLabel }) {
+                    Text(stringResource(R.string.data_source_refresh))
+                }
+                TextButton(
+                    onClick = onRemove,
+                    modifier = Modifier.semantics {
+                        contentDescription = removeLabel
+                    }
+                ) { Text(stringResource(R.string.data_remove)) }
             }
         }
     }
@@ -164,6 +188,12 @@ private fun AddSourceDialog(viewModel: DataViewModel, onDismiss: () -> Unit) {
 
 @Composable
 private fun TestResultLine(test: SourceTestState) {
+    // The result appears below the button: TalkBack announces it by itself.
+    Box(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) { TestResultText(test) }
+}
+
+@Composable
+private fun TestResultText(test: SourceTestState) {
     when (test) {
         is SourceTestState.Done -> when (val result = test.result) {
             is SourceTestResult.Ok -> Text(
@@ -179,7 +209,7 @@ private fun TestResultLine(test: SourceTestState) {
 @Composable
 private fun RadioLine(label: String, selected: Boolean, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(selected = selected, onClick = null)

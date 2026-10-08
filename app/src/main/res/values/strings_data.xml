@@ -2,6 +2,7 @@
 <resources>
     <string name="data_title">Data</string>
     <string name="data_back">Back</string>
+    <string name="data_pack_action">%1$s: %2$s</string>
     <string name="data_cancel">Cancel</string>
     <string name="data_retry">Retry</string>
 
@@ -85,8 +86,11 @@
     <string name="data_level_rule">Rule</string>
     <string name="data_source_test">Test download</string>
     <string name="data_source_testing">Testing…</string>
-    <string name="data_source_test_ok">Found %1$d valid numbers (%2$d invalid, %3$d repeated).</string>
-    <string name="data_source_updated">Updated %1$s · %2$d numbers</string>
+    <string name="data_source_test_ok">Valid numbers found: %1$d (invalid: %2$d, repeated: %3$d).</string>
+    <plurals name="data_source_updated">
+        <item quantity="one">Updated %1$s · %2$d number</item>
+        <item quantity="other">Updated %1$s · %2$d numbers</item>
+    </plurals>
     <string name="data_source_never">Not downloaded yet</string>
     <string name="data_source_refresh">Refresh</string>
     <string name="data_source_remove_title">Remove this source?</string>

@@ -9,7 +9,7 @@ warns you before you pick up. No phone number leaves the device, except towards 
 - Kotlin, Jetpack Compose, Material 3 Expressive. App in English and Spanish.
 - GPL-3.0-or-later. Business and spam data live in [UltimatePhone-data](https://github.com/qtekfun/UltimatePhone-data).
 
-**Status: release candidate (0.1.0-rc).** Phone, call screen, history, contacts, local spam filter, business data packs,
+**Status: 0.1.0, the first version.** Phone, call screen, history, contacts, local spam filter, business data packs,
 Nextcloud sync and encrypted backup are implemented. It has been tried on a Pixel 8 and a realme (Android 16) and is not
 yet tested on a wide range of devices: see [`docs/spec/compat-matrix.md`](docs/spec/compat-matrix.md). The specification
 lives in [`docs/spec/`](docs/spec/README.md) (written in Spanish), deviations from it in

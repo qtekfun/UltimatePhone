@@ -2,12 +2,15 @@ package com.qtekfun.ultimatephone.di
 
 import com.qtekfun.ultimatephone.backup.AppSettingsSection
 import com.qtekfun.ultimatephone.backup.BackupSection
+import com.qtekfun.ultimatephone.backup.DataSettingsSection
 import com.qtekfun.ultimatephone.backup.ListSection
 import com.qtekfun.ultimatephone.backup.NextcloudSection
 import com.qtekfun.ultimatephone.backup.SpamSettingsSection
 import com.qtekfun.ultimatephone.core.settings.BackupService
 import com.qtekfun.ultimatephone.core.spam.lists.ListType
 import com.qtekfun.ultimatephone.core.spam.lists.SpamListsRepository
+import com.qtekfun.ultimatephone.data.DataManager
+import com.qtekfun.ultimatephone.data.DataSettingsRepository
 import com.qtekfun.ultimatephone.screening.SpamSettingsRepository
 import com.qtekfun.ultimatephone.settings.SettingsRepository
 import com.qtekfun.ultimatephone.sync.SyncRepository
@@ -17,6 +20,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Settings export and import. Each feature that owns settings contributes a [BackupSection] with `@Provides @IntoSet`
@@ -44,6 +49,11 @@ object BackupModule {
     @Provides
     @IntoSet
     fun nextcloudSection(sync: SyncRepository): BackupSection = NextcloudSection(sync)
+
+    @Provides
+    @IntoSet
+    fun dataSettingsSection(settings: DataSettingsRepository, manager: DataManager, @ApplicationScope scope: CoroutineScope): BackupSection =
+        DataSettingsSection(settings, refresher = { ids -> scope.launch { ids.forEach { manager.refreshSource(it) } } })
 
     @Provides
     @Singleton

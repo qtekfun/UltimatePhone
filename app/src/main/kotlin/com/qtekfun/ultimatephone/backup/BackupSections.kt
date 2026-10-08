@@ -9,14 +9,21 @@ import com.qtekfun.ultimatephone.core.spam.decision.SpamLevel
 import com.qtekfun.ultimatephone.core.spam.lists.EntryJsonl
 import com.qtekfun.ultimatephone.core.spam.lists.ListType
 import com.qtekfun.ultimatephone.core.spam.lists.SpamListsRepository
+import com.qtekfun.ultimatephone.core.spam.sources.SourceFormat
 import com.qtekfun.ultimatephone.core.sync.NextcloudEndpoint
+import com.qtekfun.ultimatephone.data.CustomSource
+import com.qtekfun.ultimatephone.data.DataSettingsRepository
+import com.qtekfun.ultimatephone.data.SourceUrls
 import com.qtekfun.ultimatephone.screening.SpamSettingsRepository
 import com.qtekfun.ultimatephone.settings.SettingsRepository
 import com.qtekfun.ultimatephone.sync.SyncRepository
+import java.util.UUID
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
@@ -36,6 +43,7 @@ object SectionIds {
     const val SPAM_LIST = "spam_list"
     const val WHITELIST = "whitelist"
     const val NEXTCLOUD = "nextcloud"
+    const val DATA_SETTINGS = "data_settings"
 }
 
 private fun parseObject(data: String): JsonObject = Json.parseToJsonElement(data) as? JsonObject ?: error("Not an object")
@@ -179,5 +187,132 @@ class NextcloudSection(private val sync: SyncRepository) : BackupSection {
         val saved = sync.saveAccount(parsed.server, parsed.user, parsed.password)
         check(saved.isSuccess) { "Account not saved" }
         sync.setEnabled(parsed.enabled)
+    }
+}
+
+/** Starts a download of the given custom sources without waiting for it (a restore must not depend on the network). */
+fun interface SourceRefresher {
+    fun refresh(sourceIds: List<String>)
+}
+
+/**
+ * The data feature's choices: regions, removed packs, Wi-Fi only, automatic updates and the custom sources the user added
+ * (name, address, format, level, enabled). Per-device state never travels: update times, errors, ETags, hashes, entry
+ * counts and the set-up-completed flag. Restoring replaces the choices and merges the sources by address; sources that are
+ * new to this phone are downloaded straight away, as when one is added by hand.
+ */
+class DataSettingsSection(
+    private val repository: DataSettingsRepository,
+    private val refresher: SourceRefresher,
+    private val newId: () -> String = { UUID.randomUUID().toString().take(SOURCE_ID_LENGTH) }
+) : BackupSection {
+    override val id = SectionIds.DATA_SETTINGS
+    override val title = R.string.backup_section_data_settings
+
+    override suspend fun export(): String {
+        val s = repository.current()
+        return buildJsonObject {
+            put("selectedRegions", buildJsonArray { s.selectedRegions.map { it.uppercase() }.sorted().forEach { add(JsonPrimitive(it)) } })
+            put("excludedPacks", buildJsonArray { s.excludedPacks.sorted().forEach { add(JsonPrimitive(it)) } })
+            put("wifiOnly", s.wifiOnly)
+            put("autoUpdate", s.autoUpdate)
+            put(
+                "customSources",
+                buildJsonArray {
+                    s.customSources.forEach { source ->
+                        add(
+                            buildJsonObject {
+                                put("name", source.name)
+                                put("url", source.url)
+                                put("format", source.format.name)
+                                put("level", source.level.name)
+                                put("enabled", source.enabled)
+                            }
+                        )
+                    }
+                }
+            )
+        }.toString()
+    }
+
+    private class ParsedSource(val name: String, val url: String, val format: SourceFormat, val level: SpamLevel, val enabled: Boolean)
+
+    private class Parsed(val regions: Set<String>, val excluded: Set<String>, val wifiOnly: Boolean, val autoUpdate: Boolean, val sources: List<ParsedSource>)
+
+    private fun strings(obj: JsonObject, key: String): List<String> = (obj[key] as? JsonArray ?: error("Missing $key")).map {
+        (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content ?: error("Bad $key")
+    }
+
+    private fun parse(data: String): Parsed {
+        val obj = parseObject(data)
+        val regions = strings(obj, "selectedRegions").onEach { require(Regex("[A-Za-z]{2}").matches(it)) { "Bad region" } }
+        val excluded = strings(obj, "excludedPacks").onEach { require(it.isNotBlank()) { "Bad pack" } }
+        val sources = (obj["customSources"] as? JsonArray ?: error("Missing sources")).map { element ->
+            val o = element as? JsonObject ?: error("Bad source")
+            val url = o.text("url")?.trim() ?: error("Missing url")
+            require(SourceUrls.isValid(url)) { "Source address must be https" }
+            ParsedSource(
+                name = o.text("name").orEmpty(),
+                url = url,
+                format = SourceFormat.valueOf(o.text("format") ?: error("Missing format")),
+                level = SpamLevel.valueOf(o.text("level") ?: error("Missing level")),
+                enabled = o.flag("enabled") ?: error("Missing enabled")
+            )
+        }
+        return Parsed(
+            regions.map { it.uppercase() }.toSet(),
+            excluded.toSet(),
+            obj.flag("wifiOnly") ?: error("Missing switch"),
+            obj.flag("autoUpdate") ?: error("Missing switch"),
+            sources
+        )
+    }
+
+    override fun validate(data: String) {
+        parse(data)
+    }
+
+    override suspend fun restore(data: String) {
+        val parsed = parse(data)
+        val added = ArrayList<String>()
+        repository.update { current ->
+            added.clear()
+            current.copy(
+                selectedRegions = parsed.regions,
+                excludedPacks = parsed.excluded,
+                wifiOnly = parsed.wifiOnly,
+                autoUpdate = parsed.autoUpdate,
+                customSources = mergeSources(current.customSources, parsed.sources, added)
+            )
+        }
+        if (added.isNotEmpty()) refresher.refresh(added.toList())
+    }
+
+    /** Same address: take the user's choices and keep the local bookkeeping. New address: a new source with a fresh id. */
+    private fun mergeSources(current: List<CustomSource>, incoming: List<ParsedSource>, added: MutableList<String>): List<CustomSource> {
+        val result = current.toMutableList()
+        for (source in incoming) {
+            val index = result.indexOfFirst { it.url.equals(source.url, ignoreCase = true) }
+            if (index >= 0) {
+                val old = result[index]
+                result[index] = old.copy(name = source.name.ifBlank { old.name }, format = source.format, level = source.level, enabled = source.enabled)
+            } else {
+                val created = CustomSource(
+                    id = newId(),
+                    name = source.name.trim().ifEmpty { source.url.substringAfter("://").substringBefore('/') },
+                    url = source.url,
+                    format = source.format,
+                    level = source.level,
+                    enabled = source.enabled
+                )
+                result += created
+                added += created.id
+            }
+        }
+        return result
+    }
+
+    private companion object {
+        const val SOURCE_ID_LENGTH = 8
     }
 }

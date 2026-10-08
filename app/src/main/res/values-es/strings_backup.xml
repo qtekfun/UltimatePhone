@@ -43,4 +43,5 @@
     <string name="backup_section_spam_list">Tu lista de spam</string>
     <string name="backup_section_whitelist">Números permitidos</string>
     <string name="backup_section_nextcloud">Cuenta de Nextcloud, incluida la contraseña de aplicación</string>
+    <string name="backup_section_data_settings">Ajustes de datos: regiones, opciones de actualización y fuentes propias</string>
 </resources>

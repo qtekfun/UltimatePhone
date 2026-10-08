@@ -43,4 +43,5 @@
     <string name="backup_section_spam_list">Your spam list</string>
     <string name="backup_section_whitelist">Allowed numbers</string>
     <string name="backup_section_nextcloud">Nextcloud account, including the app password</string>
+    <string name="backup_section_data_settings">Data settings: regions, update options and custom sources</string>
 </resources>

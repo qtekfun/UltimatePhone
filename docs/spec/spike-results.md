@@ -36,6 +36,33 @@ Before the tests, in the app, in this order:
    battery usage to *unrestricted*, and allow full-screen notifications / pop-ups on the lock screen. Note exactly
    which switches you had to change in the *Notes* column of test 8.
 
+## Results received (2026-10-08)
+
+Tested by the owner on a third device, not on the two planned ones:
+**realme RMX5210, Android 16 (SDK 36), build `RMX5210_16.0.9.404(EX01)`, one SIM, no Google Mobile Services**
+(`google_mobile_services_feature = false`; the system dialer is still `com.google.android.dialer`). Release APK 0.0.1.
+
+| # | Test | realme RMX5210 | Evidence |
+|---|---|---|---|
+| 1 | Phone role | PASS: `role.dialer held=true`, `default_dialer = com.qtekfun.ultimatephone` (reboot not logged) | probe |
+| 4 | Pre-ring screening | PARTIAL: role granted and the service ran on an **outgoing** call, `decided_in=0ms`, `since_call_created=135ms`. Not yet measured on an incoming call | `[screen]` |
+| 6 | Dual SIM | PARTIAL: placing a call by SIM works and is reported as `slot0`; the phone has one SIM, so slot selection is untested | `[dial]`, `[incall]` |
+| 8 | Background | PARTIAL: Wi-Fi job and one-off job ran at once (`bucket=ACTIVE`); the 24 h run is not covered | `[bg]` |
+| 10 | No Google dependency | PASS on a device without GMS: roles, call, screening and WorkManager all worked | probe |
+| 11 | Capability probe | PASS: listed roles, SIM, notifications, full-screen intent, standby bucket | probe |
+| 2, 3, 5, 7, 9, 12, 13 | Incoming call (locked and in use), silence/reject, contacts, killed app, previous dialer, coexistence | **Not covered by this log** | |
+
+Recording (no call in progress when probed): `MIC` and `VOICE_RECOGNITION` start and capture sound (peak 109 and 99);
+`VOICE_COMMUNICATION` starts but captures silence (peak 0); `VOICE_CALL`, `VOICE_DOWNLINK` and `VOICE_UPLINK` fail with
+`RuntimeException: start failed`. The call-line sources were not tried during a live call, so line capture is not yet
+ruled out; the expected outcome is that it is not available to a normal app.
+
+Other observation: the outgoing call ended with the OPLUS reason `Oplus_LocalQuickDisconnected` after the user hung up,
+so the vendor telephony layer is present on this device and reports its own disconnect causes.
+
+**Provisional decision for F9** (to be confirmed in Phase 5 with an in-call test on the OPPO and the Pixel): plan for
+*microphone with speaker, with a clear limitations notice*; do not promise recording of the other side.
+
 ## Not yet verified (author's machine)
 
 The emulator column was not exercised by the author: the AOSP emulator (`uk34`) was killed repeatedly while the machine
@@ -127,3 +154,26 @@ Paste the event-log excerpts per device and test below.
 
 ```
 ```
+
+### realme RMX5210 (raw log)
+
+```
+10-08 17:43:43.500 [app] process started pid=4895
+10-08 17:43:51.856 [probe] role.dialer available=true held=true
+10-08 17:43:51.856 [probe] role.call_screening available=true held=true
+10-08 17:43:51.856 [probe] google_mobile_services_feature = false
+10-08 17:43:51.856 [probe] sim_accounts = 1 SIM1@slot0
+10-08 17:44:30.281 [dial] placing call to ***227 via SIM1 slot=0
+10-08 17:44:30.356 [incall] added outgoing state=CONNECTING ***227 sim=slot0(2) delivered_after=53ms
+10-08 17:44:30.435 [screen] outgoing ***227 verdict=NONE decided_in=0ms since_call_created=135ms verstat=0
+10-08 17:44:33.053 [incall] state=ACTIVE ***227 sim=slot0(2)
+10-08 17:44:36.526 [incall] removed ***227 sim=slot0(2) cause=DisconnectCause [ Code: (LOCAL) Reason: (Oplus_LocalQuickDisconnected, LOCAL) ]
+10-08 17:44:45.186 [rec] MIC: stopped bytes=5666 peak=109 nonzero_samples=4/5
+10-08 17:44:46.791 [rec] VOICE_COMMUNICATION: stopped bytes=5379 peak=0 nonzero_samples=0/5
+10-08 17:44:48.405 [rec] VOICE_RECOGNITION: stopped bytes=5661 peak=99 nonzero_samples=4/5
+10-08 17:44:48.424 [rec] VOICE_CALL: FAILED RuntimeException: start failed.
+10-08 17:44:49.956 [rec] VOICE_DOWNLINK: FAILED RuntimeException: start failed.
+10-08 17:44:51.471 [rec] VOICE_UPLINK: FAILED RuntimeException: start failed.
+10-08 17:44:47.479 [bg] ran ok bytes=122 took=392ms attempt=0 bucket=ACTIVE(10)
+```
+(The full log was shared in the conversation; this is the relevant subset.)

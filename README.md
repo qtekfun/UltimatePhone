@@ -1,5 +1,7 @@
 # UltimatePhone
 
+<img src="docs/logo.png" alt="UltimatePhone logo" width="128" />
+
 An Android phone app with contacts and a **fully local spam filter**: it downloads lists, decides on the device and
 warns you before you pick up. No phone number leaves the device, except towards the Nextcloud you configure yourself.
 

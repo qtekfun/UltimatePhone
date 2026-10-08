@@ -35,18 +35,20 @@ for LOCALE in en-US es-ES; do
   shot 03_keypad
   tap 952 2244 3                      # Settings tab
   shot 04_settings
-  tap 120 1136 9                      # Settings > Data (downloads the manifest)
+  tap 150 950 9                       # Settings > Data (downloads the manifest)
   shot 05_data
   adb shell input keyevent KEYCODE_BACK; sleep 2
-  tap 300 958 3                       # Settings > Spam filter
+  tap 150 770 3                       # Settings > Spam filter
   shot 06_spam
   adb shell input keyevent KEYCODE_BACK; sleep 2
-  # A simulated incoming call, then answered.
-  adb shell am start -n "$PKG/com.qtekfun.ultimatephone.MainActivity" > /dev/null; sleep 3
-  adb emu gsm call "$CALLER"; sleep 6
+  # A simulated incoming call with the screen off, so the full-screen call UI is what appears, then answered.
+  adb shell input keyevent KEYCODE_HOME; sleep 1
+  adb shell input keyevent KEYCODE_SLEEP; sleep 2
+  adb emu gsm call "$CALLER"; sleep 7
   shot 07_incoming_call
   adb shell input keyevent KEYCODE_CALL; sleep 4
   shot 08_in_call
   adb emu gsm cancel "$CALLER"; sleep 3
+  adb shell input keyevent KEYCODE_WAKEUP; sleep 1
 done
 ls -R "$OUT"

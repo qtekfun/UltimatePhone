@@ -22,3 +22,18 @@ Each entry: what the spec says, what reality requires, what was done instead.
 - One adaptation: UltimatePhone needs the `INTERNET` permission (data packs, sources, WebDAV), so the "no network
   permission" CI check of UltimateGallery is replaced by a "no Google dependency" check. The Phase 0 spike also needs
   `INTERNET` for test 8.
+
+## D-004 · Packs are compressed with xz, not zstd
+- **Spec (04):** `.db.zst`.
+- **Reality:** the app must decode packs on Android 12+ with no native code (F-Droid). Pure-Java zstd decoders either need
+  JDK 22 or rely on `sun.misc.Unsafe`, and `zstd-jni` ships prebuilt native libraries. XZ is in Python's standard library
+  and has a small pure-Java decoder (`org.tukaani:xz`, 0BSD).
+- **Done:** packs are `<id>.db.xz` (LZMA2, 8 MiB dictionary). The manifest also carries `compression`,
+  `uncompressedBytes` and `uncompressedSha256`, and the app refuses to unpack more than the manifest announces.
+
+## D-005 · Ed25519 verification uses Bouncy Castle
+- **Spec (04):** manifest signed with Ed25519, public key embedded in the app.
+- **Reality:** `java.security` has no Ed25519 before Android 13 and the app supports Android 12.
+- **Done:** only Bouncy Castle's lightweight `Ed25519Signer` is used (R8 removes the rest). The signature is detached
+  (`manifest.json.sig`, base64 of the 64 raw bytes over the exact manifest bytes). The implementation is tested against
+  the RFC 8032 test vector so it interoperates with the signer in the data pipeline.

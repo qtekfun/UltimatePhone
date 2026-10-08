@@ -104,6 +104,9 @@ kotlin {
 licensee {
     allow("Apache-2.0")
     allow("BSD-3-Clause")
+    allow("0BSD")
+    // Bouncy Castle: MIT-style licence without an SPDX id in its POM; only the Ed25519 verifier is used and R8 strips the rest.
+    allowUrl("https://www.bouncycastle.org/licence.html")
 }
 
 dependencies {
@@ -112,6 +115,7 @@ dependencies {
     implementation(project(":core:telecom"))
     implementation(project(":core:contacts"))
     implementation(project(":core:calllog"))
+    implementation(project(":core:datapacks"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

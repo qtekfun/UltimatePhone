@@ -8,6 +8,7 @@ import com.qtekfun.ultimatephone.core.calllog.CallLogRepository
 import com.qtekfun.ultimatephone.core.calllog.CallType
 import com.qtekfun.ultimatephone.core.calllog.DaySection
 import com.qtekfun.ultimatephone.core.calllog.NumberKeys
+import com.qtekfun.ultimatephone.core.calllog.filtered
 import com.qtekfun.ultimatephone.core.calllog.groupCalls
 import com.qtekfun.ultimatephone.core.calllog.sectionByDay
 import com.qtekfun.ultimatephone.core.contacts.ContactsRepository
@@ -16,6 +17,9 @@ import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
+import com.qtekfun.ultimatephone.feature.spam.NoSpamHistory
+import com.qtekfun.ultimatephone.feature.spam.SpamHistory
+import com.qtekfun.ultimatephone.screening.SpamVerdict
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Clock
 import javax.inject.Inject
@@ -46,7 +50,9 @@ data class RecentsRow(
     val count: Int,
     val sim: SimAccount?,
     val dateMillis: Long,
-    val isNew: Boolean
+    val isNew: Boolean,
+    /** The latest recorded spam decision of the number, when there is one worth showing (flagged or informational). */
+    val spam: SpamVerdict? = null
 )
 
 data class RecentsSection(val section: DaySection, val rows: List<RecentsRow>)
@@ -78,7 +84,8 @@ class RecentsViewModel internal constructor(
     private val placer: CallPlacer,
     private val numberKeys: NumberKeys,
     private val resolver: CallerResolver,
-    private val clock: Clock
+    private val clock: Clock,
+    private val spam: SpamHistory = NoSpamHistory
 ) : ViewModel() {
     @Inject
     constructor(
@@ -88,8 +95,9 @@ class RecentsViewModel internal constructor(
         placer: CallPlacer,
         numberKeys: NumberKeys,
         normalizer: PhoneNormalizer,
-        regionProvider: RegionProvider
-    ) : this(calls, simRepository, placer, numberKeys, CallerResolver(contacts, normalizer, regionProvider), Clock.systemDefaultZone())
+        regionProvider: RegionProvider,
+        spam: SpamHistory
+    ) : this(calls, simRepository, placer, numberKeys, CallerResolver(contacts, normalizer, regionProvider), Clock.systemDefaultZone(), spam)
 
     private val filter = MutableStateFlow<CallLogFilter>(CallLogFilter.All)
     private val selection = MutableStateFlow<Set<Long>>(emptySet())
@@ -100,16 +108,22 @@ class RecentsViewModel internal constructor(
 
     private data class Content(val sims: List<SimAccount>, val sections: List<RecentsSection>)
 
-    private val content: Flow<Content> = combine(filter, refresh) { f, _ -> f }
-        .flatMapLatest { f -> calls.observe(f).map { buildContent(it) } }
+    private val content: Flow<Content> = combine(filter, refresh, spam.verdicts) { f, _, verdicts -> f to verdicts }
+        // The spam filter is decided here, from the recorded decisions; the call log is read unfiltered for it.
+        .flatMapLatest { (f, verdicts) ->
+            calls.observe(if (f == CallLogFilter.Spam) CallLogFilter.All else f).map { buildContent(it, f, verdicts) }
+        }
 
     val uiState: StateFlow<RecentsUiState> = combine(filter, selection, content) { f, selected, c ->
         val keys = c.sections.flatMap { s -> s.rows.map { it.key } }.toSet()
         RecentsUiState(f, c.sims, c.sections, selected.intersect(keys), isLoading = false)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), RecentsUiState())
 
-    private suspend fun buildContent(entries: List<CallLogEntry>): Content {
-        val groups = groupCalls(entries, clock.zone, numberKeys.keyFunction())
+    private suspend fun buildContent(all: List<CallLogEntry>, filter: CallLogFilter, verdicts: Map<String, SpamVerdict>): Content {
+        val keyOf = numberKeys.keyFunction()
+        val verdictOf = { number: String -> verdicts[keyOf(number)]?.takeIf { it.isSpam || it.informational } }
+        val entries = all.filtered(filter) { verdictOf(it.number)?.isSpam == true }
+        val groups = groupCalls(entries, clock.zone, keyOf)
         val sections = sectionByDay(groups, clock).map { day ->
             RecentsSection(
                 day.section,
@@ -125,7 +139,8 @@ class RecentsViewModel internal constructor(
                         count = group.count,
                         sim = latest.sim,
                         dateMillis = latest.dateMillis,
-                        isNew = group.entries.any { it.isNew }
+                        isNew = group.entries.any { it.isNew },
+                        spam = verdictOf(latest.number)
                     )
                 }
             )

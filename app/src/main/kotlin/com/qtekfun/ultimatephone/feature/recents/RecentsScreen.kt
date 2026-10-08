@@ -69,6 +69,7 @@ import com.qtekfun.ultimatephone.core.calllog.CallLogFilter
 import com.qtekfun.ultimatephone.core.designsystem.Avatar
 import com.qtekfun.ultimatephone.core.designsystem.PermissionGate
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
+import com.qtekfun.ultimatephone.feature.spam.SpamBadge
 
 private enum class Confirm { DELETE_SELECTED, CLEAR_ALL }
 
@@ -212,7 +213,8 @@ private fun FilterRow(state: RecentsUiState, onSelect: (CallLogFilter) -> Unit) 
             CallLogFilter.All to R.string.recents_filter_all,
             CallLogFilter.Missed to R.string.recents_filter_missed,
             CallLogFilter.Incoming to R.string.recents_filter_incoming,
-            CallLogFilter.Outgoing to R.string.recents_filter_outgoing
+            CallLogFilter.Outgoing to R.string.recents_filter_outgoing,
+            CallLogFilter.Spam to R.string.spam_filter_chip
         )
         items(basics) { (filter, label) ->
             FilterChip(selected = state.filter == filter, onClick = { onSelect(filter) }, label = { Text(stringResource(label)) })
@@ -302,6 +304,7 @@ private fun RecentsRowItem(row: RecentsRow, showSim: Boolean, selected: Boolean,
                 }
                 val sim = row.sim
                 if (showSim && sim != null) SimBadge(sim)
+                row.spam?.let { SpamBadge(it) }
             }
         },
         trailingContent = {

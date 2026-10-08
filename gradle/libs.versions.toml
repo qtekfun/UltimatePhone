@@ -33,14 +33,12 @@ bouncycastle = "1.86"
 xz = "1.12"
 serialization = "1.11.0"
 javaxInject = "1"
-serializationJson = "1.11.0"
 
 [libraries]
 bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 xz = { group = "org.tukaani", name = "xz", version.ref = "xz" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 libphonenumber = { group = "com.googlecode.libphonenumber", name = "libphonenumber", version.ref = "libphonenumber" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationJson" }
 javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "javaxInject" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }

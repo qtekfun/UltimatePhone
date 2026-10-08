@@ -37,3 +37,23 @@ Each entry: what the spec says, what reality requires, what was done instead.
 - **Done:** only Bouncy Castle's lightweight `Ed25519Signer` is used (R8 removes the rest). The signature is detached
   (`manifest.json.sig`, base64 of the 64 raw bytes over the exact manifest bytes). The implementation is tested against
   the RFC 8032 test vector so it interoperates with the signer in the data pipeline.
+
+## D-006 · Spam decision on the call screen does not go through the caller label resolver
+- **Brief:** extend `TelecomCalls.labelResolver` so the in-call path warns when the screening role is not held.
+- **Reality:** `CallerLabel` carries a name and photo only, and the resolver runs once per call in the telecom module,
+  which must not know about spam. Changing it would also conflict with the business-name work in the same file.
+- **Done:** the in-call view model asks `DecisionEngine.verdictForCall`, which reuses the decision the screening
+  service just stored in `DecisionStore` (live map, 30 s) and otherwise decides and records it. Same decision, computed
+  once per call, no change to `core/telecom`. Without the screening role the app can warn but cannot silence or reject.
+
+## D-007 · Custom spam sources are stored as a sorted binary file, not SQLite
+- **Spec (04):** every pack is a SQLite database.
+- **Reality:** the writer for sources the user adds by URL had to be a pure, JVM-testable function, and a custom list only
+  needs exact-number membership.
+- **Done:** `custom-<id>.nums` (sorted numbers, memory-mapped, binary search). Labels are not stored: a hit is labelled
+  with the source's display name and its `sourceId` is `custom-<id>`. Packs from the data repository stay SQLite.
+
+## D-008 · Business name search relies on FTS5 in the platform SQLite
+- Dialer suggestions for businesses use an FTS5 `MATCH` over the pack's `numbers_fts` table. FTS5 is present in Android's
+  SQLite on supported releases; if it is not, business suggestions are empty and nothing else is affected. Not unit tested
+  (needs Android's SQLite); to verify on a device with an installed business pack.

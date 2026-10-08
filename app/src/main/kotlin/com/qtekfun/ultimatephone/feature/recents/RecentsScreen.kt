@@ -69,6 +69,9 @@ import com.qtekfun.ultimatephone.core.calllog.CallLogFilter
 import com.qtekfun.ultimatephone.core.designsystem.Avatar
 import com.qtekfun.ultimatephone.core.designsystem.PermissionGate
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
+import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
+import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
+import com.qtekfun.ultimatephone.feature.spam.SpamBadge
 
 private enum class Confirm { DELETE_SELECTED, CLEAR_ALL }
 
@@ -212,7 +215,8 @@ private fun FilterRow(state: RecentsUiState, onSelect: (CallLogFilter) -> Unit) 
             CallLogFilter.All to R.string.recents_filter_all,
             CallLogFilter.Missed to R.string.recents_filter_missed,
             CallLogFilter.Incoming to R.string.recents_filter_incoming,
-            CallLogFilter.Outgoing to R.string.recents_filter_outgoing
+            CallLogFilter.Outgoing to R.string.recents_filter_outgoing,
+            CallLogFilter.Spam to R.string.spam_filter_chip
         )
         items(basics) { (filter, label) ->
             FilterChip(selected = state.filter == filter, onClick = { onSelect(filter) }, label = { Text(stringResource(label)) })
@@ -300,8 +304,10 @@ private fun RecentsRowItem(row: RecentsRow, showSim: Boolean, selected: Boolean,
                     CallTypeIcon(row.type, Modifier.size(16.dp))
                     Text(text = supporting, color = row.type.tint())
                 }
+                row.caller.business?.let { BusinessCategoryLine(it.category, it.iconName) }
                 val sim = row.sim
                 if (showSim && sim != null) SimBadge(sim)
+                row.spam?.let { SpamBadge(it) }
             }
         },
         trailingContent = {
@@ -331,6 +337,8 @@ private fun RowAvatar(row: RecentsRow, title: String, selected: Boolean) {
                 )
             }
         }
+    } else if (row.caller.business != null) {
+        BusinessAvatar(row.caller.business.iconName)
     } else {
         Avatar(name = title) {
             row.caller.contact?.photoThumbUri?.let { uri ->

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes > Spam -->
+    <string name="spam_title">Filtro de spam</string>
+    <string name="spam_back">Atrás</string>
+    <string name="spam_role_title">Filtrado de llamadas</string>
+    <string name="spam_role_held">UltimatePhone filtra tus llamadas entrantes, así que las llamadas marcadas pueden silenciarse o rechazarse antes de que suenen.</string>
+    <string name="spam_role_missing">UltimatePhone no es tu app de filtrado de llamadas. Los avisos siguen apareciendo en la pantalla de llamada, pero las llamadas no pueden silenciarse ni rechazarse automáticamente.</string>
+    <string name="spam_role_unavailable">Este dispositivo no ofrece un rol de filtrado de llamadas. Los avisos siguen apareciendo en la pantalla de llamada.</string>
+    <string name="spam_role_request">Usar UltimatePhone para filtrar llamadas</string>
+    <string name="spam_actions_title">Qué hacer con las llamadas marcadas</string>
+    <string name="spam_actions_help">Elige una acción para cada tipo de coincidencia. Avisar muestra un aviso en la pantalla de llamada y deja pasar la llamada.</string>
+    <string name="spam_level_own">Tu lista de spam</string>
+    <string name="spam_level_community">Fuentes de la comunidad</string>
+    <string name="spam_level_rule">Reglas de prefijo</string>
+    <string name="spam_action_none">Nada</string>
+    <string name="spam_action_warn">Avisar</string>
+    <string name="spam_action_silence">Silenciar</string>
+    <string name="spam_action_reject">Rechazar</string>
+    <string name="spam_commercial_title">Llamadas comerciales</string>
+    <string name="spam_commercial_help">Las empresas en España deben llamar desde números que empiezan por 400. Es información, no spam: por defecto la llamada solo se etiqueta. Puedes elegir silenciarla o rechazarla.</string>
+    <string name="spam_business_title">Un negocio identificado no es spam</string>
+    <string name="spam_business_help">Un número identificado como negocio se muestra con su nombre aunque una fuente lo incluya.</string>
+    <string name="spam_own_list_title">Tu lista de spam</string>
+    <string name="spam_own_list_summary">Números y prefijos que has marcado tú</string>
+    <string name="spam_allowed_title">Números permitidos</string>
+    <string name="spam_allowed_summary">Números y prefijos que nunca se filtran</string>
+    <string name="spam_data_link_title">Fuentes y paquetes de datos</string>
+    <string name="spam_data_link_summary">De dónde salen los números marcados y los negocios</string>
+    <string name="spam_latency">Filtrado reciente más lento: %1$d ms</string>
+
+    <!-- Lista propia y números permitidos -->
+    <string name="spam_own_list_empty">Tu lista de spam está vacía. Marca un número como spam desde el historial o añade uno aquí.</string>
+    <string name="spam_allowed_empty">No hay números permitidos. Los números que añadas aquí nunca se marcan.</string>
+    <string name="spam_add">Añadir</string>
+    <string name="spam_kind_number">Número</string>
+    <string name="spam_kind_prefix">Prefijo</string>
+    <string name="spam_field_number">Número de teléfono</string>
+    <string name="spam_field_prefix">Prefijo con código de país</string>
+    <string name="spam_field_label">Etiqueta (opcional)</string>
+    <string name="spam_field_note">Nota (opcional)</string>
+    <string name="spam_error_number">No es un número de teléfono válido.</string>
+    <string name="spam_error_prefix">Escribe un prefijo con código de país y al menos 4 dígitos, por ejemplo +34900.</string>
+    <string name="spam_save">Guardar</string>
+    <string name="spam_cancel">Cancelar</string>
+    <string name="spam_entry_prefix">Prefijo %1$s</string>
+    <string name="spam_entry_added">Añadido el %1$s</string>
+    <string name="spam_remove_entry">Quitar %1$s</string>
+
+    <!-- Por qué se marcó -->
+    <string name="spam_why_title">¿Por qué se marcó?</string>
+    <string name="spam_why_number">Número</string>
+    <string name="spam_why_level">Nivel</string>
+    <string name="spam_why_reason">Motivo</string>
+    <string name="spam_why_date">Fecha</string>
+    <string name="spam_why_action">Acción</string>
+    <string name="spam_why_none">Todavía no hay ninguna decisión registrada para este número.</string>
+    <string name="spam_why_allowed">Este número está en tus números permitidos.</string>
+    <string name="spam_not_spam">No es spam</string>
+    <string name="spam_reason_own">Está en tu lista de spam.</string>
+    <string name="spam_reason_source">Aparece en la fuente %1$s.</string>
+    <string name="spam_reason_rule">Coincide con la regla: %1$s.</string>
+    <string name="spam_reason_business">Negocio identificado: %1$s.</string>
+    <string name="spam_reason_business_category">Negocio identificado: %1$s (%2$s).</string>
+    <string name="spam_reason_contact">Pertenece a uno de tus contactos.</string>
+    <string name="spam_reason_allowed">Está en tus números permitidos.</string>
+    <string name="spam_reason_nothing">Nada ha marcado este número.</string>
+    <string name="spam_short_source">Fuente %1$s</string>
+    <string name="spam_rule_es_400_commercial">Llamada comercial (prefijo 400)</string>
+    <string name="spam_rule_generic">Coincide con una regla de prefijo</string>
+
+    <!-- Pantalla de llamada -->
+    <string name="spam_incall_warning_title">Posible llamada de spam</string>
+    <string name="spam_incall_warning_body">Marcada por: %1$s. %2$s</string>
+    <string name="spam_incall_mark_spam">Marcar como spam</string>
+    <string name="spam_incall_marked">Añadido a tu lista de spam.</string>
+    <string name="spam_incall_allowed">Añadido a tus números permitidos.</string>
+
+    <!-- Historial de llamadas -->
+    <string name="spam_filter_chip">Spam</string>
+    <string name="spam_badge">Spam</string>
+    <string name="spam_badge_reason">Spam · %1$s</string>
+    <string name="spam_badge_info">Llamada comercial</string>
+    <string name="spam_action_mark">Marcar como spam</string>
+    <string name="spam_action_unmark">Quitar de la lista de spam</string>
+    <string name="spam_action_allow">Añadir a números permitidos</string>
+    <string name="spam_action_remove_allowed">Quitar de los números permitidos</string>
+    <string name="spam_action_why">¿Por qué se marcó?</string>
+</resources>

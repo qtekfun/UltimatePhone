@@ -55,6 +55,8 @@ import com.qtekfun.ultimatephone.core.calllog.CallLogEntry
 import com.qtekfun.ultimatephone.core.calllog.CallStats
 import com.qtekfun.ultimatephone.core.calllog.formatDurationClock
 import com.qtekfun.ultimatephone.core.designsystem.Avatar
+import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
+import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
 
 /** Detail of one number: who it is, what can be done with it, how often it called, and every call. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +67,7 @@ fun CallDetailRoute(
     onAddToContact: (lookupKey: String, number: String) -> Unit,
     onOpenContact: (lookupKey: String) -> Unit,
     onEditContact: (lookupKey: String) -> Unit,
+    onWhyFlagged: (number: String) -> Unit,
     viewModel: CallDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -96,7 +99,11 @@ fun CallDetailRoute(
         onAddToExistingContact = { picker.launch(null) },
         onOpenContact = onOpenContact,
         onEditContact = onEditContact,
-        onDelete = { confirmDelete = true }
+        onDelete = { confirmDelete = true },
+        onMarkSpam = viewModel::markSpam,
+        onRemoveSpam = viewModel::removeFromSpam,
+        onAllow = viewModel::allow,
+        onWhyFlagged = { onWhyFlagged(state.number) }
     )
 
     Scaffold(
@@ -136,7 +143,7 @@ fun CallDetailRoute(
 private fun CallDetailContent(state: CallDetailUiState, handlers: DetailHandlers, modifier: Modifier = Modifier) {
     val caller = state.caller
     val title = caller?.title ?: stringResource(R.string.recents_unknown_caller)
-    val actions = detailActions(caller, state.isPrivate, state.entries.isNotEmpty(), handlers)
+    val actions = detailActions(caller, state.isPrivate, state.entries.isNotEmpty(), handlers, state.spam)
     LazyColumn(modifier.fillMaxSize()) {
         item(key = "header") {
             Column(
@@ -144,12 +151,18 @@ private fun CallDetailContent(state: CallDetailUiState, handlers: DetailHandlers
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Avatar(name = title, size = 96.dp) {
-                    caller?.contact?.photoThumbUri?.let { uri ->
-                        AsyncImage(model = uri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                val business = caller?.business
+                if (business != null) {
+                    BusinessAvatar(business.iconName, size = 96.dp)
+                } else {
+                    Avatar(name = title, size = 96.dp) {
+                        caller?.contact?.photoThumbUri?.let { uri ->
+                            AsyncImage(model = uri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                        }
                     }
                 }
                 Text(text = title, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+                business?.let { BusinessCategoryLine(it.category, it.iconName) }
                 if (caller != null && caller.displayName != null && caller.formattedNumber.isNotBlank()) {
                     Text(text = caller.formattedNumber, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }

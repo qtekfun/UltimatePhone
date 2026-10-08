@@ -14,6 +14,9 @@ import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.RoleController
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
+import com.qtekfun.ultimatephone.data.BusinessHit
+import com.qtekfun.ultimatephone.data.BusinessNameSearch
+import com.qtekfun.ultimatephone.data.BusinessSuggestions
 import com.qtekfun.ultimatephone.settings.SettingsRepository
 import com.qtekfun.ultimatephone.settings.SimChooser
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +36,8 @@ data class DialerUiState(
     val number: String = "",
     val displayNumber: String = "",
     val suggestions: List<DialerSuggestion> = emptyList(),
+    /** Businesses whose name matches what is typed; shown after the contacts. */
+    val businessSuggestions: List<BusinessHit> = emptyList(),
     val sims: List<SimAccount> = emptyList(),
     /** The SIM the next call will use; null when the system decides. */
     val selectedSimKey: String? = null,
@@ -49,6 +54,7 @@ class DialerViewModel @Inject constructor(
     private val normalizer: PhoneNormalizer,
     private val regions: RegionProvider,
     private val roles: RoleController,
+    private val businessSearch: BusinessNameSearch,
     @ApplicationContext context: Context
 ) : ViewModel() {
     private val telephony = context.getSystemService(TelephonyManager::class.java)
@@ -57,18 +63,34 @@ class DialerViewModel @Inject constructor(
     private val sims = MutableStateFlow(emptyList<SimAccount>())
     private val needsRole = MutableStateFlow(false)
 
+    private class Suggested(val contacts: List<DialerSuggestion> = emptyList(), val businesses: List<BusinessHit> = emptyList())
+
     private val suggestions = number.mapLatest { typed ->
         val digits = DialerInput.searchDigits(typed)
-        if (digits.isEmpty() || typed.any { it == '*' || it == '#' }) emptyList() else contacts.suggest(digits)
+        if (digits.isEmpty() || typed.any { it == '*' || it == '#' }) {
+            Suggested()
+        } else {
+            val found = contacts.suggest(digits)
+            // Businesses come after the contacts, and never replace one.
+            val businesses = BusinessSuggestions.withoutContacts(businessSearch.searchT9(digits, MAX_BUSINESS_SUGGESTIONS), found.map { it.number })
+            Suggested(found, businesses)
+        }
     }
 
-    val state: StateFlow<DialerUiState> = combine(number, suggestions, sims, explicitSimKey, settings.settings) { typed, found, available, explicit, prefs ->
+    val state: StateFlow<DialerUiState> = combine(number, suggestions, sims, explicitSimKey, settings.settings) {
+            typed,
+            suggested,
+            available,
+            explicit,
+            prefs
+        ->
         val region = regions.defaultRegion()
         val remembered = normalizer.normalize(typed, region).e164OrNull()?.let { prefs.simByNumber[it] }
         DialerUiState(
             number = typed,
             displayNumber = if (typed.length > MIN_FORMAT_LENGTH) normalizer.formatForDisplay(typed, region) else typed,
-            suggestions = found,
+            suggestions = suggested.contacts,
+            businessSuggestions = suggested.businesses,
             sims = available,
             selectedSimKey = if (available.size > 1) SimChooser.choose(explicit, remembered, prefs.defaultSimKey, available.map { it.key }.toSet()) else null
         )
@@ -136,7 +158,13 @@ class DialerViewModel @Inject constructor(
         return call()
     }
 
+    fun callBusiness(hit: BusinessHit): Boolean {
+        number.value = DialerInput.sanitizePaste(hit.e164)
+        return call()
+    }
+
     private companion object {
+        const val MAX_BUSINESS_SUGGESTIONS = 5
         const val STOP_TIMEOUT_MS = 5_000L
         const val MIN_FORMAT_LENGTH = 4
     }

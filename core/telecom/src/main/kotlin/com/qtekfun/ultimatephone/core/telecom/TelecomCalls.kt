@@ -120,7 +120,10 @@ object TelecomCalls : CallController {
             participants = call.children.size,
             contactName = label?.name ?: details.contactDisplayName,
             contactPhotoUri = label?.photoUri,
-            disconnectLabel = details.disconnectCause?.label?.toString()?.takeIf { it.isNotBlank() }
+            disconnectLabel = details.disconnectCause?.label?.toString()?.takeIf { it.isNotBlank() },
+            isBusiness = label?.isBusiness == true,
+            businessCategory = label?.businessCategory,
+            businessIcon = label?.businessIcon
         )
     }
 

@@ -37,7 +37,11 @@ data class CallInfo(
     val participants: Int,
     val contactName: String? = null,
     val contactPhotoUri: String? = null,
-    val disconnectLabel: String? = null
+    val disconnectLabel: String? = null,
+    /** Set when [contactName] is the name of an identified business; the category id and its icon name. */
+    val isBusiness: Boolean = false,
+    val businessCategory: String? = null,
+    val businessIcon: String? = null
 ) {
     /** What to show as the title of the call. */
     val title: String get() = contactName ?: displayNumber

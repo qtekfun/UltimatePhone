@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_settings_title">Guía de configuración</string>
+    <string name="onboarding_settings_summary">App de teléfono, permisos, regiones de datos y ajustes de batería</string>
+
+    <string name="onboarding_step_of">Paso %1$d de %2$d</string>
+    <string name="onboarding_start">Empezar</string>
+    <string name="onboarding_next">Continuar</string>
+    <string name="onboarding_back">Atrás</string>
+    <string name="onboarding_skip">Omitir por ahora</string>
+
+    <!-- Bienvenida -->
+    <string name="onboarding_welcome_title">Te damos la bienvenida a UltimatePhone</string>
+    <string name="onboarding_welcome_body">Una app de teléfono que guarda todo en tu dispositivo. Pone nombre a los comercios y te avisa de las llamadas no deseadas con listas almacenadas en tu móvil.</string>
+    <string name="onboarding_welcome_point_private">Los números de teléfono nunca salen de tu dispositivo.</string>
+    <string name="onboarding_welcome_point_offline">No hace falta cuenta ni conexión a internet.</string>
+    <string name="onboarding_welcome_point_optional">Todos los pasos siguientes son opcionales y puedes hacerlos más tarde en Ajustes.</string>
+
+    <!-- Roles -->
+    <string name="onboarding_roles_title">Conviértela en tu app de teléfono</string>
+    <string name="onboarding_roles_body">Android te permite elegir qué app gestiona las llamadas y cuál las filtra. Ambas opciones son opcionales y puedes cambiarlas cuando quieras en los ajustes de Android.</string>
+    <string name="onboarding_role_phone_title">App de teléfono</string>
+    <string name="onboarding_role_phone_body">Muestra las llamadas entrantes, la pantalla de llamada y tu historial.</string>
+    <string name="onboarding_role_screening_title">Filtrado de llamadas</string>
+    <string name="onboarding_role_screening_body">Permite que la app compruebe un número entrante con tus listas antes de que suene el teléfono.</string>
+    <string name="onboarding_role_active">Activo</string>
+    <string name="onboarding_role_unavailable">No disponible en este dispositivo</string>
+    <string name="onboarding_role_request">Elegir</string>
+
+    <!-- Permisos -->
+    <string name="onboarding_perm_title">Permisos</string>
+    <string name="onboarding_perm_body">Cada permiso se pide por separado, con su motivo. Puedes rechazar cualquiera; la función correspondiente simplemente queda desactivada.</string>
+    <string name="onboarding_perm_allow">Permitir</string>
+    <string name="onboarding_perm_granted">Permitido</string>
+    <string name="onboarding_perm_blocked">Android no vuelve a preguntar. Puedes permitirlo en los ajustes del sistema de la app.</string>
+    <string name="onboarding_perm_open_settings">Abrir ajustes de la app</string>
+    <string name="onboarding_perm_phone_title">Llamadas y estado del teléfono</string>
+    <string name="onboarding_perm_phone_reason">Necesario para hacer llamadas, saber qué SIM se usa y contestar o rechazar llamadas desde la pantalla de llamada.</string>
+    <string name="onboarding_perm_contacts_title">Contactos</string>
+    <string name="onboarding_perm_contacts_reason">Necesario para mostrar nombres de números, buscar mientras marcas y editar tus contactos. Los contactos nunca se suben a ningún sitio.</string>
+    <string name="onboarding_perm_calllog_title">Historial de llamadas</string>
+    <string name="onboarding_perm_calllog_reason">Necesario para mostrar y gestionar tus llamadas recientes.</string>
+    <string name="onboarding_perm_notifications_title">Notificaciones</string>
+    <string name="onboarding_perm_notifications_reason">Necesario para mostrar las llamadas entrantes y perdidas cuando la app no está en pantalla.</string>
+
+    <!-- Regiones de datos -->
+    <string name="onboarding_data_title">Datos de tu región</string>
+    <string name="onboarding_data_body">Elige los países cuyos nombres de comercios y reglas de prefijo quieres. Son paquetes firmados que se descargan a tu móvil y puedes quitarlos cuando quieras.</string>
+    <string name="onboarding_data_loading">Cargando regiones…</string>
+    <string name="onboarding_data_offline">No se pudo cargar la lista de regiones. Puedes reintentar u omitir este paso y elegir en Ajustes > Datos cuando tengas conexión.</string>
+    <string name="onboarding_data_cached">Parece que no tienes conexión. Se muestra la última lista descargada.</string>
+    <string name="onboarding_data_size">Descarga %1$s · instalado %2$s</string>
+    <string name="onboarding_data_total">Seleccionado: descarga %1$s, instalado %2$s.</string>
+    <string name="onboarding_data_none">Nada seleccionado. Puedes añadir regiones más tarde en Ajustes > Datos.</string>
+    <string name="onboarding_data_wifi_warning">No estás en una red Wi-Fi. Las descargas esperan al Wi-Fi salvo que lo cambies en Ajustes > Datos.</string>
+
+    <!-- Nextcloud -->
+    <string name="onboarding_nextcloud_title">Nextcloud (opcional)</string>
+    <string name="onboarding_nextcloud_body">Podrás sincronizar tu propia lista de spam y tu lista blanca con tu Nextcloud. Es opcional y llegará en una actualización posterior.</string>
+    <string name="onboarding_nextcloud_later">Configurar más tarde</string>
+    <string name="onboarding_nextcloud_now">Configurar ahora</string>
+
+    <!-- Batería y segundo plano -->
+    <string name="onboarding_battery_title">Llamadas fiables</string>
+    <string name="onboarding_battery_body">Algunos móviles detienen las apps en segundo plano para ahorrar batería, lo que puede retrasar la pantalla de llamada o impedir que aparezca sobre el bloqueo. Estos ajustes lo evitan.</string>
+    <string name="onboarding_battery_detected">Detectado: %1$s (%2$s)</string>
+    <string name="onboarding_open_settings">Abrir ajustes</string>
+    <string name="onboarding_open_failed">Este móvil no tiene una pantalla para eso. Sigue los pasos de arriba en los ajustes de Android.</string>
+    <string name="onboarding_topic_battery">Optimización de batería</string>
+    <string name="onboarding_topic_autostart">Inicio automático</string>
+    <string name="onboarding_topic_popup">Ventanas emergentes en segundo plano</string>
+    <string name="onboarding_topic_fullscreen">Llamadas a pantalla completa sobre el bloqueo</string>
+    <string name="onboarding_guide_coloros">ColorOS, OPPO, realme, OnePlus</string>
+    <string name="onboarding_guide_samsung">Samsung One UI</string>
+    <string name="onboarding_guide_xiaomi">Xiaomi, Redmi, POCO</string>
+    <string name="onboarding_guide_stock">Android tal como lo entrega Google</string>
+    <string name="onboarding_guide_generic">Guía genérica</string>
+
+    <!-- Resumen -->
+    <string name="onboarding_summary_title">Todo listo</string>
+    <string name="onboarding_summary_body">Así está todo ahora. Puedes cambiar cualquier cosa más adelante.</string>
+    <string name="onboarding_summary_phone">App de teléfono</string>
+    <string name="onboarding_summary_screening">Filtrado de llamadas</string>
+    <string name="onboarding_summary_yes">activo</string>
+    <string name="onboarding_summary_not_yet">todavía no</string>
+    <string name="onboarding_summary_regions">Regiones de datos: %1$s (unos %2$s por descargar)</string>
+    <string name="onboarding_summary_no_regions">No hay regiones de datos seleccionadas.</string>
+    <string name="onboarding_summary_later">Para hacer más tarde en Ajustes:</string>
+    <string name="onboarding_summary_download_now">La descarga empieza en cuanto termines.</string>
+    <string name="onboarding_summary_download_later">Ahora no hay una conexión adecuada. La descarga empezará sola cuando estés en Wi-Fi.</string>
+    <string name="onboarding_summary_finish_download">Terminar y descargar</string>
+    <string name="onboarding_summary_finish_no_download">Terminar sin descargar</string>
+    <string name="onboarding_summary_finish">Terminar</string>
+    <string name="onboarding_step_name_roles">App de teléfono y filtrado de llamadas</string>
+    <string name="onboarding_step_name_permissions">Permisos</string>
+    <string name="onboarding_step_name_data">Regiones de datos</string>
+    <string name="onboarding_step_name_nextcloud">Nextcloud</string>
+    <string name="onboarding_step_name_battery">Ajustes de batería y segundo plano</string>
+    <string name="onboarding_step_name_other">Otros ajustes</string>
+
+    <!-- Guías por fabricante. Se buscan por nombre desde assets/oem_guides.json: para añadir un idioma, añade los mismos nombres. -->
+    <string name="onboarding_oem_coloros_battery">Abre Ajustes > Batería y busca UltimatePhone en la lista de apps. Permite la actividad en segundo plano y no dejes que el sistema la optimice ni la restrinja.</string>
+    <string name="onboarding_oem_coloros_autostart">Abre Ajustes > Aplicaciones > Inicio automático (o Gestión de aplicaciones > Inicio automático) y activa UltimatePhone.</string>
+    <string name="onboarding_oem_coloros_popup">Abre Ajustes > Aplicaciones > Gestión de aplicaciones > UltimatePhone > Permisos y permite «Mostrar ventanas emergentes mientras se ejecuta en segundo plano» y «Mostrar sobre otras apps».</string>
+    <string name="onboarding_oem_coloros_fullscreen">En la misma página de permisos, permite las notificaciones a pantalla completa o la visualización en la pantalla de bloqueo, para que la pantalla de llamada aparezca con el móvil bloqueado.</string>
+    <string name="onboarding_oem_samsung_battery">Abre Ajustes > Batería > Límites de uso en segundo plano. Quita UltimatePhone de «Apps en suspensión» y «Apps en suspensión profunda» y añádela a «Apps que nunca se suspenden».</string>
+    <string name="onboarding_oem_samsung_autostart">Samsung no tiene una lista de inicio automático aparte. Basta con que UltimatePhone no esté en «Apps en suspensión» ni en «Apps en suspensión profunda».</string>
+    <string name="onboarding_oem_samsung_popup">Abre Ajustes > Aplicaciones > UltimatePhone > Aparecer encima y actívalo.</string>
+    <string name="onboarding_oem_samsung_fullscreen">Permite las notificaciones a pantalla completa para UltimatePhone (Ajustes > Notificaciones > Ajustes avanzados, o los ajustes de notificaciones de la app).</string>
+    <string name="onboarding_oem_xiaomi_battery">Abre Ajustes > Aplicaciones > Administrar aplicaciones > UltimatePhone > Ahorro de batería y elige «Sin restricciones».</string>
+    <string name="onboarding_oem_xiaomi_autostart">Abre Seguridad > Permisos > Inicio automático y activa UltimatePhone.</string>
+    <string name="onboarding_oem_xiaomi_popup">Abre «Otros permisos» de la app y permite «Mostrar ventanas emergentes mientras se ejecuta en segundo plano».</string>
+    <string name="onboarding_oem_xiaomi_fullscreen">En la misma página de «Otros permisos», permite «Mostrar en la pantalla de bloqueo».</string>
+    <string name="onboarding_oem_stock_battery">Permite que UltimatePhone ignore la optimización de batería: muestra «Todas las apps», busca UltimatePhone y elige «No optimizar».</string>
+    <string name="onboarding_oem_stock_autostart">No hace falta en este móvil: Android no restringe el inicio automático.</string>
+    <string name="onboarding_oem_stock_popup">Normalmente no hace falta. Abre la información de la app si alguna vez la pantalla de llamada no aparece.</string>
+    <string name="onboarding_oem_stock_fullscreen">Permite las notificaciones a pantalla completa para UltimatePhone, para que las llamadas entrantes aparezcan sobre el bloqueo (Android 14 y posteriores).</string>
+    <string name="onboarding_oem_generic_battery">Busca los ajustes de batería o energía, encuentra UltimatePhone y exclúyela de la optimización de batería y de las restricciones en segundo plano.</string>
+    <string name="onboarding_oem_generic_autostart">Si tu móvil tiene una lista de inicio automático (a menudo en Seguridad o Aplicaciones), activa UltimatePhone.</string>
+    <string name="onboarding_oem_generic_popup">Si tu móvil tiene un permiso de ventanas emergentes o de mostrar sobre otras apps, permítelo para UltimatePhone.</string>
+    <string name="onboarding_oem_generic_fullscreen">Permite que UltimatePhone muestre notificaciones a pantalla completa o se muestre sobre el bloqueo, para que las llamadas entrantes aparezcan con el móvil bloqueado.</string>
+</resources>

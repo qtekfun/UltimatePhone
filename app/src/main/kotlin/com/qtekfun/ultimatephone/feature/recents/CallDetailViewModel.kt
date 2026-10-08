@@ -14,6 +14,11 @@ import com.qtekfun.ultimatephone.core.contacts.ContactsRepository
 import com.qtekfun.ultimatephone.core.phonenumber.PhoneNormalizer
 import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
+import com.qtekfun.ultimatephone.data.BusinessFinder
+import com.qtekfun.ultimatephone.data.NoBusinesses
+import com.qtekfun.ultimatephone.feature.spam.NoSpamNumberActions
+import com.qtekfun.ultimatephone.feature.spam.NumberSpamState
+import com.qtekfun.ultimatephone.feature.spam.SpamNumberActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -34,6 +39,7 @@ data class CallDetailUiState(
     /** Every call to or from the number, newest first. */
     val entries: List<CallLogEntry> = emptyList(),
     val stats: CallStats = statsOf(emptyList()),
+    val spam: NumberSpamState = NumberSpamState.Hidden,
     val isLoading: Boolean = true
 ) {
     val isPrivate: Boolean get() = isHiddenNumber(number)
@@ -54,23 +60,26 @@ class CallDetailViewModel @Inject constructor(
     private val placer: CallPlacer,
     private val numberKeys: NumberKeys,
     normalizer: PhoneNormalizer,
-    regionProvider: RegionProvider
+    regionProvider: RegionProvider,
+    private val spamActions: SpamNumberActions = NoSpamNumberActions,
+    businesses: BusinessFinder = NoBusinesses
 ) : ViewModel() {
     private val number: String = savedStateHandle.get<String>(NUMBER_ARG).orEmpty()
-    private val resolver = CallerResolver(contacts, normalizer, regionProvider)
+    private val resolver = CallerResolver(contacts, normalizer, regionProvider, businesses)
     private val refresh = MutableStateFlow(0)
     private val eventChannel = Channel<CallDetailEvent>(Channel.BUFFERED)
 
     val events: Flow<CallDetailEvent> = eventChannel.receiveAsFlow()
 
-    val uiState: StateFlow<CallDetailUiState> = combine(calls.observe(), refresh) { all, _ -> all }
-        .map { all ->
+    val uiState: StateFlow<CallDetailUiState> = combine(calls.observe(), refresh, spamActions.observeState(number)) { all, _, spam -> all to spam }
+        .map { (all, spam) ->
             val entries = entriesForNumber(all, number, numberKeys.keyFunction())
             CallDetailUiState(
                 number = number,
                 caller = resolver.resolve(number, entries.firstNotNullOfOrNull { it.cachedName }),
                 entries = entries,
                 stats = statsOf(entries),
+                spam = spam,
                 isLoading = false
             )
         }
@@ -84,6 +93,18 @@ class CallDetailViewModel @Inject constructor(
     fun call() {
         if (isHiddenNumber(number)) return
         if (!placer.placeCall(number)) eventChannel.trySend(CallDetailEvent.CallFailed)
+    }
+
+    fun markSpam() {
+        viewModelScope.launch { spamActions.markSpam(number) }
+    }
+
+    fun removeFromSpam() {
+        viewModelScope.launch { spamActions.removeFromSpam(number) }
+    }
+
+    fun allow() {
+        viewModelScope.launch { spamActions.allow(number) }
     }
 
     fun deleteHistory() {

@@ -48,4 +48,9 @@
     <string name="settings_about">Acerca de</string>
     <string name="settings_version">Versión %1$s</string>
     <string name="settings_diagnostics">Mostrar capacidades del dispositivo</string>
+    <string name="settings_spam">Protección contra spam</string>
+    <string name="settings_spam_title">Filtro de spam</string>
+    <string name="settings_spam_summary">Niveles, tu lista propia, números permitidos y fuentes</string>
+    <string name="settings_data_title">Datos</string>
+    <string name="settings_data_summary">Regiones, comercios y actualizaciones</string>
 </resources>

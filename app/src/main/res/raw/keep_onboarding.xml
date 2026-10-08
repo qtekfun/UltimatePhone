@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The manufacturer guides name their texts in assets/oem_guides.json and the app finds them with Resources.getIdentifier,
+     so the resource shrinker must not drop them. -->
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/onboarding_oem_*" />

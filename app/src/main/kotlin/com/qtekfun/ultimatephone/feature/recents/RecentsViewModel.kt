@@ -17,6 +17,7 @@ import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
+import com.qtekfun.ultimatephone.data.BusinessFinder
 import com.qtekfun.ultimatephone.feature.spam.NoSpamHistory
 import com.qtekfun.ultimatephone.feature.spam.SpamHistory
 import com.qtekfun.ultimatephone.screening.SpamVerdict
@@ -96,8 +97,17 @@ class RecentsViewModel internal constructor(
         numberKeys: NumberKeys,
         normalizer: PhoneNormalizer,
         regionProvider: RegionProvider,
-        spam: SpamHistory
-    ) : this(calls, simRepository, placer, numberKeys, CallerResolver(contacts, normalizer, regionProvider), Clock.systemDefaultZone(), spam)
+        spam: SpamHistory,
+        businesses: BusinessFinder
+    ) : this(
+        calls,
+        simRepository,
+        placer,
+        numberKeys,
+        CallerResolver(contacts, normalizer, regionProvider, businesses),
+        Clock.systemDefaultZone(),
+        spam
+    )
 
     private val filter = MutableStateFlow<CallLogFilter>(CallLogFilter.All)
     private val selection = MutableStateFlow<Set<Long>>(emptySet())

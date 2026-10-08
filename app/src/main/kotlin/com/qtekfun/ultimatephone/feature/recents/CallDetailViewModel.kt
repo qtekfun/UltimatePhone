@@ -14,6 +14,8 @@ import com.qtekfun.ultimatephone.core.contacts.ContactsRepository
 import com.qtekfun.ultimatephone.core.phonenumber.PhoneNormalizer
 import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
+import com.qtekfun.ultimatephone.data.BusinessFinder
+import com.qtekfun.ultimatephone.data.NoBusinesses
 import com.qtekfun.ultimatephone.feature.spam.NoSpamNumberActions
 import com.qtekfun.ultimatephone.feature.spam.NumberSpamState
 import com.qtekfun.ultimatephone.feature.spam.SpamNumberActions
@@ -59,10 +61,11 @@ class CallDetailViewModel @Inject constructor(
     private val numberKeys: NumberKeys,
     normalizer: PhoneNormalizer,
     regionProvider: RegionProvider,
-    private val spamActions: SpamNumberActions = NoSpamNumberActions
+    private val spamActions: SpamNumberActions = NoSpamNumberActions,
+    businesses: BusinessFinder = NoBusinesses
 ) : ViewModel() {
     private val number: String = savedStateHandle.get<String>(NUMBER_ARG).orEmpty()
-    private val resolver = CallerResolver(contacts, normalizer, regionProvider)
+    private val resolver = CallerResolver(contacts, normalizer, regionProvider, businesses)
     private val refresh = MutableStateFlow(0)
     private val eventChannel = Channel<CallDetailEvent>(Channel.BUFFERED)
 

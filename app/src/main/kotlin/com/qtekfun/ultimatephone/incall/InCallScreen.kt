@@ -60,6 +60,8 @@ import com.qtekfun.ultimatephone.core.telecom.AudioRoute
 import com.qtekfun.ultimatephone.core.telecom.CallDurationFormatter
 import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
+import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
+import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
 import com.qtekfun.ultimatephone.feature.spam.CallSpamPanel
 import com.qtekfun.ultimatephone.feature.spam.CallSpamUi
 import kotlinx.coroutines.delay
@@ -143,8 +145,9 @@ private fun CallHeader(call: CallInfo) {
         }
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 32.dp)) {
-        Avatar(name = call.title, size = 96.dp)
+        if (call.isBusiness) BusinessAvatar(call.businessIcon, size = 96.dp) else Avatar(name = call.title, size = 96.dp)
         Text(call.title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 16.dp))
+        if (call.isBusiness) BusinessCategoryLine(call.businessCategory, call.businessIcon)
         if (call.contactName != null && call.displayNumber.isNotEmpty()) {
             Text(call.displayNumber, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

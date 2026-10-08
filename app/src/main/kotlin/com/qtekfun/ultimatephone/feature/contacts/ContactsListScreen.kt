@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,8 +44,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,6 +80,11 @@ private fun ContactsListContentScreen(onOpenContact: (String) -> Unit, onAddCont
         }
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
+            Text(
+                stringResource(R.string.contacts_title),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).semantics { heading() }
+            )
             SearchField(query, viewModel::onQueryChange)
             when (val current = state) {
                 ContactsListState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingIndicator() }
@@ -120,7 +129,8 @@ private fun ContactRows(content: ContactListContent, showIndex: Boolean, onOpenC
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+        // The bottom padding keeps the last rows clear of the "new contact" button.
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 88.dp)) {
             items(content.rows, key = { it.key }) { row ->
                 when (row) {
                     ListRow.FavoritesHeader -> SectionHeader(stringResource(R.string.contacts_favorites))
@@ -154,7 +164,7 @@ private fun ContactRow(row: ListRow.Item, onOpenContact: (String) -> Unit) {
     val contact = row.contact
     val name = contact.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
     ListItem(
-        headlineContent = { Text(name, maxLines = 1) },
+        headlineContent = { Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         leadingContent = { ContactAvatar(name = name, photoUri = contact.photoThumbUri) },
         trailingContent = if (contact.starred && !row.favorite) {
             { Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary) }

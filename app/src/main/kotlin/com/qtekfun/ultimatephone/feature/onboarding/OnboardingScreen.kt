@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -34,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -69,6 +74,11 @@ fun OnboardingRoute(
         contentWindowInsets = if (embedded) WindowInsets(0) else WindowInsets.safeDrawing,
         bottomBar = {
             NavigationButtons(
+                modifier = if (embedded) {
+                    Modifier
+                } else {
+                    Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
+                },
                 state = flow,
                 onBack = viewModel::back,
                 onNext = viewModel::next,
@@ -103,24 +113,38 @@ fun OnboardingRoute(
 }
 
 @Composable
-private fun NavigationButtons(state: OnboardingState, onBack: () -> Unit, onNext: () -> Unit, onSkip: () -> Unit) {
+private fun NavigationButtons(modifier: Modifier, state: OnboardingState, onBack: () -> Unit, onNext: () -> Unit, onSkip: () -> Unit) {
     // The summary has its own finishing buttons.
     if (state.isLast) {
-        if (!state.isFirst) TextButton(onClick = onBack, modifier = Modifier.padding(horizontal = 16.dp)) { Text(stringResource(R.string.onboarding_back)) }
+        if (!state.isFirst) TextButton(onClick = onBack, modifier = modifier.padding(horizontal = 16.dp)) { Text(stringResource(R.string.onboarding_back)) }
+        return
+    }
+    val nextLabel = stringResource(if (state.isFirst) R.string.onboarding_start else R.string.onboarding_next)
+    val nextButtonModifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)
+    if (LocalDensity.current.fontScale >= STACKED_FONT_SCALE) {
+        // Large text: the buttons would not fit side by side, so they stack with the main action first.
+        Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Button(onClick = onNext, modifier = nextButtonModifier.fillMaxWidth()) { Text(nextLabel) }
+            if (state.step.skippable) TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.onboarding_skip)) }
+            if (!state.isFirst) TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.onboarding_back)) }
+        }
         return
     }
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (!state.isFirst) TextButton(onClick = onBack) { Text(stringResource(R.string.onboarding_back)) }
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
             if (state.step.skippable) TextButton(onClick = onSkip) { Text(stringResource(R.string.onboarding_skip)) }
-            Button(onClick = onNext) { Text(stringResource(if (state.isFirst) R.string.onboarding_start else R.string.onboarding_next)) }
+            Button(onClick = onNext, modifier = nextButtonModifier) { Text(nextLabel) }
         }
     }
 }
+
+private val MIN_TOUCH_TARGET = 56.dp
+private const val STACKED_FONT_SCALE = 1.3f
 
 @Composable
 internal fun StepTitle(title: Int, body: Int) {

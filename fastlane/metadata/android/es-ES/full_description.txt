@@ -1,0 +1,14 @@
+UltimatePhone es una app de teléfono con contactos y un filtro de spam que funciona por completo en tu móvil. Descarga listas, decide en local y te avisa antes de que contestes. Ningún número sale de tu teléfono, salvo hacia el Nextcloud que configures tú.
+
+• Teclado con búsqueda por nombre de contacto, número y comercios cercanos
+• Pantalla de llamada con contestar, rechazar, silenciar, teclado, ruta de audio, retener y unir
+• Doble SIM: elige la SIM en cada llamada y recuérdala por número
+• Historial de llamadas con filtros, agrupación y detalle
+• Contactos: crear, editar, favoritos, cuentas como DAVx5
+• Filtro de spam: tu lista propia, números permitidos, fuentes que añades por URL, reglas por prefijo
+• Identifica comercios con paquetes de datos de OpenStreetMap (cobertura parcial, por región)
+• Sincronización opcional de tu lista de spam con Nextcloud (WebDAV) y copia cifrada de ajustes
+
+Funciona en Android 12 o superior, con o sin servicios de Google y de cualquier fabricante. Sin analíticas, sin rastreadores, sin dependencias de Google. Software libre, GPL-3.0.
+
+Datos de comercios © colaboradores de OpenStreetMap, ODbL.

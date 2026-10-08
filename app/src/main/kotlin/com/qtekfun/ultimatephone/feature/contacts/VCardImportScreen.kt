@@ -36,9 +36,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -109,7 +112,7 @@ private fun VCardImportContentScreen(onClose: () -> Unit, viewModel: VCardImport
 @Composable
 private fun Centered(content: @Composable () -> Unit) {
     Column(
-        Modifier.fillMaxSize().padding(24.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -121,7 +124,7 @@ private fun Centered(content: @Composable () -> Unit) {
 @Composable
 private fun Busy(label: Int) {
     LoadingIndicator()
-    Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
+    Text(stringResource(label), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
 }
 
 @Composable
@@ -134,7 +137,10 @@ private fun SummaryBody(summary: ImportSummary) {
     Text(
         stringResource(R.string.contactsadv_import_done_title),
         style = MaterialTheme.typography.headlineSmall,
-        modifier = Modifier.semantics { heading() }
+        modifier = Modifier.semantics {
+            heading()
+            liveRegion = LiveRegionMode.Polite
+        }
     )
     Text(stringResource(R.string.contactsadv_import_done_imported, summary.imported))
     if (summary.skippedDuplicates > 0) Text(stringResource(R.string.contactsadv_import_done_dups, summary.skippedDuplicates))
@@ -147,17 +153,20 @@ private fun PreviewBody(preview: ImportPreview, viewModel: VCardImportViewModel)
     val context = LocalContext.current
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            stringResource(R.string.contactsadv_import_found, preview.contacts.size),
+            pluralStringResource(R.plurals.contactsadv_import_found, preview.contacts.size, preview.contacts.size),
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.semantics {
                 heading()
             }
         )
         if (preview.invalid > 0) {
-            Text(stringResource(R.string.contactsadv_import_invalid, preview.invalid), style = MaterialTheme.typography.bodyMedium)
+            Text(pluralStringResource(R.plurals.contactsadv_import_invalid, preview.invalid, preview.invalid), style = MaterialTheme.typography.bodyMedium)
         }
         if (preview.duplicates.isNotEmpty()) {
-            Text(stringResource(R.string.contactsadv_import_dups, preview.duplicates.size), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                pluralStringResource(R.plurals.contactsadv_import_dups, preview.duplicates.size, preview.duplicates.size),
+                style = MaterialTheme.typography.bodyMedium
+            )
             Row(
                 Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).toggleable(
                     value = preview.skipDuplicates,
@@ -196,7 +205,7 @@ private fun PreviewBody(preview: ImportPreview, viewModel: VCardImportViewModel)
             enabled = preview.toImport.isNotEmpty(),
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp).defaultMinSize(minHeight = 48.dp)
         ) {
-            Text(stringResource(R.string.contactsadv_import_action, preview.toImport.size))
+            Text(pluralStringResource(R.plurals.contactsadv_import_action, preview.toImport.size, preview.toImport.size))
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
@@ -39,7 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -81,7 +86,8 @@ fun BackupRoute(onBack: () -> Unit, viewModel: BackupViewModel = hiltViewModel()
                     Text(
                         stringResource(R.string.backup_warning_title),
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onErrorContainer
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.semantics { heading() }
                     )
                     Text(
                         stringResource(R.string.backup_warning),
@@ -90,15 +96,28 @@ fun BackupRoute(onBack: () -> Unit, viewModel: BackupViewModel = hiltViewModel()
                     )
                 }
             }
-            Text(stringResource(R.string.backup_export_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(R.string.backup_export_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() }
+            )
             Text(stringResource(R.string.backup_export_summary), style = MaterialTheme.typography.bodyMedium)
             Button(onClick = viewModel::askExport, enabled = !state.busy) { Text(stringResource(R.string.backup_export_action)) }
             HorizontalDivider()
-            Text(stringResource(R.string.backup_import_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Text(
+                stringResource(R.string.backup_import_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.semantics { heading() }
+            )
             Text(stringResource(R.string.backup_import_summary), style = MaterialTheme.typography.bodyMedium)
             OutlinedButton(onClick = { openFile.launch(arrayOf("*/*")) }, enabled = !state.busy) { Text(stringResource(R.string.backup_import_action)) }
-            if (state.busy) Text(stringResource(R.string.backup_working), style = MaterialTheme.typography.bodyMedium)
-            state.message?.let { MessageText(it) }
+            // Progress and the result are announced by TalkBack as they appear.
+            Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
+                if (state.busy) Text(stringResource(R.string.backup_working), style = MaterialTheme.typography.bodyMedium)
+                state.message?.let { MessageText(it) }
+            }
         }
     }
 
@@ -209,7 +228,7 @@ private fun ChoiceDialog(choice: ImportChoice, viewModel: BackupViewModel) {
                 choice.available.forEach { item ->
                     val checked = item.id in choice.selected
                     Row(
-                        modifier = Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Checkbox, onValueChange = {
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(value = checked, role = Role.Checkbox, onValueChange = {
                             viewModel.toggle(item.id)
                         }).padding(vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically

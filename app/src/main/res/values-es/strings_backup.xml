@@ -2,14 +2,14 @@
 <resources>
     <!-- Ajustes > Copia de seguridad -->
     <string name="backup_row_title">Copia de seguridad y restauración</string>
-    <string name="backup_row_summary">Guarda tus ajustes en un fichero cifrado</string>
+    <string name="backup_row_summary">Guarda tus ajustes en un archivo cifrado</string>
     <string name="backup_title">Copia de seguridad</string>
     <string name="backup_back">Atrás</string>
-    <string name="backup_warning_title">Guarda bien este fichero</string>
-    <string name="backup_warning">La copia contiene tus ajustes, tus listas de spam y los datos de tu cuenta de Nextcloud, incluida la contraseña de aplicación. Solo está protegida por la contraseña que elijas. Quien tenga el fichero y la contraseña puede leerla, y una contraseña perdida no se puede recuperar.</string>
+    <string name="backup_warning_title">Guarda bien este archivo</string>
+    <string name="backup_warning">La copia contiene tus ajustes, tus listas de spam y los datos de tu cuenta de Nextcloud, incluida la contraseña de aplicación. Solo está protegida por la contraseña que elijas. Quien tenga el archivo y la contraseña puede leerla, y una contraseña perdida no se puede recuperar.</string>
     <string name="backup_export_title">Exportar</string>
-    <string name="backup_export_summary">Guarda todo en un fichero que elijas, por ejemplo para pasarlo a un móvil nuevo.</string>
-    <string name="backup_export_action">Exportar a un fichero</string>
+    <string name="backup_export_summary">Guarda todo en un archivo que elijas, por ejemplo para pasarlo a un móvil nuevo.</string>
+    <string name="backup_export_action">Exportar a un archivo</string>
     <string name="backup_export_password_title">Elige una contraseña</string>
     <string name="backup_password">Contraseña</string>
     <string name="backup_password_repeat">Repite la contraseña</string>
@@ -21,15 +21,15 @@
     <string name="backup_export_done">Copia guardada.</string>
     <string name="backup_export_failed">No se pudo guardar la copia.</string>
     <string name="backup_import_title">Importar</string>
-    <string name="backup_import_summary">Restaura desde un fichero de copia. Tú eliges qué restaurar.</string>
-    <string name="backup_import_action">Importar desde un fichero</string>
+    <string name="backup_import_summary">Restaura desde un archivo de copia. Tú eliges qué restaurar.</string>
+    <string name="backup_import_action">Importar desde un archivo</string>
     <string name="backup_import_password_title">Introduce la contraseña de la copia</string>
     <string name="backup_open">Abrir</string>
-    <string name="backup_import_wrong">Contraseña incorrecta o el fichero ha sido modificado. No se importó nada.</string>
-    <string name="backup_import_not_backup">Este fichero no es una copia de UltimatePhone. No se importó nada.</string>
+    <string name="backup_import_wrong">Contraseña incorrecta o el archivo ha sido modificado. No se importó nada.</string>
+    <string name="backup_import_not_backup">Este archivo no es una copia de UltimatePhone. No se importó nada.</string>
     <string name="backup_import_newer">Esta copia la hizo una versión más reciente de la app. Actualiza la app para importarla.</string>
-    <string name="backup_import_corrupt">El fichero está dañado. No se importó nada.</string>
-    <string name="backup_import_unreadable">No se pudo leer el fichero.</string>
+    <string name="backup_import_corrupt">El archivo está dañado. No se importó nada.</string>
+    <string name="backup_import_unreadable">No se pudo leer el archivo.</string>
     <string name="backup_import_choose">Elige qué restaurar</string>
     <string name="backup_import_created">Copia hecha el %1$s</string>
     <string name="backup_import_merge_note">Las listas de spam se combinan con las de este móvil; gana el cambio más reciente de cada número.</string>

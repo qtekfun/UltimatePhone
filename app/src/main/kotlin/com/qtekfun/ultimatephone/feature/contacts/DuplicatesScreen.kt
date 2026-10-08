@@ -49,10 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -165,7 +168,7 @@ private fun ClusterList(clusters: List<DuplicateCluster>, onOpen: (DuplicateClus
                 stringResource(R.string.contactsadv_dup_count, clusters.size),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp).semantics { heading() }
             )
         }
         items(clusters, key = { it.id }) { cluster -> ClusterRow(cluster, onOpen) }
@@ -183,7 +186,9 @@ private fun ClusterRow(cluster: DuplicateCluster, onOpen: (DuplicateCluster) -> 
     )
     ListItem(
         headlineContent = { Text(names, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-        supportingContent = { Text("$reasons · $confidence · " + stringResource(R.string.contactsadv_dup_members, cluster.members.size)) },
+        supportingContent = {
+            Text("$reasons · $confidence · " + pluralStringResource(R.plurals.contactsadv_dup_members, cluster.members.size, cluster.members.size))
+        },
         modifier = Modifier.defaultMinSize(minHeight = 56.dp).clickable(role = Role.Button) { onOpen(cluster) }
     )
     HorizontalDivider()
@@ -224,7 +229,7 @@ private fun ReviewBody(review: ReviewState, busy: Boolean, onToggle: (String) ->
                 stringResource(R.string.contactsadv_review_need_two),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }
             )
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

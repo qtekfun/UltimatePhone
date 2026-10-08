@@ -22,7 +22,7 @@
     <string name="recents_count_calls">%1$d calls</string>
     <string name="recents_call_back">Call back</string>
     <string name="recents_select">Select</string>
-    <string name="recents_selected">Selected</string>
+    <string name="recents_new">New</string>
     <string name="recents_details_for">Details for %1$s</string>
     <string name="recents_call_failed">The call could not be placed</string>
     <string name="recents_more_options">More options</string>
@@ -30,7 +30,10 @@
     <string name="recents_clear_title">Clear call history?</string>
     <string name="recents_clear_body">Every entry will be deleted from this phone. This cannot be undone.</string>
     <string name="recents_clear_confirm">Clear</string>
-    <string name="recents_selected_count">%1$d selected</string>
+    <plurals name="recents_selected_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
     <string name="recents_cancel_selection">Cancel selection</string>
     <string name="recents_delete_selected">Delete selected calls</string>
     <string name="recents_delete_selected_title">Delete selected calls?</string>

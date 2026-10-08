@@ -44,6 +44,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -65,9 +66,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -240,12 +246,12 @@ private fun CallHeader(call: CallInfo, layout: CallLayout, showAvatar: Boolean) 
         if (showAvatar) {
             if (call.isBusiness) BusinessAvatar(call.businessIcon, size = layout.avatarSize) else Avatar(name = call.title, size = layout.avatarSize)
         }
-        // The name is the most important line: large, up to two lines.
+        // The name is the most important line: large, up to three lines (large font sizes).
         Text(
             call.title,
             style = MaterialTheme.typography.headlineLarge,
             textAlign = TextAlign.Center,
-            maxLines = 2,
+            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 12.dp)
         )
@@ -265,12 +271,15 @@ private fun CallHeader(call: CallInfo, layout: CallLayout, showAvatar: Boolean) 
             CallStatus.DISCONNECTING, CallStatus.DISCONNECTED -> call.disconnectLabel ?: stringResource(R.string.incall_call_ended)
             CallStatus.OTHER -> ""
         }
+        // Active and on-hold calls show a running duration: that must not be read out every second.
+        val ticking = call.status == CallStatus.ACTIVE || call.status == CallStatus.HOLDING
         Text(
             status,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp)
+            // Ringing, calling and ended are announced by TalkBack as they change; the running duration is not live.
+            modifier = Modifier.padding(top = 8.dp).semantics { if (!ticking) liveRegion = LiveRegionMode.Polite }
         )
         if (call.isConference) {
             Text(stringResource(R.string.incall_conference, call.participants), style = MaterialTheme.typography.labelLarge)
@@ -385,7 +394,15 @@ private fun OngoingControls(
         }
         add(
             CallAction("add") {
-                ToggleAction(Icons.Filled.PersonAdd, stringResource(R.string.incall_add_call), false, onAddCall, size = size, modifier = Modifier.weight(1f))
+                ToggleAction(
+                    Icons.Filled.PersonAdd,
+                    stringResource(R.string.incall_add_call),
+                    false,
+                    onAddCall,
+                    size = size,
+                    modifier = Modifier.weight(1f),
+                    toggle = false
+                )
             }
         )
         if (recording.available || recording.isBusy) {
@@ -449,18 +466,38 @@ internal fun ToggleAction(
     onClick: () -> Unit,
     size: Dp,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    toggle: Boolean = true,
+    stateText: String? = null
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-        FilledTonalIconToggleButton(checked = checked, onCheckedChange = { onClick() }, enabled = enabled, modifier = Modifier.size(size)) {
-            Icon(icon, contentDescription = description)
+        if (toggle) {
+            // A real on/off control: TalkBack says "On" or "Off", not just a colour change.
+            val state = stringResource(if (checked) R.string.incall_state_on else R.string.incall_state_off)
+            FilledTonalIconToggleButton(
+                checked = checked,
+                onCheckedChange = { onClick() },
+                enabled = enabled,
+                modifier = Modifier.size(size).semantics { stateDescription = state }
+            ) {
+                Icon(icon, contentDescription = description)
+            }
+        } else {
+            // A one-shot action (add a call, record, audio): announced as a plain button, with its current value if any.
+            FilledTonalIconButton(
+                onClick = onClick,
+                enabled = enabled,
+                modifier = Modifier.size(size).semantics { if (stateText != null) stateDescription = stateText }
+            ) {
+                Icon(icon, contentDescription = description)
+            }
         }
         // The icon already carries the description for TalkBack.
         Text(
             description,
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center,
-            maxLines = 2,
+            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 4.dp).clearAndSetSemantics {}
         )
@@ -484,7 +521,9 @@ private fun RouteAction(route: AudioRoute, available: Set<AudioRoute>, onRoute: 
             description = stringResource(R.string.incall_audio),
             checked = route != AudioRoute.EARPIECE,
             onClick = { if (several) menu = true else onRoute(if (route == AudioRoute.SPEAKER) AudioRoute.EARPIECE else AudioRoute.SPEAKER) },
-            size = size
+            size = size,
+            toggle = false,
+            stateText = stringResource(routeName(route))
         )
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             available.forEach { option ->
@@ -513,6 +552,11 @@ private fun DtmfKeypad(onDown: (Char) -> Unit, onUp: () -> Unit) {
         DIAL_KEYS.forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 row.forEach { char ->
+                    val keyName = when (char) {
+                        '*' -> stringResource(R.string.incall_key_star)
+                        '#' -> stringResource(R.string.incall_key_pound)
+                        else -> char.toString()
+                    }
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -522,9 +566,18 @@ private fun DtmfKeypad(onDown: (Char) -> Unit, onUp: () -> Unit) {
                                 tryAwaitRelease()
                                 onUp()
                             })
+                        }.semantics(mergeDescendants = true) {
+                            // The touch handler above cannot be reached by TalkBack; this gives it a button that sends the tone.
+                            role = Role.Button
+                            contentDescription = keyName
+                            onClick {
+                                onDown(char)
+                                onUp()
+                                true
+                            }
                         }
                     ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET).clearAndSetSemantics {}) {
                             Text(char.toString(), style = MaterialTheme.typography.headlineSmall)
                         }
                     }

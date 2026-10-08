@@ -46,8 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -178,7 +181,12 @@ private fun EditForm(state: ContactEditState, viewModel: ContactEditViewModel) {
             AccountPicker(draft.account, state.accounts, viewModel::setAccount)
         }
         if (state.saveFailed) {
-            Text(stringResource(R.string.edit_error_save), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                stringResource(R.string.edit_error_save),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+            )
         }
     }
 }
@@ -203,18 +211,12 @@ private fun LabeledField(
     onRemove: () -> Unit
 ) {
     val context = LocalContext.current
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(
-            value = value.value,
-            onValueChange = { onChange(value.copy(value = it)) },
-            label = { Text(stringResource(label)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier.weight(1f)
-        )
-        var expanded by remember { mutableStateOf(false) }
-        val shown = labelText(context, choices, value)
-        val spoken = stringResource(typeDescription, shown)
+    // With large text the type chip would squeeze the field to a sliver: it drops below the field instead.
+    val stacked = LocalDensity.current.fontScale >= STACK_FONT_SCALE
+    var expanded by remember { mutableStateOf(false) }
+    val shown = labelText(context, choices, value)
+    val spoken = stringResource(typeDescription, shown)
+    val typeChip: @Composable () -> Unit = {
         Box {
             AssistChip(
                 onClick = { expanded = true },
@@ -233,9 +235,25 @@ private fun LabeledField(
                 }
             }
         }
-        IconButton(onClick = onRemove) { Icon(Icons.Filled.Remove, contentDescription = stringResource(removeDescription)) }
+    }
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            OutlinedTextField(
+                value = value.value,
+                onValueChange = { onChange(value.copy(value = it)) },
+                label = { Text(stringResource(label)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                modifier = Modifier.weight(1f)
+            )
+            if (!stacked) typeChip()
+            IconButton(onClick = onRemove) { Icon(Icons.Filled.Remove, contentDescription = stringResource(removeDescription)) }
+        }
+        if (stacked) typeChip()
     }
 }
+
+private const val STACK_FONT_SCALE = 1.3f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

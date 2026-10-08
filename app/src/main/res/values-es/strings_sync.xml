@@ -29,11 +29,14 @@
     <string name="sync_last_sync">Última sincronización: %1$s</string>
     <string name="sync_never">Aún sin sincronizar</string>
     <string name="sync_pending">Hay cambios pendientes de subir.</string>
-    <string name="sync_result">Hecho. %1$d recibidos, %2$d enviados.</string>
-    <string name="sync_bad_lines">Se omitieron %1$d líneas ilegibles de los ficheros remotos.</string>
+    <string name="sync_result">Hecho. Recibidos: %1$d. Enviados: %2$d.</string>
+    <plurals name="sync_bad_lines">
+        <item quantity="one">Se omitió %1$d línea ilegible de los archivos remotos.</item>
+        <item quantity="other">Se omitieron %1$d líneas ilegibles de los archivos remotos.</item>
+    </plurals>
     <string name="sync_forget">Olvidar cuenta</string>
     <string name="sync_forget_title">¿Olvidar la cuenta de Nextcloud?</string>
-    <string name="sync_forget_message">La cuenta y la contraseña de aplicación guardada se borran de este móvil y la sincronización se detiene. Tus listas y los ficheros de Nextcloud no cambian.</string>
+    <string name="sync_forget_message">La cuenta y la contraseña de aplicación guardada se borran de este móvil y la sincronización se detiene. Tus listas y los archivos de Nextcloud no cambian.</string>
     <string name="sync_forget_confirm">Olvidar</string>
     <string name="sync_cancel">Cancelar</string>
     <string name="sync_error_title">Último problema</string>
@@ -43,9 +46,9 @@
     <string name="sync_error_auth">El servidor rechazó el usuario o la contraseña de aplicación. Crea una contraseña de aplicación nueva en Nextcloud.</string>
     <string name="sync_error_network">No se pudo contactar con el servidor. Se reintentará cuando haya conexión.</string>
     <string name="sync_error_tls">No se aceptó el certificado de seguridad del servidor.</string>
-    <string name="sync_error_conflict">Los ficheros no dejaron de cambiar en el servidor. Se reintentará más tarde.</string>
+    <string name="sync_error_conflict">Los archivos no dejaron de cambiar en el servidor. Se reintentará más tarde.</string>
     <string name="sync_error_server_old">Este servidor no ofrece lo que necesita la sincronización (WebDAV con soporte de ETag).</string>
-    <string name="sync_error_remote_corrupt">Un fichero de la carpeta UltimatePhone no es una lista válida. Se ha dejado sin tocar.</string>
+    <string name="sync_error_remote_corrupt">Un archivo de la carpeta UltimatePhone no es una lista válida. Se ha dejado sin tocar.</string>
     <string name="sync_error_credentials">La contraseña guardada ya no se puede leer porque se perdió la clave segura. Introduce de nuevo la contraseña de aplicación.</string>
     <string name="sync_error_unknown">Algo salió mal.</string>
 </resources>

@@ -6,12 +6,18 @@
     <string name="contactsadv_menu_duplicates">Buscar duplicados</string>
     <string name="contactsadv_menu_import">Importar vCard</string>
     <string name="contactsadv_menu_export_all">Exportar todos los contactos</string>
-    <string name="contactsadv_selection_count">%1$d seleccionados</string>
+    <plurals name="contactsadv_selection_count">
+        <item quantity="one">%1$d seleccionado</item>
+        <item quantity="other">%1$d seleccionados</item>
+    </plurals>
     <string name="contactsadv_selection_clear">Borrar selección</string>
     <string name="contactsadv_select_action">Seleccionar</string>
     <string name="contactsadv_export_selected">Exportar contactos seleccionados</string>
     <string name="contactsadv_export_one">Exportar como archivo vCard</string>
-    <string name="contactsadv_export_done">%1$d contactos exportados</string>
+    <plurals name="contactsadv_export_done">
+        <item quantity="one">%1$d contacto exportado</item>
+        <item quantity="other">%1$d contactos exportados</item>
+    </plurals>
     <string name="contactsadv_export_one_done">Contacto exportado</string>
     <string name="contactsadv_export_failed">No se pudo escribir el archivo</string>
     <string name="contactsadv_filter_label">Filtrar por grupo</string>
@@ -22,7 +28,10 @@
     <!-- Grupos -->
     <string name="contactsadv_groups_title">Grupos</string>
     <string name="contactsadv_groups_empty">Aún no hay grupos. Crea uno para organizar tus contactos.</string>
-    <string name="contactsadv_groups_members">%1$d contactos</string>
+    <plurals name="contactsadv_groups_members">
+        <item quantity="one">%1$d contacto</item>
+        <item quantity="other">%1$d contactos</item>
+    </plurals>
     <string name="contactsadv_groups_read_only">gestionado por su cuenta</string>
     <string name="contactsadv_groups_add">Nuevo grupo</string>
     <string name="contactsadv_groups_create_title">Nuevo grupo</string>
@@ -48,7 +57,10 @@
     <string name="contactsadv_dup_empty">No se han encontrado duplicados</string>
     <string name="contactsadv_dup_count">Posibles duplicados: %1$d</string>
     <string name="contactsadv_dup_ignore_all">Ignorar todos</string>
-    <string name="contactsadv_dup_members">%1$d contactos</string>
+    <plurals name="contactsadv_dup_members">
+        <item quantity="one">%1$d contacto</item>
+        <item quantity="other">%1$d contactos</item>
+    </plurals>
     <string name="contactsadv_dup_reason_number">Mismo número</string>
     <string name="contactsadv_dup_reason_email">Mismo correo</string>
     <string name="contactsadv_dup_reason_name">Nombre parecido</string>
@@ -91,12 +103,24 @@
     <string name="contactsadv_import_importing">Importando contactos…</string>
     <string name="contactsadv_import_read_failed">No se pudo leer el archivo</string>
     <string name="contactsadv_import_none">No se encontraron contactos en este archivo</string>
-    <string name="contactsadv_import_found">%1$d contactos encontrados</string>
-    <string name="contactsadv_import_invalid">%1$d entradas no se pudieron leer y se omitirán</string>
-    <string name="contactsadv_import_dups">%1$d se parecen a contactos que ya tienes</string>
+    <plurals name="contactsadv_import_found">
+        <item quantity="one">%1$d contacto encontrado</item>
+        <item quantity="other">%1$d contactos encontrados</item>
+    </plurals>
+    <plurals name="contactsadv_import_invalid">
+        <item quantity="one">%1$d entrada no se pudo leer y se omitirá</item>
+        <item quantity="other">%1$d entradas no se pudieron leer y se omitirán</item>
+    </plurals>
+    <plurals name="contactsadv_import_dups">
+        <item quantity="one">%1$d se parece a un contacto que ya tienes</item>
+        <item quantity="other">%1$d se parecen a contactos que ya tienes</item>
+    </plurals>
     <string name="contactsadv_import_skip_dups">Omitir los contactos que ya tengo</string>
     <string name="contactsadv_import_account">Importar en</string>
-    <string name="contactsadv_import_action">Importar %1$d contactos</string>
+    <plurals name="contactsadv_import_action">
+        <item quantity="one">Importar %1$d contacto</item>
+        <item quantity="other">Importar %1$d contactos</item>
+    </plurals>
     <string name="contactsadv_import_done_title">Importación terminada</string>
     <string name="contactsadv_import_done_imported">Importados: %1$d</string>
     <string name="contactsadv_import_done_dups">Omitidos, ya estaban en tus contactos: %1$d</string>

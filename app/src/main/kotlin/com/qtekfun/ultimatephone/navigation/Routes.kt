@@ -51,6 +51,7 @@ const val SETTINGS_SPAM_ROUTE = "settings/spam"
 const val SETTINGS_DATA_ROUTE = "settings/data"
 const val SETTINGS_SYNC_ROUTE = "settings/sync"
 const val SETTINGS_BACKUP_ROUTE = "settings/backup"
+const val SETTINGS_RECORDING_ROUTE = "settings/recording"
 
 /** The setup guide (onboarding), re-run from Settings. The first run is shown by `AppNavHost` before any other screen. */
 const val ONBOARDING_ROUTE = "onboarding"

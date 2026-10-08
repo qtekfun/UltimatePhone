@@ -9,6 +9,8 @@ import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
 import com.qtekfun.ultimatephone.feature.spam.CallSpamUi
 import com.qtekfun.ultimatephone.feature.spam.SpamNumberActions
+import com.qtekfun.ultimatephone.recording.CallRecording
+import com.qtekfun.ultimatephone.recording.RecordingUi
 import com.qtekfun.ultimatephone.screening.DecisionEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -21,10 +23,14 @@ import kotlinx.coroutines.launch
 class InCallViewModel @Inject constructor(
     private val controller: CallController,
     private val engine: DecisionEngine,
-    private val spamActions: SpamNumberActions
+    private val spamActions: SpamNumberActions,
+    private val recording: CallRecording
 ) : ViewModel() {
     val calls: StateFlow<List<CallInfo>> = controller.calls
     val audio: StateFlow<AudioState> = controller.audio
+
+    /** Call recording: the indicator, the Record button and the one-time warning. */
+    val recordingUi: StateFlow<RecordingUi> = recording.ui
 
     private val spamState = MutableStateFlow<Map<String, CallSpamUi>>(emptyMap())
 
@@ -34,6 +40,7 @@ class InCallViewModel @Inject constructor(
     private val seen = HashSet<String>()
 
     init {
+        recording.refresh()
         viewModelScope.launch {
             controller.calls.collect { current ->
                 val ids = current.map { it.id }.toSet()
@@ -91,6 +98,14 @@ class InCallViewModel @Inject constructor(
     fun dtmfDown(call: CallInfo, digit: Char) = controller.playDtmf(call.id, digit)
 
     fun dtmfUp(call: CallInfo) = controller.stopDtmf(call.id)
+
+    fun toggleRecording(call: CallInfo) = if (recordingUi.value.isBusy) recording.stop() else recording.startManual(call)
+
+    fun stopRecording() = recording.stop()
+
+    fun dismissRecordingFailure() = recording.dismissFailure()
+
+    fun dismissMicWarning() = recording.dismissMicWarning()
 
     fun merge() = controller.mergeCalls()
 

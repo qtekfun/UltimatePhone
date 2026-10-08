@@ -16,6 +16,8 @@ import com.qtekfun.ultimatephone.feature.recents.FakeContacts
 import com.qtekfun.ultimatephone.feature.recents.FakeNormalizer
 import com.qtekfun.ultimatephone.feature.recents.FakeRegion
 import com.qtekfun.ultimatephone.incall.InCallViewModel
+import com.qtekfun.ultimatephone.recording.CallRecording
+import com.qtekfun.ultimatephone.recording.RecordingUi
 import com.qtekfun.ultimatephone.screening.DecisionEngine
 import com.qtekfun.ultimatephone.screening.RULE_ES_400_COMMERCIAL
 import com.qtekfun.ultimatephone.screening.RoomDecisionStore
@@ -230,6 +232,20 @@ class InCallSpamTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
+    private object NoRecording : CallRecording {
+        override val ui = MutableStateFlow(RecordingUi())
+
+        override fun refresh() = Unit
+
+        override fun startManual(call: CallInfo) = Unit
+
+        override fun stop() = Unit
+
+        override fun dismissFailure() = Unit
+
+        override fun dismissMicWarning() = Unit
+    }
+
     private fun call(id: String, number: String?, incoming: Boolean = true, status: CallStatus = CallStatus.RINGING) =
         CallInfo(id, status, number, number.orEmpty(), incoming, null, 0, false, false, false, 0)
 
@@ -239,7 +255,7 @@ class InCallSpamTest {
         store: RoomDecisionStore = RoomDecisionStore(FakeDecisionDao())
     ): InCallViewModel {
         val engine = DecisionEngine(FakeContacts(), lists, FakePacks(), builtInRuleSet(), FakeSpamSettings(), FakeNormalizer(), FakeRegion(), store)
-        return InCallViewModel(controller, engine, ListsSpamNumberActions(lists, engine, NoSpamHistory, FakeNormalizer(), FakeRegion()))
+        return InCallViewModel(controller, engine, ListsSpamNumberActions(lists, engine, NoSpamHistory, FakeNormalizer(), FakeRegion()), NoRecording)
     }
 
     @Test

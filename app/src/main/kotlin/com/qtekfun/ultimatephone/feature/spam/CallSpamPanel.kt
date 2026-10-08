@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -41,6 +42,9 @@ data class CallSpamUi(val verdict: SpamVerdict? = null, val markedSpam: Boolean 
     /** The warning is shown for a flagged number until the user overrules it. */
     val showWarning: Boolean get() = verdict?.isSpam == true && !allowed && !markedSpam
 
+    /** The warning can open its explanation (needs the number the explanation is about). */
+    val canExplain: Boolean get() = showWarning && hasNumber
+
     /** Something worth saying calmly: a commercial call, an identified business. */
     val showInfo: Boolean get() = !showWarning && verdict?.let { it.informational || it.decision.reason == DecisionReason.BUSINESS } == true
 
@@ -54,9 +58,16 @@ data class CallSpamUi(val verdict: SpamVerdict? = null, val markedSpam: Boolean 
  * informational result is a calm line of text, not a warning.
  */
 @Composable
-fun CallSpamPanel(ui: CallSpamUi, ringing: Boolean, onNotSpam: () -> Unit, onMarkSpam: () -> Unit, modifier: Modifier = Modifier) {
+fun CallSpamPanel(
+    ui: CallSpamUi,
+    ringing: Boolean,
+    onNotSpam: () -> Unit,
+    onMarkSpam: () -> Unit,
+    modifier: Modifier = Modifier,
+    onWhyFlagged: (() -> Unit)? = null
+) {
     when {
-        ui.showWarning -> WarningCard(ui, onNotSpam, modifier)
+        ui.showWarning -> WarningCard(ui, onNotSpam, onWhyFlagged.takeIf { ui.canExplain }, modifier)
         ui.markedSpam -> Note(R.string.spam_incall_marked, modifier)
         ui.allowed -> Note(R.string.spam_incall_allowed, modifier)
         ui.showInfo -> ui.verdict?.let {
@@ -84,7 +95,7 @@ private fun Note(text: Int, modifier: Modifier) {
 }
 
 @Composable
-private fun WarningCard(ui: CallSpamUi, onNotSpam: () -> Unit, modifier: Modifier) {
+private fun WarningCard(ui: CallSpamUi, onNotSpam: () -> Unit, onWhyFlagged: (() -> Unit)?, modifier: Modifier) {
     val decision = ui.verdict?.decision ?: return
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
@@ -109,6 +120,10 @@ private fun WarningCard(ui: CallSpamUi, onNotSpam: () -> Unit, modifier: Modifie
                     contentColor = MaterialTheme.colorScheme.errorContainer
                 )
             ) { Text(stringResource(R.string.spam_not_spam)) }
+            if (onWhyFlagged != null) {
+                TextButton(onClick = onWhyFlagged, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.gaps_incall_why_flagged)) }
+                Text(stringResource(R.string.gaps_incall_why_flagged_hint), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+            }
         }
     }
 }

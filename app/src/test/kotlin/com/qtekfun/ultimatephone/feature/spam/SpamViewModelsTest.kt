@@ -273,6 +273,19 @@ class InCallSpamTest {
     }
 
     @Test
+    fun theExplanationIsOfferedOnlyWhileTheWarningShowsForANumber() = runTest {
+        val lists = InMemoryLists()
+        lists.add(ListType.OWN, EntryKind.NUMBER, "+34600111222")
+        val controller = Controller(listOf(call("c1", "600111222")))
+        val vm = viewModel(controller, lists)
+        assertTrue(vm.spam.value.getValue("c1").canExplain)
+        assertFalse(vm.spam.value.getValue("c1").copy(hasNumber = false).canExplain)
+        assertFalse(CallSpamUi().canExplain)
+        vm.notSpam(controller.calls.value.single())
+        assertFalse(vm.spam.value.getValue("c1").canExplain)
+    }
+
+    @Test
     fun notSpamClearsTheWarningAndWhitelists() = runTest {
         val lists = InMemoryLists()
         lists.add(ListType.OWN, EntryKind.NUMBER, "+34600111222")

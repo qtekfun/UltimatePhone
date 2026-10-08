@@ -3,6 +3,7 @@ package com.qtekfun.ultimatephone.core.datapacks
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
 import org.tukaani.xz.XZInputStream
 
 sealed interface InstallResult {
@@ -19,23 +20,11 @@ enum class InstallFailure { NETWORK, SIZE_MISMATCH, CHECKSUM_MISMATCH, BAD_ARCHI
  */
 class PackInstaller(private val fetcher: HttpFetcher, private val store: PackStore) {
     fun install(entry: PackEntry, onProgress: (Long) -> Unit = {}): InstallResult {
-        if (!entry.url.startsWith("https://")) return InstallResult.Failed(InstallFailure.INSECURE_URL)
-        if (entry.compression != PackEntry.COMPRESSION_XZ && entry.compression != PackEntry.COMPRESSION_NONE) {
-            return InstallResult.Failed(InstallFailure.UNSUPPORTED)
-        }
+        precheck(entry)?.let { return InstallResult.Failed(it) }
         val download = store.newTempFile("dl-")
         val unpacked = store.newTempFile("db-")
         try {
-            try {
-                fetcher.download(entry.url, download, onProgress)
-            } catch (_: IOException) {
-                return InstallResult.Failed(InstallFailure.NETWORK)
-            }
-            if (entry.bytes > 0 && download.length() != entry.bytes) return InstallResult.Failed(InstallFailure.SIZE_MISMATCH)
-            if (!Hashing.sha256Hex(download).equals(entry.sha256, ignoreCase = true)) {
-                return InstallResult.Failed(InstallFailure.CHECKSUM_MISMATCH)
-            }
-            val failure = unpack(entry, download, unpacked)
+            val failure = fetchAndVerify(entry, download, onProgress) ?: unpack(entry, download, unpacked)
             if (failure != null) return InstallResult.Failed(failure)
             store.install(entry.id, entry.version, unpacked)
             return InstallResult.Installed(entry.id, entry.version)
@@ -45,35 +34,59 @@ class PackInstaller(private val fetcher: HttpFetcher, private val store: PackSto
         }
     }
 
+    private fun precheck(entry: PackEntry): InstallFailure? = when {
+        !entry.url.startsWith("https://") -> InstallFailure.INSECURE_URL
+        entry.compression != PackEntry.COMPRESSION_XZ && entry.compression != PackEntry.COMPRESSION_NONE -> InstallFailure.UNSUPPORTED
+        else -> null
+    }
+
+    private fun fetchAndVerify(entry: PackEntry, target: File, onProgress: (Long) -> Unit): InstallFailure? {
+        try {
+            fetcher.download(entry.url, target, onProgress)
+        } catch (_: IOException) {
+            return InstallFailure.NETWORK
+        }
+        return when {
+            entry.bytes > 0 && target.length() != entry.bytes -> InstallFailure.SIZE_MISMATCH
+            !Hashing.sha256Hex(target).equals(entry.sha256, ignoreCase = true) -> InstallFailure.CHECKSUM_MISMATCH
+            else -> null
+        }
+    }
+
     private fun unpack(entry: PackEntry, source: File, target: File): InstallFailure? {
         // A hostile or corrupt archive must not fill the disk: never write more than the manifest announces.
         val limit = if (entry.uncompressedBytes > 0) entry.uncompressedBytes else MAX_UNPACKED_BYTES
-        try {
-            val input: InputStream = if (entry.compression == PackEntry.COMPRESSION_XZ) {
-                XZInputStream(source.inputStream().buffered(), MAX_DICTIONARY_KB)
-            } else {
-                source.inputStream().buffered()
-            }
-            var total = 0L
-            input.use { stream ->
-                target.outputStream().use { output ->
-                    val buffer = ByteArray(BUFFER)
-                    while (true) {
-                        val read = stream.read(buffer)
-                        if (read < 0) break
-                        total += read
-                        if (total > limit) return InstallFailure.TOO_LARGE
-                        output.write(buffer, 0, read)
-                    }
-                }
-            }
-            if (entry.uncompressedBytes > 0 && total != entry.uncompressedBytes) return InstallFailure.SIZE_MISMATCH
+        val total = try {
+            openStream(entry, source).use { stream -> target.outputStream().use { copyLimited(stream, it, limit) } }
         } catch (_: IOException) {
             return InstallFailure.BAD_ARCHIVE
         }
-        val expected = entry.uncompressedSha256
-        if (expected != null && !Hashing.sha256Hex(target).equals(expected, ignoreCase = true)) return InstallFailure.CHECKSUM_MISMATCH
-        return null
+        return when {
+            total < 0 -> InstallFailure.TOO_LARGE
+            entry.uncompressedBytes > 0 && total != entry.uncompressedBytes -> InstallFailure.SIZE_MISMATCH
+            entry.uncompressedSha256 != null && !Hashing.sha256Hex(target).equals(entry.uncompressedSha256, ignoreCase = true) ->
+                InstallFailure.CHECKSUM_MISMATCH
+            else -> null
+        }
+    }
+
+    private fun openStream(entry: PackEntry, source: File): InputStream = if (entry.compression == PackEntry.COMPRESSION_XZ) {
+        XZInputStream(source.inputStream().buffered(), MAX_DICTIONARY_KB)
+    } else {
+        source.inputStream().buffered()
+    }
+
+    /** @return the number of bytes copied, or -1 when more than [limit] bytes would have been written. */
+    private fun copyLimited(input: InputStream, output: OutputStream, limit: Long): Long {
+        val buffer = ByteArray(BUFFER)
+        var total = 0L
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) return total
+            total += read
+            if (total > limit) return -1
+            output.write(buffer, 0, read)
+        }
     }
 
     private companion object {

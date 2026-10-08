@@ -2,6 +2,8 @@ package com.qtekfun.ultimatephone.core.datapacks
 
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -44,21 +46,21 @@ class HttpUrlFetcher(private val userAgent: String = "UltimatePhone") : HttpFetc
         val connection = open(url)
         try {
             if (connection.responseCode != HttpURLConnection.HTTP_OK) throw IOException("HTTP ${connection.responseCode}")
-            var written = 0L
-            connection.inputStream.use { input ->
-                target.outputStream().use { output ->
-                    val buffer = ByteArray(BUFFER)
-                    while (true) {
-                        val read = input.read(buffer)
-                        if (read < 0) break
-                        output.write(buffer, 0, read)
-                        written += read
-                        onProgress(written)
-                    }
-                }
-            }
+            connection.inputStream.use { input -> target.outputStream().use { output -> copy(input, output, onProgress) } }
         } finally {
             connection.disconnect()
+        }
+    }
+
+    private fun copy(input: InputStream, output: OutputStream, onProgress: (Long) -> Unit) {
+        val buffer = ByteArray(BUFFER)
+        var written = 0L
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            output.write(buffer, 0, read)
+            written += read
+            onProgress(written)
         }
     }
 

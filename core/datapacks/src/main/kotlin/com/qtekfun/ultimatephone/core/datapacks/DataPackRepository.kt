@@ -56,33 +56,47 @@ class DataPackRepository(
 
     fun refresh(): RefreshResult {
         val cached = cachedManifest()
-        val etag = etagFile.takeIf { it.exists() && cached != null }?.readText()
-        val body: ByteArray
-        val signature: String
-        val newEtag: String?
-        try {
-            when (val manifestResponse = fetcher.fetch(source.manifestUrl, etag)) {
-                Fetched.NotModified -> return cached?.let { RefreshResult.Ok(it, fromCache = true) } ?: RefreshResult.Offline(null)
-                is Fetched.Body -> {
-                    body = manifestResponse.bytes
-                    newEtag = manifestResponse.etag
-                }
-            }
-            val signatureResponse = fetcher.fetch(source.signatureUrl)
-            if (signatureResponse !is Fetched.Body) return RefreshResult.Offline(cached)
-            signature = signatureResponse.bytes.decodeToString()
+        val download = try {
+            download(etag = etagFile.takeIf { it.exists() && cached != null }?.readText())
         } catch (_: IOException) {
             return RefreshResult.Offline(cached)
         }
-        if (!verifier.verify(body, signature)) return RefreshResult.InvalidSignature
+        return when (download) {
+            Download.Unchanged -> cached?.let { RefreshResult.Ok(it, fromCache = true) } ?: RefreshResult.Offline(null)
+            Download.Missing -> RefreshResult.Offline(cached)
+            is Download.Fresh -> accept(download)
+        }
+    }
+
+    private sealed interface Download {
+        data object Unchanged : Download
+
+        data object Missing : Download
+
+        class Fresh(val body: ByteArray, val signature: String, val etag: String?) : Download
+    }
+
+    @Throws(IOException::class)
+    private fun download(etag: String?): Download {
+        val manifest = when (val response = fetcher.fetch(source.manifestUrl, etag)) {
+            Fetched.NotModified -> return Download.Unchanged
+            is Fetched.Body -> response
+        }
+        val signature = fetcher.fetch(source.signatureUrl) as? Fetched.Body ?: return Download.Missing
+        return Download.Fresh(manifest.bytes, signature.bytes.decodeToString(), manifest.etag)
+    }
+
+    /** Nothing is parsed, cached or used before the signature has been checked. */
+    private fun accept(fresh: Download.Fresh): RefreshResult {
+        if (!verifier.verify(fresh.body, fresh.signature)) return RefreshResult.InvalidSignature
         val manifest = try {
-            ManifestParser.parse(body)
+            ManifestParser.parse(fresh.body)
         } catch (e: ManifestException) {
             return RefreshResult.Malformed(e.message.orEmpty())
         }
-        manifestFile.writeBytes(body)
-        signatureFile.writeText(signature)
-        if (newEtag != null) etagFile.writeText(newEtag) else etagFile.delete()
+        manifestFile.writeBytes(fresh.body)
+        signatureFile.writeText(fresh.signature)
+        if (fresh.etag != null) etagFile.writeText(fresh.etag) else etagFile.delete()
         return RefreshResult.Ok(manifest, fromCache = false)
     }
 

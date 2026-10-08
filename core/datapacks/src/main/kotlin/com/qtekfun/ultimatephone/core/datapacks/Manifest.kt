@@ -50,22 +50,23 @@ object ManifestParser {
 
     /** @throws ManifestException when the bytes are not a manifest this version of the app understands. */
     fun parse(bytes: ByteArray): Manifest {
-        val manifest = try {
-            json.decodeFromString(Manifest.serializer(), bytes.decodeToString())
-        } catch (e: kotlinx.serialization.SerializationException) {
-            throw ManifestException("Malformed manifest: ${e.javaClass.simpleName}")
-        } catch (e: IllegalArgumentException) {
-            throw ManifestException("Malformed manifest: ${e.javaClass.simpleName}")
-        }
+        val manifest = decode(bytes)
         if (manifest.schema != Manifest.SUPPORTED_SCHEMA) throw ManifestException("Unsupported manifest schema ${manifest.schema}")
         val ids = manifest.packs.map { it.id }
         if (ids.size != ids.toSet().size) throw ManifestException("Duplicate pack ids")
         manifest.packs.forEach { PackIds.require(it.id) }
         return manifest
     }
+
+    // SerializationException is an IllegalArgumentException, so this also covers bad field values.
+    private fun decode(bytes: ByteArray): Manifest = try {
+        json.decodeFromString(Manifest.serializer(), bytes.decodeToString())
+    } catch (e: IllegalArgumentException) {
+        throw ManifestException("Malformed manifest", e)
+    }
 }
 
-class ManifestException(message: String) : Exception(message)
+class ManifestException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 /** Pack ids become file names, so only a conservative set of characters is accepted. */
 object PackIds {

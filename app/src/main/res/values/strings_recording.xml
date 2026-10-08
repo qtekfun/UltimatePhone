@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notifications and the announcement -->
+    <string name="recording_channel">Call recording</string>
+    <string name="recording_notification_title">Recording the call</string>
+    <string name="recording_notification_text">Tap to open the call. Stop ends the recording.</string>
+    <string name="recording_prompt_title">Recording did not start by itself</string>
+    <string name="recording_prompt_text">Android only lets the app start recording while the call screen is visible. Tap Record to start now.</string>
+    <string name="recording_announcement">This call is being recorded.</string>
+    <string name="recording_record">Record</string>
+    <string name="recording_stop">Stop</string>
+    <string name="recording_stop_description">Stop recording</string>
+    <string name="recording_dismiss">Dismiss</string>
+
+    <!-- Call screen -->
+    <string name="recording_indicator_description">Recording, %1$s</string>
+    <string name="recording_mic_warning_title">Microphone only</string>
+    <string name="recording_mic_warning_text">On this phone the app can only record your microphone. Turn on the speaker to capture the other person.</string>
+    <string name="recording_mic_warning_ok">Got it</string>
+    <string name="recording_error_setup">Recording is not set up. Open Settings, Call recording.</string>
+    <string name="recording_error_no_folder">Choose a recordings folder in Settings, Call recording.</string>
+    <string name="recording_error_permission">Allow the microphone in Settings, Call recording.</string>
+    <string name="recording_error_no_microphone">This phone has no usable microphone.</string>
+    <string name="recording_error_foreground">Android did not let the recording start in the background. Open the call screen and tap Record.</string>
+    <string name="recording_error_source">The microphone could not be opened. Another app may be using it.</string>
+    <string name="recording_error_storage">The recordings folder could not be written to.</string>
+    <string name="recording_error_no_audio">Nothing was recorded.</string>
+    <string name="recording_error_capture">The recording stopped because of an error.</string>
+
+    <!-- Settings > Call recording -->
+    <string name="recording_row_title">Call recording</string>
+    <string name="recording_row_summary">Record calls to a folder you choose</string>
+    <string name="recording_title">Call recording</string>
+    <string name="recording_back">Back</string>
+    <string name="recording_enable">Record calls</string>
+    <string name="recording_why_disabled">Recording is off.</string>
+    <string name="recording_why_legal">Read and accept the notice to turn recording on.</string>
+    <string name="recording_why_folder">Recording is off until you choose a folder for the recordings.</string>
+    <string name="recording_why_permission">Allow the microphone to be able to record.</string>
+    <string name="recording_why_no_microphone">This phone has no usable microphone, so calls cannot be recorded.</string>
+    <string name="recording_ready">Ready. Use Record on the call screen.</string>
+    <string name="recording_ready_auto">Ready. Use Record on the call screen, or let the app start by itself.</string>
+    <string name="recording_allow_microphone">Allow the microphone</string>
+
+    <string name="recording_legal_title">Before you record calls</string>
+    <string name="recording_legal_text">Recording a phone call may need the consent of the other person, depending on the country and the situation. In some places it is illegal to record someone without telling them. You are responsible for following the law where you and the other person are.\n\nYou can make the app say aloud that the call is being recorded.</string>
+    <string name="recording_legal_accept">I understand and accept</string>
+    <string name="recording_legal_cancel">Cancel</string>
+
+    <string name="recording_capability_title">What this phone can record</string>
+    <string name="recording_capability_unknown">Not checked yet. The first time you record a call, the app tests whether this phone lets it record the call line. If not, it records the microphone only.</string>
+    <string name="recording_capability_line">This phone lets the app record the call line, so both people are recorded.</string>
+    <string name="recording_capability_mic">On this phone the app can only record your microphone; use speaker to capture the other person.</string>
+    <string name="recording_capability_none">This phone has no usable microphone.</string>
+    <string name="recording_capability_recheck">Check again on the next recording</string>
+    <string name="recording_auto_note">Automatic recording needs the call screen to be visible on this version of Android. When it is not, a notification offers a Record button instead.</string>
+    <string name="recording_auto_blocked">This already happened on this phone: an automatic recording could not start in the background.</string>
+
+    <string name="recording_folder_title">Recordings folder</string>
+    <string name="recording_folder_none">No folder chosen.</string>
+    <string name="recording_folder_lost">The chosen folder is not available any more. Choose it again.</string>
+    <string name="recording_folder_choose">Choose folder</string>
+    <string name="recording_folder_change">Change folder</string>
+
+    <string name="recording_mode_title">Record automatically</string>
+    <string name="recording_mode_off">Only when I tap Record</string>
+    <string name="recording_mode_all">All calls</string>
+    <string name="recording_mode_unknown">Calls from numbers that are not in my contacts</string>
+    <string name="recording_mode_selected">Calls from numbers I choose</string>
+    <string name="recording_selected_manage">Choose numbers (%1$d)</string>
+    <string name="recording_selected_title">Numbers to record</string>
+    <string name="recording_selected_label">Phone number</string>
+    <string name="recording_selected_add">Add</string>
+    <string name="recording_selected_empty">No numbers yet.</string>
+    <string name="recording_selected_remove">Remove %1$s</string>
+    <string name="recording_selected_done">Done</string>
+
+    <string name="recording_format_title">File format</string>
+    <string name="recording_format_m4a">AAC in .m4a (plays everywhere)</string>
+    <string name="recording_format_ogg">Opus in .ogg (smaller files)</string>
+
+    <string name="recording_options_title">Options</string>
+    <string name="recording_contact_name">Put the contact name in file names</string>
+    <string name="recording_contact_name_summary">Off: file names only hold the date and the last three digits of the number.</string>
+    <string name="recording_auto_speaker">Turn on the speaker when recording</string>
+    <string name="recording_auto_speaker_summary">Needed to capture the other person when only the microphone can be recorded.</string>
+    <string name="recording_announce">Announce the recording</string>
+    <string name="recording_announce_summary">Says aloud that the call is being recorded. The other person hears it only with the speaker on.</string>
+
+    <string name="recording_test_title">Test</string>
+    <string name="recording_test">Test the microphone</string>
+    <string name="recording_testing">Recording for 3 seconds. Say something.</string>
+    <string name="recording_test_ok">The microphone works. Loudest sound: %1$d of 32767.</string>
+    <string name="recording_test_silent">The microphone started but captured only silence (peak 0).</string>
+    <string name="recording_test_failed">The microphone could not be opened.</string>
+    <string name="recording_test_busy">A recording is in progress.</string>
+
+    <!-- Recordings list -->
+    <string name="recording_list_row">Recordings</string>
+    <string name="recording_list_row_summary">Play, share, rename or delete</string>
+    <string name="recording_list_title">Recordings</string>
+    <string name="recording_list_empty">No recordings yet.</string>
+    <string name="recording_list_no_folder">Choose a recordings folder first.</string>
+    <string name="recording_item_incoming">Incoming · %1$s</string>
+    <string name="recording_item_outgoing">Outgoing · %1$s</string>
+    <string name="recording_item_subtitle">%1$s · %2$s · %3$s</string>
+    <string name="recording_item_subtitle_no_duration">%1$s · %2$s</string>
+    <string name="recording_play">Play</string>
+    <string name="recording_pause">Pause</string>
+    <string name="recording_share">Share</string>
+    <string name="recording_share_chooser">Share recording</string>
+    <string name="recording_rename">Rename</string>
+    <string name="recording_delete">Delete</string>
+    <string name="recording_position">Position</string>
+    <string name="recording_player_time">%1$s of %2$s</string>
+    <string name="recording_play_failed">This recording could not be played.</string>
+    <string name="recording_share_failed">No app can receive this recording.</string>
+    <string name="recording_cancel">Cancel</string>
+    <string name="recording_delete_title">Delete this recording?</string>
+    <string name="recording_delete_message">%1$s will be deleted for good.</string>
+    <string name="recording_delete_failed">The recording could not be deleted.</string>
+    <string name="recording_rename_title">Rename recording</string>
+    <string name="recording_rename_label">Name</string>
+    <string name="recording_rename_confirm">Rename</string>
+    <string name="recording_rename_failed">The folder did not allow renaming this recording.</string>
+</resources>

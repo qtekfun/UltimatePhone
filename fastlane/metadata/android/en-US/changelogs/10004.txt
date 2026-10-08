@@ -1,0 +1,1 @@
+Faster start, better accessibility (TalkBack, large text) and reviewed translations.

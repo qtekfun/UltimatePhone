@@ -3,6 +3,12 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.0-rc4]
+
+- Faster start: heavy work moved off the main thread; the first call after opening the app is still handled.
+- Accessibility: TalkBack reads rows, keys and states properly; the call screen and keypad work with large text; recording and spam states no longer rely on colour alone.
+- Spanish and English wording reviewed, plurals fixed.
+
 ## [0.1.0-rc3]
 
 - Business names on the keypad now work: the data packs use an index that Android supports (the previous one needed a SQLite module Android does not include). Data packs are updated automatically.

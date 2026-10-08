@@ -1,0 +1,1 @@
+Fixes a crash on first start and refines the launcher icon.

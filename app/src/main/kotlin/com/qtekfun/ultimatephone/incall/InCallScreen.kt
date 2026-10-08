@@ -111,7 +111,7 @@ private data class CallLayout(val landscape: Boolean, val compact: Boolean) {
 }
 
 @Composable
-fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: () -> Unit) {
+fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: () -> Unit, onWhyFlagged: (String) -> Unit = {}) {
     val calls by viewModel.calls.collectAsStateWithLifecycle()
     val audio by viewModel.audio.collectAsStateWithLifecycle()
     val spam by viewModel.spam.collectAsStateWithLifecycle()
@@ -153,6 +153,7 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                             onSwap = viewModel::swap,
                             onNotSpam = { viewModel.notSpam(primary) },
                             onMarkSpam = { viewModel.markSpam(primary) },
+                            onWhyFlagged = primary.number?.let { number -> { onWhyFlagged(number) } },
                             onDtmfDown = { viewModel.dtmfDown(primary, it) },
                             onDtmfUp = { viewModel.dtmfUp(primary) },
                             recordingStatus = {
@@ -215,6 +216,7 @@ private fun InfoPane(
     onSwap: () -> Unit,
     onNotSpam: () -> Unit,
     onMarkSpam: () -> Unit,
+    onWhyFlagged: (() -> Unit)?,
     onDtmfDown: (Char) -> Unit,
     onDtmfUp: () -> Unit,
     recordingStatus: @Composable () -> Unit
@@ -226,7 +228,7 @@ private fun InfoPane(
         recordingStatus()
         if (other != null) OtherCallCard(other, onSwap = onSwap)
         CallHeader(call, layout, showAvatar = !showKeypad)
-        CallSpamPanel(ui = spam, ringing = call.status == CallStatus.RINGING, onNotSpam = onNotSpam, onMarkSpam = onMarkSpam)
+        CallSpamPanel(ui = spam, ringing = call.status == CallStatus.RINGING, onNotSpam = onNotSpam, onMarkSpam = onMarkSpam, onWhyFlagged = onWhyFlagged)
         if (showKeypad) {
             Spacer(Modifier.size(16.dp))
             DtmfKeypad(onDown = onDtmfDown, onUp = onDtmfUp)

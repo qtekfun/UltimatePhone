@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.core.designsystem.UltimatePhoneTheme
 import com.qtekfun.ultimatephone.navigation.AppNavHost
+import com.qtekfun.ultimatephone.navigation.WhyFlaggedLink
 import com.qtekfun.ultimatephone.settings.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -21,15 +22,17 @@ class MainActivity : ComponentActivity() {
     lateinit var settings: SettingsRepository
 
     private var dialNumber by mutableStateOf<String?>(null)
+    private var whyNumber by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         dialNumber = numberFrom(intent)
+        whyNumber = WhyFlaggedLink.consume(intent)
         setContent {
             val prefs by settings.settings.collectAsStateWithLifecycle()
             UltimatePhoneTheme(mode = prefs.themeMode) {
-                AppNavHost(initialDialNumber = dialNumber)
+                AppNavHost(initialDialNumber = dialNumber, whyFlaggedNumber = whyNumber, onWhyFlaggedHandled = { whyNumber = null })
             }
         }
     }
@@ -37,6 +40,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         dialNumber = numberFrom(intent)
+        WhyFlaggedLink.consume(intent)?.let { whyNumber = it }
     }
 
     /** `tel:` links and the system "dial" action carry the number the user wants to call. */

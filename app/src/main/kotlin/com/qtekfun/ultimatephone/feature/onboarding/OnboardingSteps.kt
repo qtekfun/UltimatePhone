@@ -37,6 +37,7 @@ import com.qtekfun.ultimatephone.data.PackCatalog
 import com.qtekfun.ultimatephone.data.RegionGroup
 import com.qtekfun.ultimatephone.data.SizeFormat
 import com.qtekfun.ultimatephone.feature.data.errorText
+import com.qtekfun.ultimatephone.feature.sync.NextcloudSetupContent
 
 // ---- Data regions ---------------------------------------------------------------------------------------------------
 
@@ -105,10 +106,16 @@ private fun SelectionTotal(state: OnboardingUiState) {
 // ---- Nextcloud ------------------------------------------------------------------------------------------------------
 
 @Composable
-internal fun NextcloudStep(onSetUp: (() -> Unit)?, onLater: () -> Unit) {
+internal fun NextcloudStep(formOpen: Boolean, onOpenForm: () -> Unit, onCloseForm: () -> Unit, onConnected: () -> Unit, onLater: () -> Unit) {
     StepTitle(R.string.onboarding_nextcloud_title, R.string.onboarding_nextcloud_body)
-    if (onSetUp != null) Button(onClick = onSetUp) { Text(stringResource(R.string.onboarding_nextcloud_now)) }
-    OutlinedButton(onClick = onLater) { Text(stringResource(R.string.onboarding_nextcloud_later)) }
+    if (formOpen) {
+        // The form tests the connection, saves the account and turns sync on. Its "Not now" only folds it away, so the step
+        // still offers "Set up later" and the usual skip.
+        NextcloudSetupContent(onDone = onConnected, onSkip = onCloseForm, scrollable = false)
+    } else {
+        Button(onClick = onOpenForm, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.onboarding_nextcloud_now)) }
+    }
+    OutlinedButton(onClick = onLater, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.onboarding_nextcloud_later)) }
 }
 
 // ---- Battery, auto-start, pop-ups and full-screen calls -----------------------------------------------------------------

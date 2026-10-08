@@ -1,5 +1,6 @@
 package com.qtekfun.ultimatephone.incall
 
+import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.activity.viewModels
 import com.qtekfun.ultimatephone.MainActivity
 import com.qtekfun.ultimatephone.core.designsystem.UltimatePhoneTheme
 import com.qtekfun.ultimatephone.core.telecom.InCallIntents
+import com.qtekfun.ultimatephone.navigation.WhyFlaggedLink
 import dagger.hilt.android.AndroidEntryPoint
 
 /** The call screen. Shown over the lock screen for incoming calls; closes itself shortly after the last call ends. */
@@ -25,7 +27,8 @@ class InCallActivity : ComponentActivity() {
                 InCallScreen(
                     viewModel = viewModel,
                     onAddCall = { startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) },
-                    onFinished = { finish() }
+                    onFinished = { finish() },
+                    onWhyFlagged = ::openWhyFlagged
                 )
             }
         }
@@ -35,6 +38,25 @@ class InCallActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handle(intent)
+    }
+
+    /**
+     * Opens the explanation in the main task; the call carries on. On a locked phone the system asks for the unlock first and
+     * the explanation opens only once it succeeds, so nothing about the number is shown to someone who cannot unlock.
+     */
+    private fun openWhyFlagged(number: String) {
+        val open = { startActivity(WhyFlaggedLink.intent(this, number)) }
+        val keyguard = getSystemService(KeyguardManager::class.java)
+        if (keyguard != null && keyguard.isKeyguardLocked) {
+            keyguard.requestDismissKeyguard(
+                this,
+                object : KeyguardManager.KeyguardDismissCallback() {
+                    override fun onDismissSucceeded() = open()
+                }
+            )
+        } else {
+            open()
+        }
     }
 
     private fun handle(intent: Intent) {

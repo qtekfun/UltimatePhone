@@ -1,10 +1,10 @@
-import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.ktlint)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.licensee)
 }
 
@@ -74,6 +74,7 @@ android {
     }
 
     buildFeatures {
+        compose = true
         buildConfig = true
     }
 
@@ -99,21 +100,6 @@ kotlin {
     }
 }
 
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    source.setFrom("src/main/kotlin", "src/test/kotlin")
-}
-
-tasks.withType<Detekt>().configureEach {
-    jvmTarget = "17"
-}
-
-ktlint {
-    version.set(libs.versions.ktlint)
-}
-
 // Only free licenses may ship in the APK (F-Droid). Anything else fails the build.
 licensee {
     allow("Apache-2.0")
@@ -121,9 +107,26 @@ licensee {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:phonenumber"))
+    implementation(project(":core:telecom"))
+    implementation(project(":core:contacts"))
+    implementation(project(":core:calllog"))
+
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.coil.compose)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
 }

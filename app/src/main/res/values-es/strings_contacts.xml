@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contacts_title">Contactos</string>
+    <string name="contacts_search_hint">Buscar contactos</string>
+    <string name="contacts_search_clear">Borrar búsqueda</string>
+    <string name="contacts_add">Nuevo contacto</string>
+    <string name="contacts_favorites">Favoritos</string>
+    <string name="contacts_empty">Aún no hay contactos</string>
+    <string name="contacts_no_results">Ningún contacto coincide con la búsqueda</string>
+    <string name="contacts_index_description">Índice alfabético. Desliza hacia arriba o abajo para saltar a una letra.</string>
+    <string name="contacts_permission_rationale">Permite el acceso a tus contactos para verlos, buscarlos y editarlos.</string>
+    <string name="contacts_permission_button">Permitir acceso</string>
+
+    <string name="contact_back">Atrás</string>
+    <string name="contact_call">Llamar a %1$s</string>
+    <string name="contact_email_to">Enviar un correo a %1$s</string>
+    <string name="contact_star">Añadir a favoritos</string>
+    <string name="contact_unstar">Quitar de favoritos</string>
+    <string name="contact_edit">Editar</string>
+    <string name="contact_share">Compartir</string>
+    <string name="contact_delete">Eliminar</string>
+    <string name="contact_delete_title">¿Eliminar contacto?</string>
+    <string name="contact_delete_message">%1$s se eliminará de este teléfono y de la cuenta con la que se sincroniza.</string>
+    <string name="contact_cancel">Cancelar</string>
+    <string name="contact_not_found">Este contacto ya no existe</string>
+    <string name="contact_share_failed">Ninguna aplicación puede recibir este contacto</string>
+    <string name="contact_section_phones">Teléfonos</string>
+    <string name="contact_section_emails">Correos electrónicos</string>
+    <string name="contact_section_birthday">Cumpleaños</string>
+    <string name="contact_section_notes">Notas</string>
+    <string name="contact_section_account">Cuenta</string>
+    <string name="contact_account_local">Dispositivo (sin sincronizar)</string>
+    <string name="contact_account_format">%1$s (%2$s)</string>
+    <string name="contact_unnamed">Contacto sin nombre</string>
+
+    <string name="edit_title_new">Nuevo contacto</string>
+    <string name="edit_title_edit">Editar contacto</string>
+    <string name="edit_close">Cerrar sin guardar</string>
+    <string name="edit_save">Guardar</string>
+    <string name="edit_name">Nombre</string>
+    <string name="edit_organization">Organización</string>
+    <string name="edit_phone">Teléfono</string>
+    <string name="edit_email">Correo electrónico</string>
+    <string name="edit_notes">Notas</string>
+    <string name="edit_add_phone">Añadir teléfono</string>
+    <string name="edit_add_email">Añadir correo</string>
+    <string name="edit_remove_phone">Quitar teléfono</string>
+    <string name="edit_remove_email">Quitar correo</string>
+    <string name="edit_type_phone">Tipo de teléfono: %1$s</string>
+    <string name="edit_type_email">Tipo de correo: %1$s</string>
+    <string name="edit_birthday_add">Añadir cumpleaños</string>
+    <string name="edit_birthday_remove">Quitar cumpleaños</string>
+    <string name="edit_birthday_ok">Aceptar</string>
+    <string name="edit_account">Guardar en la cuenta</string>
+    <string name="edit_error_required">Introduce un nombre o un teléfono</string>
+    <string name="edit_error_save">No se pudo guardar el contacto</string>
+
+    <string name="label_mobile">Móvil</string>
+    <string name="label_home">Casa</string>
+    <string name="label_work">Trabajo</string>
+    <string name="label_main">Principal</string>
+    <string name="label_other">Otro</string>
+</resources>

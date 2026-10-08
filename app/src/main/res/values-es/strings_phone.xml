@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_close">Cerrar</string>
+
+    <string name="dialer_call">Llamar</string>
+    <string name="dialer_delete">Borrar dígito</string>
+    <string name="dialer_sim_slot">SIM %1$d</string>
+    <string name="phone_role_banner_title">Haz de UltimatePhone tu app de teléfono</string>
+    <string name="phone_role_banner_body">Para recibir y hacer llamadas con esta app, elígela como app de teléfono predeterminada.</string>
+    <string name="phone_role_banner_action">Establecer como predeterminada</string>
+
+    <string name="incall_call_ended">Llamada finalizada</string>
+    <string name="incall_incoming">Llamada entrante</string>
+    <string name="incall_calling">Llamando…</string>
+    <string name="incall_on_hold">En espera · %1$s</string>
+    <string name="incall_conference">Conferencia · %1$d personas</string>
+    <string name="incall_waiting">En espera: %1$s</string>
+    <string name="incall_held">Retenida: %1$s</string>
+    <string name="incall_swap">Cambiar</string>
+    <string name="incall_answer">Contestar</string>
+    <string name="incall_decline">Rechazar</string>
+    <string name="incall_mute">Silenciar</string>
+    <string name="incall_keypad">Teclado</string>
+    <string name="incall_audio">Audio</string>
+    <string name="incall_hold">Retener</string>
+    <string name="incall_add_call">Añadir llamada</string>
+    <string name="incall_merge">Unir</string>
+    <string name="incall_end_call">Colgar</string>
+    <string name="incall_route_earpiece">Teléfono</string>
+    <string name="incall_route_speaker">Altavoz</string>
+    <string name="incall_route_bluetooth">Bluetooth</string>
+    <string name="incall_route_headset">Auriculares</string>
+
+    <string name="settings_phone_app">App de teléfono</string>
+    <string name="settings_phone_app_active">UltimatePhone es tu app de teléfono predeterminada</string>
+    <string name="settings_phone_app_inactive">UltimatePhone no es tu app de teléfono predeterminada</string>
+    <string name="settings_phone_app_unavailable">Este dispositivo no ofrece el rol de app de teléfono.</string>
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_theme_system">Según el sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_default_sim">SIM predeterminada para llamadas</string>
+    <string name="settings_sim_ask">Preguntar siempre</string>
+    <string name="settings_region">País para los números</string>
+    <string name="settings_region_help">Los números sin prefijo de país se interpretan como de este país.</string>
+    <string name="settings_region_auto">(según la SIM)</string>
+    <string name="settings_region_auto_option">Automático (según la SIM)</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_version">Versión %1$s</string>
+    <string name="settings_diagnostics">Mostrar capacidades del dispositivo</string>
+</resources>

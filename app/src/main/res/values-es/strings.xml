@@ -1,59 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">UltimatePhone Spike</string>
-    <string name="channel_incoming">Llamadas entrantes</string>
-    <string name="channel_ongoing">Llamada en curso</string>
-    <string name="incoming_call">Llamada entrante %1$s</string>
-    <string name="ongoing_call">Llamada con %1$s</string>
-    <string name="no_call">Sin llamada</string>
-    <string name="spam_warning">Coincide con la lista de prueba: %1$s</string>
-
-    <string name="section_roles">Roles y permisos</string>
-    <string name="btn_role_dialer">Pedir rol de app de teléfono</string>
-    <string name="btn_role_screening">Pedir rol de filtrado de llamadas</string>
-    <string name="btn_permissions">Conceder permisos</string>
-    <string name="btn_default_apps">Abrir ajustes de apps predeterminadas</string>
-    <string name="btn_battery">Ajustes de optimización de batería</string>
-    <string name="btn_probe">Ejecutar sondeo de capacidades</string>
-
-    <string name="section_screening">Lista de prueba de filtrado</string>
-    <string name="screening_hint">Los números de esta lista se tratan antes de que suene la llamada. Se compara por las últimas cifras.</string>
-    <string name="hint_rule_number">Número o últimas cifras (6 o más)</string>
-    <string name="btn_add_rule">Añadir regla</string>
-    <string name="btn_clear_rules">Borrar reglas</string>
-    <string name="no_rules">Sin reglas</string>
-
-    <string name="section_dial">Marcar</string>
-    <string name="hint_dial_number">Número a llamar</string>
-    <string name="btn_refresh_sims">Actualizar lista de SIM</string>
-    <string name="btn_dial">Llamar</string>
-    <string name="no_sims">Sin cuentas SIM (concede el permiso de teléfono)</string>
-
-    <string name="section_data">Historial y contactos</string>
-    <string name="btn_read_calllog">Leer últimas llamadas</string>
-    <string name="btn_contacts_count">Contar contactos</string>
-    <string name="btn_contact_create">Crear contacto de prueba</string>
-    <string name="btn_contact_delete">Borrar contactos de prueba</string>
-
-    <string name="section_recording">Grabación</string>
-    <string name="recording_hint">Inicia una fuente, habla unos segundos, detén y lee el registro. Prueba con y sin altavoz.</string>
-    <string name="btn_record">Grabar: %1$s</string>
-    <string name="btn_record_stop">Detener grabación</string>
-    <string name="btn_probe_sources">Sondear todas las fuentes de audio (sin llamada)</string>
-
-    <string name="section_background">Segundo plano</string>
-    <string name="btn_bg_daily">Programar tarea diaria (solo Wi-Fi)</string>
-    <string name="btn_bg_fast">Programar tarea de 15 minutos (cualquier red)</string>
-    <string name="btn_bg_once">Ejecutar una tarea ahora</string>
-    <string name="btn_bg_cancel">Cancelar tareas programadas</string>
-
-    <string name="section_log">Registro de eventos</string>
-    <string name="btn_log_copy">Copiar registro</string>
-    <string name="btn_log_clear">Borrar registro</string>
-
-    <string name="btn_answer">Contestar</string>
-    <string name="btn_reject">Rechazar</string>
-    <string name="btn_hangup">Colgar</string>
-    <string name="btn_speaker">Altavoz sí/no</string>
-    <string name="btn_mute">Silenciar sí/no</string>
+    <string name="app_name">UltimatePhone</string>
+    <string name="nav_dialer">Teclado</string>
+    <string name="nav_recents">Recientes</string>
+    <string name="nav_contacts">Contactos</string>
+    <string name="nav_settings">Ajustes</string>
 </resources>

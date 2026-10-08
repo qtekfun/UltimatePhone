@@ -5,7 +5,7 @@
     <!-- A phone app; the capability probe copes with devices that have no telephony. -->
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
-    <!-- Phase 0 spike. Every permission is requested in context from the spike screen. -->
+    <!-- Every runtime permission is requested in context, with an explanation. -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
@@ -14,14 +14,14 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Data packs, spam sources and the user's WebDAV only. Never used during a call. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".spike.SpikeApp"
+        android:name=".UltimatePhoneApp"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -31,14 +31,15 @@
         android:theme="@style/Theme.UltimatePhone">
 
         <activity
-            android:name=".spike.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Required for the dialer role. -->
+            <!-- Required for the dialer role, and what other apps use to hand us a number. -->
             <intent-filter>
                 <action android:name="android.intent.action.DIAL" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -49,38 +50,31 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="tel" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tel" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.CALL_BUTTON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
+        <!-- The call screen, shown over the lock screen. Opened by the in-call service through this action. -->
         <activity
-            android:name=".spike.InCallActivity"
+            android:name=".incall.InCallActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:showWhenLocked="true"
-            android:turnScreenOn="true" />
-
-        <service
-            android:name=".spike.SpikeInCallService"
-            android:exported="true"
-            android:permission="android.permission.BIND_INCALL_SERVICE">
-            <meta-data
-                android:name="android.telecom.IN_CALL_SERVICE_UI"
-                android:value="true" />
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity="">
             <intent-filter>
-                <action android:name="android.telecom.InCallService" />
+                <action android:name="com.qtekfun.ultimatephone.action.IN_CALL" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </service>
-
-        <service
-            android:name=".spike.SpikeScreeningService"
-            android:exported="true"
-            android:permission="android.permission.BIND_SCREENING_SERVICE">
-            <intent-filter>
-                <action android:name="android.telecom.CallScreeningService" />
-            </intent-filter>
-        </service>
-
-        <receiver
-            android:name=".spike.CallActionReceiver"
-            android:exported="false" />
+        </activity>
     </application>
 </manifest>

@@ -9,6 +9,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,6 +30,10 @@ fun AppNavHost(initialDialNumber: String?) {
     val roleViewModel: RoleViewModel = hiltViewModel()
     val roleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     val requestPhoneRole = { roleViewModel.phoneRoleIntent()?.let { roleLauncher.launch(it) } ?: Unit }
+    // A new tel: link while the app is already open must reach the keypad too, not only the first one.
+    LaunchedEffect(initialDialNumber) {
+        if (!initialDialNumber.isNullOrBlank()) navController.openDialer(initialDialNumber)
+    }
     val backStack by navController.currentBackStackEntryAsState()
     val hierarchy = backStack?.destination?.hierarchy
     Scaffold(

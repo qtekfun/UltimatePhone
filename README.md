@@ -9,10 +9,11 @@ warns you before you pick up. No phone number leaves the device, except towards 
 - Kotlin, Jetpack Compose, Material 3 Expressive. App in English and Spanish.
 - GPL-3.0-or-later. Business and spam data live in [UltimatePhone-data](https://github.com/qtekfun/UltimatePhone-data).
 
-**Status: Phase 0.** Only a spike app exists, to measure on real phones what documentation cannot tell
-(roles, call screen, screening, recording). See [`docs/spec/05-fase0-spike-oppo.md`](docs/spec/05-fase0-spike-oppo.md) and
-[`docs/spec/spike-results.md`](docs/spec/spike-results.md). The specification lives in [`docs/spec/`](docs/spec/README.md)
-(written in Spanish), deviations from it in [`docs/spec/DEVIATIONS.md`](docs/spec/DEVIATIONS.md).
+**Status: Phase 1 (phone and contacts).** Keypad with contact search and SIM choice, call screen, call history, contacts
+and settings work on paper and in unit tests; nothing is tested on a device yet. The spam engine comes next. The
+specification lives in [`docs/spec/`](docs/spec/README.md) (written in Spanish), deviations from it in
+[`docs/spec/DEVIATIONS.md`](docs/spec/DEVIATIONS.md), and the Phase 0 measurements in
+[`docs/spec/spike-results.md`](docs/spec/spike-results.md).
 
 ## Build
 

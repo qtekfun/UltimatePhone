@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="telecom_channel_incoming">Incoming calls</string>
+    <string name="telecom_channel_ongoing">Ongoing call</string>
+    <string name="telecom_incoming_call">Incoming call</string>
+    <string name="telecom_ongoing_call">Ongoing call</string>
+    <string name="telecom_hang_up">Hang up</string>
+</resources>

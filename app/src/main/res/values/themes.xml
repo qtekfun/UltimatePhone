@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.UltimatePhone" parent="@android:style/Theme.DeviceDefault.DayNight" />
+    <!-- Compose draws everything; this only avoids a flash of the wrong colour and the platform action bar. -->
+    <style name="Theme.UltimatePhone" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>

@@ -7,7 +7,6 @@
     <string name="contacts_favorites">Favoritos</string>
     <string name="contacts_empty">Aún no hay contactos</string>
     <string name="contacts_no_results">Ningún contacto coincide con la búsqueda</string>
-    <string name="contacts_index_description">Índice alfabético. Desliza hacia arriba o abajo para saltar a una letra.</string>
     <string name="contacts_permission_rationale">Permite el acceso a tus contactos para verlos, buscarlos y editarlos.</string>
     <string name="contacts_permission_button">Permitir acceso</string>
 
@@ -23,7 +22,7 @@
     <string name="contact_delete_message">%1$s se eliminará de este teléfono y de la cuenta con la que se sincroniza.</string>
     <string name="contact_cancel">Cancelar</string>
     <string name="contact_not_found">Este contacto ya no existe</string>
-    <string name="contact_share_failed">Ninguna aplicación puede recibir este contacto</string>
+    <string name="contact_share_failed">Ninguna app puede recibir este contacto</string>
     <string name="contact_section_phones">Teléfonos</string>
     <string name="contact_section_emails">Correos electrónicos</string>
     <string name="contact_section_birthday">Cumpleaños</string>

@@ -10,3 +10,5 @@ build/
 .DS_Store
 .kotlin/
 captures/
+core.[0-9]*
+.cxx/

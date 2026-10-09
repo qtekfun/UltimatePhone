@@ -209,7 +209,7 @@ fun RadioRow(title: String, selected: Boolean, onClick: () -> Unit, modifier: Mo
 @Composable
 fun <T> SegmentedChoice(
     options: List<T>,
-    selected: T,
+    selected: T?,
     onSelected: (T) -> Unit,
     label: @Composable (T) -> String,
     modifier: Modifier = Modifier,

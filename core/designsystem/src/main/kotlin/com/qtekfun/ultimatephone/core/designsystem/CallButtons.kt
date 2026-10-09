@@ -101,7 +101,8 @@ private val ActionCornerOn = 22.dp
 /**
  * A round tonal action of the call screen (mute, hold, keypad, speaker, record, add call) with a label underneath.
  *
- * - [checked] null: a one-shot action (add call); it is a plain button.
+ * - [checked] null: a one-shot action (add call); it is a plain button. [active] makes it look "on" (filled, rounded square)
+ *   without being an on/off control for TalkBack: the record button and the audio route use it.
  * - [checked] true/false: an on/off control. On is filled with the primary colour and the button morphs from a circle to a
  *   rounded square, so the state is visible without relying on colour only; [stateDescription] ("On"/"Off") is what
  *   TalkBack says. The change is animated unless motion is reduced.
@@ -117,11 +118,12 @@ fun CallActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     checked: Boolean? = null,
+    active: Boolean = checked == true,
     enabled: Boolean = true,
     stateDescription: String? = null,
     size: Dp = 68.dp
 ) {
-    val on = checked == true
+    val on = active
     val scheme = MaterialTheme.colorScheme
     val container by animateColorAsState(if (on) scheme.primary else scheme.surfaceContainerHighest, motionEffectsSpec(), label = "actionContainer")
     val content by animateColorAsState(if (on) scheme.onPrimary else scheme.onSurface, motionEffectsSpec(), label = "actionContent")

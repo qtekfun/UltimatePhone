@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ajustes > Apariencia -->
+    <string name="design_system_colors_title">Usar los colores del sistema</string>
+    <string name="design_system_colors_summary">Sigue los colores de tu fondo de pantalla (Material You) en lugar del verde azulado de la app.</string>
+</resources>

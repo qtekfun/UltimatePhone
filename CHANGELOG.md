@@ -3,6 +3,12 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.2]
+
+- Updated the HTTP library used for Nextcloud sync (OkHttp 4.12 to 5.5).
+- Dependabot now proposes dependency and GitHub Actions updates every week, grouped by family.
+- Fixed an intermittent unit-test failure; no change in how the app behaves.
+
 ## [0.1.1]
 
 - New look: a brand palette (deep teal and mint; system colours are an option in Settings), grouped settings lists, large title bars, a redesigned keypad and call screens (bigger End call, pulsing ring while ringing), a step-by-step setup guide and consistent screens everywhere.

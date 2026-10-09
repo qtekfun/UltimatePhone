@@ -16,8 +16,8 @@ Repo: https://github.com/qtekfun/UltimatePhone.git
 Binaries: https://github.com/qtekfun/UltimatePhone/releases/download/v%v/UltimatePhone-%v.apk
 
 Builds:
-  - versionName: 0.1.1
-    versionCode: 10199
+  - versionName: 0.1.2
+    versionCode: 10299
     commit: TODO_RELEASE_TAG_COMMIT
     subdir: app
     sudo:
@@ -32,5 +32,5 @@ AllowedAPKSigningKeys: 5aec737a127944f96e5bde920b83d392c02765df823e827cd3eb0de5a
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$
-CurrentVersion: 0.1.1
-CurrentVersionCode: 10199
+CurrentVersion: 0.1.2
+CurrentVersionCode: 10299

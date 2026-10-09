@@ -85,6 +85,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    testOptions {
+        unitTests {
+            all {
+                // Use the standard service loader so the test-only main dispatcher in src/test/resources is found
+                // (see SafeMainDispatcherFactory); the fast loader only knows Android's own factory.
+                it.systemProperty("kotlinx.coroutines.fast.service.loader", "false")
+            }
+        }
+    }
+
     lint {
         abortOnError = true
         checkReleaseBuilds = true

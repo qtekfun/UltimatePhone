@@ -114,6 +114,27 @@ private fun EmptyStatePreview() = Themed(false) {
     EmptyState(Icons.Filled.Contacts, "No contacts yet", "Add a contact and it will show up here.", action = UiAction("Add contact") {})
 }
 
+@Composable
+private fun GroupedListSample() {
+    var query by remember { mutableStateOf("") }
+    Column(Modifier.padding(vertical = Spacing.Medium)) {
+        SearchPill(value = query, onValueChange = { query = it }, placeholder = "Search", clearLabel = "Clear")
+        listOf("Ada Lovelace", "Alan Turing", "Grace Hopper").forEachIndexed { index, name ->
+            GroupedItem(index = index, count = 3) {
+                SettingsRow(title = name, summary = "Mobile", icon = Icons.Filled.Contacts, onClick = {})
+            }
+        }
+    }
+}
+
+@Preview(name = "Grouped list light", showBackground = true)
+@Composable
+private fun GroupedListLightPreview() = Themed(false) { GroupedListSample() }
+
+@Preview(name = "Grouped list dark", showBackground = true)
+@Composable
+private fun GroupedListDarkPreview() = Themed(true) { GroupedListSample() }
+
 @Preview(name = "Screen scaffold", showBackground = true)
 @Composable
 private fun ScaffoldPreview() = Themed(false) {

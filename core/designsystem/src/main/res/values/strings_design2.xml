@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Strings used by the shared components added for the screen redesign. -->
+    <string name="design2_permission_title">Permission needed</string>
+</resources>

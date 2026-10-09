@@ -2,6 +2,16 @@ package com.qtekfun.ultimatephone.navigation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -15,8 +25,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,12 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.qtekfun.ultimatephone.core.designsystem.LocalReduceMotion
 import com.qtekfun.ultimatephone.feature.contacts.contactsGraph
 import com.qtekfun.ultimatephone.feature.dialer.dialerGraph
 import com.qtekfun.ultimatephone.feature.onboarding.OnboardingGateViewModel
@@ -78,7 +92,7 @@ private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, o
     Scaffold(
         bottomBar = {
             if (!inSetupGuide) {
-                NavigationBar {
+                NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
                     TopLevelDestination.entries.forEach { destination ->
                         NavigationBarItem(
                             selected = hierarchy?.any { it.route?.startsWith(destination.route) == true } == true,
@@ -90,7 +104,12 @@ private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, o
                                 }
                             },
                             icon = { Icon(destination.icon, contentDescription = null) },
-                            label = { Text(stringResource(destination.label)) }
+                            label = { Text(stringResource(destination.label), style = MaterialTheme.typography.labelMedium) },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                selectedTextColor = MaterialTheme.colorScheme.onSurface
+                            )
                         )
                     }
                 }
@@ -112,10 +131,15 @@ private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, o
                 )
                 .imePadding()
         }
+        val reduceMotion = LocalReduceMotion.current
         NavHost(
             navController = navController,
             startDestination = dialerRoute(initialDialNumber),
-            modifier = containerInsets
+            modifier = containerInsets,
+            enterTransition = { if (reduceMotion) EnterTransition.None else enterFor(forward = true) },
+            exitTransition = { if (reduceMotion) ExitTransition.None else exitFor(forward = true) },
+            popEnterTransition = { if (reduceMotion) EnterTransition.None else enterFor(forward = false) },
+            popExitTransition = { if (reduceMotion) ExitTransition.None else exitFor(forward = false) }
         ) {
             dialerGraph(navController, requestPhoneRole)
             recentsGraph(navController)
@@ -124,4 +148,34 @@ private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, o
             composable(ONBOARDING_ROUTE) { OnboardingRoute(onFinished = { navController.popBackStack() }) }
         }
     }
+}
+
+// ---- Transitions ---------------------------------------------------------------------------------------------------------
+
+private const val FADE_IN_MS = 210
+private const val FADE_IN_DELAY_MS = 90
+private const val FADE_OUT_MS = 90
+private const val SLIDE_MS = 300
+private const val SLIDE_DIVISOR = 10
+private const val TAB_START_SCALE = 0.96f
+
+/** The top-level graph a destination belongs to, or null (the setup guide). */
+private fun NavBackStackEntry.topLevelRoute(): String? =
+    destination.hierarchy.mapNotNull { it.route }.firstOrNull { route -> TopLevelDestination.entries.any { it.route == route } }
+
+/** Switching between tabs fades through; going deeper or back inside a tab slides a little and fades. */
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.switchesTab(): Boolean = initialState.topLevelRoute() != targetState.topLevelRoute()
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.enterFor(forward: Boolean): EnterTransition = if (switchesTab()) {
+    fadeIn(tween(FADE_IN_MS, FADE_IN_DELAY_MS, FastOutSlowInEasing)) + scaleIn(tween(SLIDE_MS, easing = FastOutSlowInEasing), TAB_START_SCALE)
+} else {
+    slideInHorizontally(tween(SLIDE_MS, easing = FastOutSlowInEasing)) { width -> if (forward) width / SLIDE_DIVISOR else -width / SLIDE_DIVISOR } +
+        fadeIn(tween(FADE_IN_MS, FADE_IN_DELAY_MS, FastOutSlowInEasing))
+}
+
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.exitFor(forward: Boolean): ExitTransition = if (switchesTab()) {
+    fadeOut(tween(FADE_OUT_MS, easing = FastOutSlowInEasing))
+} else {
+    slideOutHorizontally(tween(SLIDE_MS, easing = FastOutSlowInEasing)) { width -> if (forward) -width / SLIDE_DIVISOR else width / SLIDE_DIVISOR } +
+        fadeOut(tween(FADE_OUT_MS, easing = FastOutSlowInEasing))
 }

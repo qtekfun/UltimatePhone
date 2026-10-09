@@ -7,23 +7,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.MainActivity
 import com.qtekfun.ultimatephone.core.designsystem.UltimatePhoneTheme
 import com.qtekfun.ultimatephone.core.telecom.InCallIntents
 import com.qtekfun.ultimatephone.navigation.WhyFlaggedLink
+import com.qtekfun.ultimatephone.settings.SettingsRepository
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /** The call screen. Shown over the lock screen for incoming calls; closes itself shortly after the last call ends. */
 @AndroidEntryPoint
 class InCallActivity : ComponentActivity() {
     private val viewModel: InCallViewModel by viewModels()
 
+    @Inject
+    lateinit var settings: SettingsRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         handle(intent)
         setContent {
-            UltimatePhoneTheme {
+            // The call screen follows the same light/dark and colour choices as the rest of the app.
+            val prefs by settings.settings.collectAsStateWithLifecycle()
+            UltimatePhoneTheme(mode = prefs.themeMode, useSystemColors = prefs.useSystemColors) {
                 InCallScreen(
                     viewModel = viewModel,
                     onAddCall = { startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) },

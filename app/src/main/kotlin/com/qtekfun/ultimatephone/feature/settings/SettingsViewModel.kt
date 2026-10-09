@@ -68,6 +68,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setTheme(mode: ThemeMode) = viewModelScope.launch { repository.setThemeMode(mode) }
 
+    fun setUseSystemColors(enabled: Boolean) = viewModelScope.launch { repository.setUseSystemColors(enabled) }
+
     fun setDefaultSim(key: String?) = viewModelScope.launch { repository.setDefaultSim(key) }
 
     fun setRegion(region: String?) = viewModelScope.launch { repository.setRegionOverride(region) }

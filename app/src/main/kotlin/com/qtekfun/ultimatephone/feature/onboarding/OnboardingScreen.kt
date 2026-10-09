@@ -6,26 +6,41 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,12 +52,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -53,6 +69,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
+import com.qtekfun.ultimatephone.core.designsystem.BannerKind
+import com.qtekfun.ultimatephone.core.designsystem.SettingsGroup
+import com.qtekfun.ultimatephone.core.designsystem.SettingsRow
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
+import com.qtekfun.ultimatephone.core.designsystem.StatusChip
+import com.qtekfun.ultimatephone.core.designsystem.motionEffectsSpec
 
 /**
  * The first-run flow: welcome, roles, permissions, data regions, Nextcloud, battery guide and summary. Every step but the
@@ -85,18 +107,18 @@ fun OnboardingRoute(onFinished: () -> Unit, embedded: Boolean = false, viewModel
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            // The text below says the same as the bar, so the bar is hidden from TalkBack.
-            LinearProgressIndicator(progress = { flow.position.toFloat() / flow.total }, modifier = Modifier.fillMaxWidth().clearAndSetSemantics {})
+            Stepper(position = flow.position, total = flow.total)
             Text(
                 stringResource(R.string.onboarding_step_of, flow.position, flow.total),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }
+                modifier = Modifier.padding(horizontal = Spacing.Large, vertical = Spacing.Small).semantics { liveRegion = LiveRegionMode.Polite }
             )
             Column(
-                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = Spacing.Large, vertical = Spacing.Small),
+                verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
             ) {
+                StepIcon(flow.step)
                 when (flow.step) {
                     OnboardingStep.WELCOME -> WelcomeStep()
                     OnboardingStep.ROLES -> RolesStep(state.roles, viewModel)
@@ -117,18 +139,78 @@ fun OnboardingRoute(onFinished: () -> Unit, embedded: Boolean = false, viewModel
     }
 }
 
+/**
+ * Progress as a row of segments, one per step: those reached are filled. The text under it says the same as the
+ * stepper, so the stepper is hidden from TalkBack.
+ */
+@Composable
+private fun Stepper(position: Int, total: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.Large, vertical = Spacing.Small).clearAndSetSemantics {},
+        horizontalArrangement = Arrangement.spacedBy(Spacing.XSmall)
+    ) {
+        repeat(total) { index ->
+            val reached = index < position
+            val color by animateColorAsState(
+                targetValue = if (reached) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                animationSpec = motionEffectsSpec(),
+                label = "stepSegment"
+            )
+            Box(modifier = Modifier.weight(1f).height(STEP_SEGMENT_HEIGHT).clip(CircleShape).background(color))
+        }
+    }
+}
+
+private val STEP_SEGMENT_HEIGHT = 6.dp
+
+/** The illustration of a step: a big icon in a tonal circle, decorative (the step title says the same). */
+@Composable
+private fun StepIcon(step: OnboardingStep) {
+    Box(
+        modifier = Modifier.size(STEP_ICON_CIRCLE).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            stepIcon(step),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(STEP_ICON_SIZE)
+        )
+    }
+}
+
+private val STEP_ICON_CIRCLE = 88.dp
+private val STEP_ICON_SIZE = 44.dp
+
+private fun stepIcon(step: OnboardingStep): ImageVector = when (step) {
+    OnboardingStep.WELCOME -> Icons.Filled.Call
+    OnboardingStep.ROLES -> Icons.Filled.AdminPanelSettings
+    OnboardingStep.PERMISSIONS -> Icons.Filled.VerifiedUser
+    OnboardingStep.DATA -> Icons.Filled.Public
+    OnboardingStep.NEXTCLOUD -> Icons.Filled.Cloud
+    OnboardingStep.BATTERY -> Icons.Filled.BatteryChargingFull
+    OnboardingStep.SUMMARY -> Icons.Filled.CheckCircle
+}
+
 @Composable
 private fun NavigationButtons(modifier: Modifier, state: OnboardingState, onBack: () -> Unit, onNext: () -> Unit, onSkip: () -> Unit) {
     // The summary has its own finishing buttons.
     if (state.isLast) {
-        if (!state.isFirst) TextButton(onClick = onBack, modifier = modifier.padding(horizontal = 16.dp)) { Text(stringResource(R.string.onboarding_back)) }
+        if (!state.isFirst) {
+            TextButton(onClick = onBack, modifier = modifier.padding(horizontal = Spacing.Medium)) {
+                Text(stringResource(R.string.onboarding_back))
+            }
+        }
         return
     }
     val nextLabel = stringResource(if (state.isFirst) R.string.onboarding_start else R.string.onboarding_next)
     val nextButtonModifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)
     if (LocalDensity.current.fontScale >= STACKED_FONT_SCALE) {
         // Large text: the buttons would not fit side by side, so they stack with the main action first.
-        Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+            modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
+            verticalArrangement = Arrangement.spacedBy(Spacing.XSmall)
+        ) {
             Button(onClick = onNext, modifier = nextButtonModifier.fillMaxWidth()) { Text(nextLabel) }
             if (state.step.skippable) TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.onboarding_skip)) }
             if (!state.isFirst) TextButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.onboarding_back)) }
@@ -136,8 +218,8 @@ private fun NavigationButtons(modifier: Modifier, state: OnboardingState, onBack
         return
     }
     Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.Small),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (!state.isFirst) TextButton(onClick = onBack) { Text(stringResource(R.string.onboarding_back)) }
@@ -154,16 +236,20 @@ private const val STACKED_FONT_SCALE = 1.3f
 @Composable
 internal fun StepTitle(title: Int, body: Int) {
     Text(stringResource(title), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
-    Text(stringResource(body), style = MaterialTheme.typography.bodyLarge)
+    Text(stringResource(body), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
+
+/** The inner padding of a card-like [SettingsGroup] that holds free-form content instead of rows. */
+internal val CardContentPadding = Modifier.padding(Spacing.Medium)
 
 @Composable
 private fun WelcomeStep() {
     StepTitle(R.string.onboarding_welcome_title, R.string.onboarding_welcome_body)
-    listOf(R.string.onboarding_welcome_point_private, R.string.onboarding_welcome_point_offline, R.string.onboarding_welcome_point_optional).forEach {
-        val point = stringResource(it)
-        // The bullet is only decoration: TalkBack reads the sentence alone.
-        Text("•  $point", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.semantics { contentDescription = point })
+    SettingsGroup {
+        // Each point is one item for TalkBack; the icon is decoration.
+        SettingsRow(title = stringResource(R.string.onboarding_welcome_point_private), icon = Icons.Filled.Lock)
+        SettingsRow(title = stringResource(R.string.onboarding_welcome_point_offline), icon = Icons.Filled.CloudOff)
+        SettingsRow(title = stringResource(R.string.onboarding_welcome_point_optional), icon = Icons.Filled.Tune)
     }
 }
 
@@ -189,20 +275,26 @@ private fun RolesStep(roles: RolesState, viewModel: OnboardingViewModel) {
     )
 }
 
+/** A titled explanation with its state: a green "Active" chip, "not available", or the button that asks for it. */
+@Composable
+internal fun StepCard(title: Int, body: String, content: @Composable () -> Unit) {
+    SettingsGroup {
+        Column(modifier = CardContentPadding, verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
+            Text(stringResource(title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+            Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            content()
+        }
+    }
+}
+
 @Composable
 private fun RoleCard(title: Int, body: Int, available: Boolean, held: Boolean, onRequest: () -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-            Text(stringResource(body), style = MaterialTheme.typography.bodyMedium)
-            when {
-                held -> Text(
-                    stringResource(R.string.onboarding_role_active),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelLarge
-                )
-                !available -> Text(stringResource(R.string.onboarding_role_unavailable), style = MaterialTheme.typography.labelLarge)
-                else -> OutlinedButton(onClick = onRequest) { Text(stringResource(R.string.onboarding_role_request)) }
+    StepCard(title, stringResource(body)) {
+        when {
+            held -> StatusChip(stringResource(R.string.onboarding_role_active), icon = Icons.Filled.CheckCircle, kind = BannerKind.Success)
+            !available -> StatusChip(stringResource(R.string.onboarding_role_unavailable))
+            else -> FilledTonalButton(onClick = onRequest, modifier = Modifier.heightIn(min = Spacing.MinTarget)) {
+                Text(stringResource(R.string.onboarding_role_request))
             }
         }
     }
@@ -224,27 +316,23 @@ private fun PermissionsStep() {
     val missingByGroup = remember(tick) { PermissionGroup.entries.associateWith { it.missing(granted) } }
     PermissionGroup.entries.forEach { group ->
         val missing = missingByGroup.getValue(group)
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(group.title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-                Text(stringResource(group.reason), style = MaterialTheme.typography.bodyMedium)
-                when {
-                    missing.isEmpty() -> Text(
-                        stringResource(R.string.onboarding_perm_granted),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    group in asked -> {
-                        Text(stringResource(R.string.onboarding_perm_blocked), style = MaterialTheme.typography.bodySmall)
-                        OutlinedButton(onClick = { context.startActivity(appDetailsIntent(context.packageName)) }) {
-                            Text(stringResource(R.string.onboarding_perm_open_settings))
-                        }
-                    }
-                    else -> OutlinedButton(onClick = {
+        StepCard(group.title, stringResource(group.reason)) {
+            when {
+                missing.isEmpty() -> StatusChip(stringResource(R.string.onboarding_perm_granted), icon = Icons.Filled.CheckCircle, kind = BannerKind.Success)
+                group in asked -> {
+                    Text(stringResource(R.string.onboarding_perm_blocked), style = MaterialTheme.typography.bodySmall)
+                    FilledTonalButton(
+                        onClick = { context.startActivity(appDetailsIntent(context.packageName)) },
+                        modifier = Modifier.heightIn(min = Spacing.MinTarget)
+                    ) { Text(stringResource(R.string.onboarding_perm_open_settings)) }
+                }
+                else -> FilledTonalButton(
+                    onClick = {
                         asked = asked + group
                         launcher.launch(missing.toTypedArray())
-                    }) { Text(stringResource(R.string.onboarding_perm_allow)) }
-                }
+                    },
+                    modifier = Modifier.heightIn(min = Spacing.MinTarget)
+                ) { Text(stringResource(R.string.onboarding_perm_allow)) }
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.qtekfun.ultimatephone.incall
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,14 +23,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMerge
 import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.Headset
@@ -38,16 +38,12 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,8 +57,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -73,21 +67,30 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
-import com.qtekfun.ultimatephone.core.designsystem.Avatar
+import com.qtekfun.ultimatephone.core.designsystem.AvatarStyled
+import com.qtekfun.ultimatephone.core.designsystem.BrandBackground
+import com.qtekfun.ultimatephone.core.designsystem.CallActionButton
+import com.qtekfun.ultimatephone.core.designsystem.CallButton
+import com.qtekfun.ultimatephone.core.designsystem.CallButtonKind
+import com.qtekfun.ultimatephone.core.designsystem.CallPillButton
+import com.qtekfun.ultimatephone.core.designsystem.PulsingRing
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
+import com.qtekfun.ultimatephone.core.designsystem.StatusChip
 import com.qtekfun.ultimatephone.core.designsystem.callColors
+import com.qtekfun.ultimatephone.core.designsystem.motionEffectsSpec
+import com.qtekfun.ultimatephone.core.designsystem.tabularFigures
 import com.qtekfun.ultimatephone.core.telecom.AudioRoute
 import com.qtekfun.ultimatephone.core.telecom.CallDurationFormatter
 import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
-import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
-import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
+import com.qtekfun.ultimatephone.feature.data.businessCategoryLabel
+import com.qtekfun.ultimatephone.feature.data.businessIcon
 import com.qtekfun.ultimatephone.feature.spam.CallSpamPanel
 import com.qtekfun.ultimatephone.feature.spam.CallSpamUi
 import com.qtekfun.ultimatephone.recording.RecordingUi
@@ -100,12 +103,12 @@ private val DIAL_KEYS = listOf("123", "456", "789", "*0#")
 /** Below this height the screen switches to smaller avatar and controls. */
 private val COMPACT_HEIGHT = 600.dp
 private val MIN_TOUCH_TARGET = 56.dp
-private val HANGUP_MAX_WIDTH = 320.dp
+private val HANGUP_MAX_WIDTH = 360.dp
 
 /** What the layout needs to know about the space it has. */
 private data class CallLayout(val landscape: Boolean, val compact: Boolean) {
-    val avatarSize: Dp get() = if (compact) 64.dp else 96.dp
-    val actionSize: Dp get() = if (compact) 56.dp else 64.dp
+    val avatarSize: Dp get() = if (compact) 72.dp else 132.dp
+    val actionSize: Dp get() = if (compact) 60.dp else 68.dp
     val answerSize: Dp get() = if (compact) 72.dp else 88.dp
     val hangupHeight: Dp get() = if (compact) 64.dp else 72.dp
 }
@@ -130,15 +133,10 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
     val other = calls.firstOrNull { it.id != primary?.id }
 
     // Full screen, also over the lock screen: keep every control clear of the status bar, the cutout and the gesture bar.
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+    BrandBackground(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
             if (primary == null) {
-                Text(
-                    stringResource(R.string.incall_call_ended),
-                    style = MaterialTheme.typography.headlineMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center).padding(24.dp).semantics { liveRegion = LiveRegionMode.Polite }
-                )
+                CallEnded(modifier = Modifier.align(Alignment.Center))
             } else {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                     val layout = CallLayout(landscape = maxWidth > maxHeight, compact = maxHeight < COMPACT_HEIGHT)
@@ -187,20 +185,38 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                         }
                     }
                     if (layout.landscape) {
-                        Row(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                        Row(modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.Medium)) {
                             info(Modifier.weight(1f).fillMaxHeight())
-                            Spacer(Modifier.width(16.dp))
+                            Spacer(Modifier.width(Spacing.Medium))
                             controls(Modifier.weight(1f).fillMaxHeight())
                         }
                     } else {
-                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                        Column(modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.Medium)) {
                             info(Modifier.weight(1f).fillMaxWidth())
-                            controls(Modifier.fillMaxWidth().padding(bottom = 16.dp))
+                            controls(Modifier.fillMaxWidth().padding(bottom = Spacing.Medium))
                         }
                     }
                 }
             }
         }
+    }
+}
+
+/** "Call ended": the end icon in a tonal circle and the words, announced politely. */
+@Composable
+private fun CallEnded(modifier: Modifier) {
+    Column(
+        modifier = modifier.padding(Spacing.Large).semantics { liveRegion = LiveRegionMode.Polite },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
+    ) {
+        Box(
+            modifier = Modifier.size(88.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.CallEnd, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(44.dp))
+        }
+        Text(stringResource(R.string.incall_call_ended), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
     }
 }
 
@@ -222,7 +238,7 @@ private fun InfoPane(
     recordingStatus: @Composable () -> Unit
 ) {
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()).padding(top = 8.dp),
+        modifier = modifier.verticalScroll(rememberScrollState()).padding(top = Spacing.Small),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         recordingStatus()
@@ -230,7 +246,7 @@ private fun InfoPane(
         CallHeader(call, layout, showAvatar = !showKeypad)
         CallSpamPanel(ui = spam, ringing = call.status == CallStatus.RINGING, onNotSpam = onNotSpam, onMarkSpam = onMarkSpam, onWhyFlagged = onWhyFlagged)
         if (showKeypad) {
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.size(Spacing.Medium))
             DtmfKeypad(onDown = onDtmfDown, onUp = onDtmfUp)
         }
     }
@@ -244,27 +260,37 @@ private fun CallHeader(call: CallInfo, layout: CallLayout, showAvatar: Boolean) 
             delay(MILLIS_PER_SECOND)
         }
     }
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = if (layout.compact) 8.dp else 24.dp)) {
+    val ringing = call.status == CallStatus.RINGING
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = if (layout.compact) Spacing.Small else Spacing.Large)) {
         if (showAvatar) {
-            if (call.isBusiness) BusinessAvatar(call.businessIcon, size = layout.avatarSize) else Avatar(name = call.title, size = layout.avatarSize)
+            // The ring pulses only while the phone rings (and never with reduced motion).
+            PulsingRing(active = ringing, extent = if (layout.compact) 12.dp else 24.dp) {
+                AvatarStyled(
+                    name = call.title.takeIf { call.contactName != null },
+                    size = layout.avatarSize,
+                    business = call.isBusiness,
+                    businessIcon = businessIcon(call.businessIcon)
+                )
+            }
         }
-        // The name is the most important line: large, up to three lines (large font sizes).
+        // The name is the most important line: display size, up to three lines (large font sizes).
         Text(
             call.title,
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.displaySmall,
             textAlign = TextAlign.Center,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 12.dp)
+            modifier = Modifier.padding(top = Spacing.Small)
         )
-        if (call.isBusiness) BusinessCategoryLine(call.businessCategory, call.businessIcon)
         if (call.contactName != null && call.displayNumber.isNotEmpty()) {
-            Text(call.displayNumber, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                call.displayNumber,
+                style = MaterialTheme.typography.titleMedium.tabularFigures(),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Spacing.XSmall)
+            )
         }
-        call.sim?.let { sim ->
-            val label = if (sim.slot >= 0) stringResource(R.string.dialer_sim_slot, sim.slot + 1) else sim.label
-            Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        CallChips(call)
         val status = when (call.status) {
             CallStatus.RINGING -> stringResource(R.string.incall_incoming)
             CallStatus.DIALING, CallStatus.CONNECTING -> stringResource(R.string.incall_calling)
@@ -277,11 +303,11 @@ private fun CallHeader(call: CallInfo, layout: CallLayout, showAvatar: Boolean) 
         val ticking = call.status == CallStatus.ACTIVE || call.status == CallStatus.HOLDING
         Text(
             status,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.tabularFigures(),
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
             // Ringing, calling and ended are announced by TalkBack as they change; the running duration is not live.
-            modifier = Modifier.padding(top = 8.dp).semantics { if (!ticking) liveRegion = LiveRegionMode.Polite }
+            modifier = Modifier.padding(top = Spacing.Small).semantics { if (!ticking) liveRegion = LiveRegionMode.Polite }
         )
         if (call.isConference) {
             Text(stringResource(R.string.incall_conference, call.participants), style = MaterialTheme.typography.labelLarge)
@@ -289,49 +315,57 @@ private fun CallHeader(call: CallInfo, layout: CallLayout, showAvatar: Boolean) 
     }
 }
 
+/** The secondary facts under the name: the business category and the SIM, as small chips. */
+@Composable
+private fun CallChips(call: CallInfo) {
+    val sim = call.sim
+    if (!call.isBusiness && sim == null) return
+    Row(
+        modifier = Modifier.padding(top = Spacing.Small),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.Small, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (call.isBusiness) {
+            StatusChip(text = stringResource(businessCategoryLabel(call.businessCategory)), icon = businessIcon(call.businessIcon))
+        }
+        if (sim != null) {
+            val label = if (sim.slot >= 0) stringResource(R.string.dialer_sim_slot, sim.slot + 1) else sim.label
+            StatusChip(text = label, icon = Icons.Filled.SimCard)
+        }
+    }
+}
+
 @Composable
 private fun OtherCallCard(call: CallInfo, onSwap: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+    ) {
         Row(
-            modifier = Modifier.padding(start = 12.dp, end = 4.dp),
+            modifier = Modifier.padding(start = Spacing.Medium, end = Spacing.XSmall),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = stringResource(if (call.status == CallStatus.RINGING) R.string.incall_waiting else R.string.incall_held, call.title),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+                modifier = Modifier.weight(1f).padding(vertical = Spacing.Small)
             )
             TextButton(onClick = onSwap, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)) { Text(stringResource(R.string.incall_swap)) }
         }
     }
 }
 
+/** Decline and Answer: big, labelled, at the bottom where the thumb rests. */
 @Composable
 private fun RingingControls(layout: CallLayout, modifier: Modifier, onAnswer: () -> Unit, onReject: () -> Unit) {
-    val colors = callColors()
     Row(
-        modifier = modifier.padding(vertical = 16.dp),
+        modifier = modifier.padding(vertical = Spacing.Large),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
     ) {
-        RoundAction(Icons.Filled.CallEnd, stringResource(R.string.incall_decline), colors.decline, colors.onDecline, layout.answerSize, onReject)
-        RoundAction(Icons.Filled.Call, stringResource(R.string.incall_answer), colors.answer, colors.onAnswer, layout.answerSize, onAnswer)
-    }
-}
-
-@Composable
-private fun RoundAction(icon: ImageVector, description: String, container: Color, content: Color, size: Dp, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        FilledIconButton(
-            onClick = onClick,
-            modifier = Modifier.size(size),
-            colors = IconButtonDefaults.filledIconButtonColors(containerColor = container, contentColor = content)
-        ) {
-            Icon(icon, contentDescription = description, modifier = Modifier.size(size / 2))
-        }
-        // The icon already carries the description for TalkBack.
-        Text(description, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp).clearAndSetSemantics {})
+        CallButton(CallButtonKind.Decline, stringResource(R.string.incall_decline), onReject, size = layout.answerSize)
+        CallButton(CallButtonKind.Answer, stringResource(R.string.incall_answer), onAnswer, size = layout.answerSize)
     }
 }
 
@@ -360,15 +394,19 @@ private fun OngoingControls(
 ) {
     val size = layout.actionSize
     val holding = call.status == CallStatus.HOLDING
+    val on = stringResource(R.string.incall_state_on)
+    val off = stringResource(R.string.incall_state_off)
+    fun state(checked: Boolean) = if (checked) on else off
     // Hold and merge only appear when they can do something.
     val actions = buildList {
         add(
             CallAction("mute") {
-                ToggleAction(
-                    if (muted) Icons.Filled.MicOff else Icons.Filled.Mic,
-                    stringResource(R.string.incall_mute),
-                    muted,
-                    onMute,
+                CallActionButton(
+                    icon = if (muted) Icons.Filled.MicOff else Icons.Filled.Mic,
+                    label = stringResource(R.string.incall_mute),
+                    onClick = onMute,
+                    checked = muted,
+                    stateDescription = state(muted),
                     size = size,
                     modifier = Modifier.weight(1f)
                 )
@@ -376,18 +414,27 @@ private fun OngoingControls(
         )
         add(
             CallAction("keypad") {
-                ToggleAction(Icons.Filled.Dialpad, stringResource(R.string.incall_keypad), keypadShown, onKeypad, size = size, modifier = Modifier.weight(1f))
+                CallActionButton(
+                    icon = Icons.Filled.Dialpad,
+                    label = stringResource(R.string.incall_keypad),
+                    onClick = onKeypad,
+                    checked = keypadShown,
+                    stateDescription = state(keypadShown),
+                    size = size,
+                    modifier = Modifier.weight(1f)
+                )
             }
         )
         add(CallAction("audio") { RouteAction(route, availableRoutes, onRoute, size, Modifier.weight(1f)) })
         if (call.canHold || holding) {
             add(
                 CallAction("hold") {
-                    ToggleAction(
-                        if (holding) Icons.Filled.PlayArrow else Icons.Filled.Pause,
-                        stringResource(R.string.incall_hold),
-                        holding,
-                        onHold,
+                    CallActionButton(
+                        icon = if (holding) Icons.Filled.PlayArrow else Icons.Filled.Pause,
+                        label = stringResource(R.string.incall_hold),
+                        onClick = onHold,
+                        checked = holding,
+                        stateDescription = state(holding),
                         size = size,
                         modifier = Modifier.weight(1f)
                     )
@@ -396,14 +443,12 @@ private fun OngoingControls(
         }
         add(
             CallAction("add") {
-                ToggleAction(
-                    Icons.Filled.PersonAdd,
-                    stringResource(R.string.incall_add_call),
-                    false,
-                    onAddCall,
+                CallActionButton(
+                    icon = Icons.Filled.PersonAdd,
+                    label = stringResource(R.string.incall_add_call),
+                    onClick = onAddCall,
                     size = size,
-                    modifier = Modifier.weight(1f),
-                    toggle = false
+                    modifier = Modifier.weight(1f)
                 )
             }
         )
@@ -413,11 +458,12 @@ private fun OngoingControls(
         if (hasOtherCall || call.canMerge || call.isConference) {
             add(
                 CallAction("merge") {
-                    ToggleAction(
-                        if (call.isConference) Icons.AutoMirrored.Filled.CallSplit else Icons.AutoMirrored.Filled.CallMerge,
-                        stringResource(R.string.incall_merge),
-                        call.isConference,
-                        onMerge,
+                    CallActionButton(
+                        icon = if (call.isConference) Icons.AutoMirrored.Filled.CallSplit else Icons.AutoMirrored.Filled.CallMerge,
+                        label = stringResource(R.string.incall_merge),
+                        onClick = onMerge,
+                        checked = call.isConference,
+                        stateDescription = state(call.isConference),
                         enabled = hasOtherCall || call.canMerge,
                         size = size,
                         modifier = Modifier.weight(1f)
@@ -430,81 +476,27 @@ private fun OngoingControls(
         // The grid gives way (and scrolls) before the hang-up button does.
         Column(
             modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
         ) {
             actions.chunked(GRID_COLUMNS).forEach { rowActions ->
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.Small), verticalAlignment = Alignment.Top) {
                     rowActions.forEach { action -> action.content(this) }
                     repeat(GRID_COLUMNS - rowActions.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }
-        HangupButton(height = layout.hangupHeight, onClick = onHangup)
+        // The most important control: wide, red, centred, at the bottom where the thumb rests.
+        CallPillButton(
+            kind = CallButtonKind.End,
+            label = stringResource(R.string.incall_end_call),
+            onClick = onHangup,
+            modifier = Modifier.padding(top = Spacing.Large).fillMaxWidth().widthIn(max = HANGUP_MAX_WIDTH),
+            height = layout.hangupHeight
+        )
     }
 }
 
 private const val GRID_COLUMNS = 3
-
-/** The most important control: large, red, centred, at the bottom where the thumb rests. */
-@Composable
-private fun HangupButton(height: Dp, onClick: () -> Unit) {
-    val colors = callColors()
-    Button(
-        onClick = onClick,
-        modifier = Modifier.padding(top = 16.dp).fillMaxWidth().widthIn(max = HANGUP_MAX_WIDTH).heightIn(min = height),
-        shape = RoundedCornerShape(height / 2),
-        colors = ButtonDefaults.buttonColors(containerColor = colors.decline, contentColor = colors.onDecline)
-    ) {
-        Icon(Icons.Filled.CallEnd, contentDescription = null, modifier = Modifier.size(32.dp))
-        Text(stringResource(R.string.incall_end_call), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 12.dp))
-    }
-}
-
-@Composable
-internal fun ToggleAction(
-    icon: ImageVector,
-    description: String,
-    checked: Boolean,
-    onClick: () -> Unit,
-    size: Dp,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    toggle: Boolean = true,
-    stateText: String? = null
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-        if (toggle) {
-            // A real on/off control: TalkBack says "On" or "Off", not just a colour change.
-            val state = stringResource(if (checked) R.string.incall_state_on else R.string.incall_state_off)
-            FilledTonalIconToggleButton(
-                checked = checked,
-                onCheckedChange = { onClick() },
-                enabled = enabled,
-                modifier = Modifier.size(size).semantics { stateDescription = state }
-            ) {
-                Icon(icon, contentDescription = description)
-            }
-        } else {
-            // A one-shot action (add a call, record, audio): announced as a plain button, with its current value if any.
-            FilledTonalIconButton(
-                onClick = onClick,
-                enabled = enabled,
-                modifier = Modifier.size(size).semantics { if (stateText != null) stateDescription = stateText }
-            ) {
-                Icon(icon, contentDescription = description)
-            }
-        }
-        // The icon already carries the description for TalkBack.
-        Text(
-            description,
-            style = MaterialTheme.typography.labelMedium,
-            textAlign = TextAlign.Center,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 4.dp).clearAndSetSemantics {}
-        )
-    }
-}
 
 /** One button: toggles the speaker, or opens a menu when Bluetooth or a headset is available too. */
 @Composable
@@ -518,14 +510,14 @@ private fun RouteAction(route: AudioRoute, available: Set<AudioRoute>, onRoute: 
         AudioRoute.EARPIECE -> Icons.Filled.PhoneInTalk
     }
     Box(modifier = modifier, contentAlignment = Alignment.TopCenter) {
-        ToggleAction(
+        // A plain button for TalkBack (it announces the current route); it looks "on" when the sound is not in the earpiece.
+        CallActionButton(
             icon = icon,
-            description = stringResource(R.string.incall_audio),
-            checked = route != AudioRoute.EARPIECE,
+            label = stringResource(R.string.incall_audio),
             onClick = { if (several) menu = true else onRoute(if (route == AudioRoute.SPEAKER) AudioRoute.EARPIECE else AudioRoute.SPEAKER) },
-            size = size,
-            toggle = false,
-            stateText = stringResource(routeName(route))
+            active = route != AudioRoute.EARPIECE,
+            stateDescription = stringResource(routeName(route)),
+            size = size
         )
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             available.forEach { option ->
@@ -550,41 +542,52 @@ private fun routeName(route: AudioRoute): Int = when (route) {
 
 @Composable
 private fun DtmfKeypad(onDown: (Char) -> Unit, onUp: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.widthIn(max = 320.dp).fillMaxWidth()) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small), modifier = Modifier.widthIn(max = 320.dp).fillMaxWidth()) {
         DIAL_KEYS.forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                row.forEach { char ->
-                    val keyName = when (char) {
-                        '*' -> stringResource(R.string.incall_key_star)
-                        '#' -> stringResource(R.string.incall_key_pound)
-                        else -> char.toString()
-                    }
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).heightIn(min = MIN_TOUCH_TARGET).pointerInput(char) {
-                            detectTapGestures(onPress = {
-                                onDown(char)
-                                tryAwaitRelease()
-                                onUp()
-                            })
-                        }.semantics(mergeDescendants = true) {
-                            // The touch handler above cannot be reached by TalkBack; this gives it a button that sends the tone.
-                            role = Role.Button
-                            contentDescription = keyName
-                            onClick {
-                                onDown(char)
-                                onUp()
-                                true
-                            }
-                        }
-                    ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET).clearAndSetSemantics {}) {
-                            Text(char.toString(), style = MaterialTheme.typography.headlineSmall)
-                        }
-                    }
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small), modifier = Modifier.fillMaxWidth()) {
+                row.forEach { char -> DtmfKey(char, onDown, onUp, Modifier.weight(1f)) }
             }
+        }
+    }
+}
+
+@Composable
+private fun DtmfKey(char: Char, onDown: (Char) -> Unit, onUp: () -> Unit, modifier: Modifier) {
+    val keyName = when (char) {
+        '*' -> stringResource(R.string.incall_key_star)
+        '#' -> stringResource(R.string.incall_key_pound)
+        else -> char.toString()
+    }
+    var pressed by remember { mutableStateOf(false) }
+    val fill by animateColorAsState(
+        targetValue = if (pressed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+        animationSpec = motionEffectsSpec(),
+        label = "dtmfFill"
+    )
+    Surface(
+        shape = CircleShape,
+        color = fill,
+        modifier = modifier.heightIn(min = MIN_TOUCH_TARGET).pointerInput(char) {
+            detectTapGestures(onPress = {
+                pressed = true
+                onDown(char)
+                tryAwaitRelease()
+                pressed = false
+                onUp()
+            })
+        }.semantics(mergeDescendants = true) {
+            // The touch handler above cannot be reached by TalkBack; this gives it a button that sends the tone.
+            role = Role.Button
+            contentDescription = keyName
+            onClick {
+                onDown(char)
+                onUp()
+                true
+            }
+        }
+    ) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET).clearAndSetSemantics {}) {
+            Text(char.toString(), style = MaterialTheme.typography.headlineSmall)
         }
     }
 }

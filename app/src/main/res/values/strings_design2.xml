@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared state descriptions -->
+    <string name="design2_expanded">Expanded</string>
+    <string name="design2_collapsed">Collapsed</string>
+
+    <!-- Recents -->
+    <string name="design2_recents_empty_title">No calls here</string>
+
+    <!-- Contacts -->
+    <string name="design2_contacts_empty_title">No contacts yet</string>
+    <string name="design2_contacts_noresult_title">Nothing found</string>
+    <string name="design2_contact_missing_body">It may have been deleted or merged into another contact.</string>
+    <string name="design2_groups_empty_title">No groups</string>
+    <string name="design2_dup_empty_body">Your contacts have no repeated people.</string>
+    <string name="design2_import_idle_body">Choose a vCard (.vcf) file to add the contacts in it to this phone.</string>
+    <string name="design2_import_failed_body">Try another file.</string>
+</resources>

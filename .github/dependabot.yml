@@ -1,0 +1,52 @@
+# Dependabot: weekly update PRs for the Gradle build (including the version catalog and the Gradle wrapper) and for the
+# pinned GitHub Actions. Related libraries are grouped so they arrive in one PR that CI can check as a whole.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    groups:
+      # Kotlin, its compiler plugins and KSP must move together.
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "com.google.devtools.ksp*"
+      androidx:
+        patterns:
+          - "androidx.*"
+        exclude-patterns:
+          - "androidx.compose*"
+      compose:
+        patterns:
+          - "androidx.compose*"
+      hilt-dagger:
+        patterns:
+          - "com.google.dagger*"
+          - "androidx.hilt*"
+      static-analysis:
+        patterns:
+          - "io.gitlab.arturbosch.detekt*"
+          - "org.jlleitschuh.gradle.ktlint*"
+          - "com.pinterest*"
+          - "app.cash.licensee*"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "build"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "ci"

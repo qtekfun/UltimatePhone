@@ -3,35 +3,29 @@ package com.qtekfun.ultimatephone.feature.recents
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,12 +48,21 @@ import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.calllog.CallLogEntry
 import com.qtekfun.ultimatephone.core.calllog.CallStats
 import com.qtekfun.ultimatephone.core.calllog.formatDurationClock
-import com.qtekfun.ultimatephone.core.designsystem.Avatar
-import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
+import com.qtekfun.ultimatephone.core.designsystem.AvatarStyled
+import com.qtekfun.ultimatephone.core.designsystem.ConfirmDialog
+import com.qtekfun.ultimatephone.core.designsystem.GroupedItem
+import com.qtekfun.ultimatephone.core.designsystem.ScreenScaffold
+import com.qtekfun.ultimatephone.core.designsystem.SectionHeader
+import com.qtekfun.ultimatephone.core.designsystem.SettingsGroup
+import com.qtekfun.ultimatephone.core.designsystem.SettingsRow
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
+import com.qtekfun.ultimatephone.core.designsystem.StatusChip
 import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
+import com.qtekfun.ultimatephone.feature.data.businessIcon
+
+private val AvatarSize = 96.dp
 
 /** Detail of one number: who it is, what can be done with it, how often it called, and every call. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CallDetailRoute(
     onBack: () -> Unit,
@@ -106,145 +109,153 @@ fun CallDetailRoute(
         onWhyFlagged = { onWhyFlagged(state.number) }
     )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.recents_detail_title)) },
-                windowInsets = WindowInsets(0),
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.recents_back)) }
-                }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbar) },
-        contentWindowInsets = WindowInsets(0)
+    ScreenScaffold(
+        title = stringResource(R.string.recents_detail_title),
+        onBack = onBack,
+        snackbarHost = { SnackbarHost(snackbar) }
     ) { padding ->
-        CallDetailContent(state = state, handlers = handlers, modifier = Modifier.padding(padding))
+        CallDetailContent(state = state, handlers = handlers, padding = padding)
     }
 
     if (confirmDelete) {
-        AlertDialog(
-            onDismissRequest = { confirmDelete = false },
-            title = { Text(stringResource(R.string.recents_delete_number_title)) },
-            text = { Text(stringResource(R.string.recents_delete_number_body)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDelete = false
-                    viewModel.deleteHistory()
-                }) { Text(stringResource(R.string.recents_delete)) }
-            },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.recents_cancel)) } }
+        ConfirmDialog(
+            title = stringResource(R.string.recents_delete_number_title),
+            body = stringResource(R.string.recents_delete_number_body),
+            confirmLabel = stringResource(R.string.recents_delete),
+            dismissLabel = stringResource(R.string.recents_cancel),
+            onConfirm = viewModel::deleteHistory,
+            onDismiss = { confirmDelete = false },
+            destructive = true
         )
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CallDetailContent(state: CallDetailUiState, handlers: DetailHandlers, modifier: Modifier = Modifier) {
+private fun CallDetailContent(state: CallDetailUiState, handlers: DetailHandlers, padding: PaddingValues) {
     val caller = state.caller
     val title = caller?.title ?: stringResource(R.string.recents_unknown_caller)
     val actions = detailActions(caller, state.isPrivate, state.entries.isNotEmpty(), handlers, state.spam)
-    LazyColumn(modifier.fillMaxSize()) {
-        item(key = "header") {
-            Column(
-                Modifier.fillMaxWidth().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                val business = caller?.business
-                if (business != null) {
-                    BusinessAvatar(business.iconName, size = 96.dp)
-                } else {
-                    Avatar(name = title, size = 96.dp) {
-                        caller?.contact?.photoThumbUri?.let { uri ->
-                            AsyncImage(model = uri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                        }
-                    }
-                }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.semantics { heading() }
-                )
-                business?.let { BusinessCategoryLine(it.category, it.iconName) }
-                if (caller != null && caller.displayName != null && caller.formattedNumber.isNotBlank()) {
-                    Text(text = caller.formattedNumber, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = padding) {
+        item(key = "header") { HeaderCard(caller = caller, title = title) }
         if (actions.isNotEmpty()) {
             item(key = "actions") {
                 FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.Small, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.Small)
                 ) {
-                    actions.forEach { action ->
-                        FilledTonalButton(onClick = action.onClick) {
-                            Icon(action.icon, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Text(stringResource(action.label), modifier = Modifier.padding(start = 8.dp))
-                        }
-                    }
+                    actions.forEach { action -> ActionButton(action) }
                 }
             }
         }
-        item(key = "stats") { StatsCard(state.stats) }
-        item(key = "calls-header") {
-            Text(
-                text = stringResource(R.string.recents_calls_heading),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics { heading() }
-            )
+        item(key = "stats") { StatsGroup(state.stats) }
+        item(key = "calls-header") { SectionHeader(stringResource(R.string.recents_calls_heading)) }
+        items(state.entries.size, key = { "call-${state.entries[it].id}" }) { index ->
+            GroupedItem(index = index, count = state.entries.size) { CallEntryRow(state.entries[index]) }
         }
-        items(state.entries, key = { "call-${it.id}" }) { CallEntryRow(it) }
+        item(key = "end") { Spacer(Modifier.size(Spacing.Medium)) }
     }
 }
 
 @Composable
-private fun StatsCard(stats: CallStats) {
-    ElevatedCard(Modifier.fillMaxWidth().padding(16.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun HeaderCard(caller: CallerInfo?, title: String) {
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.Medium, vertical = Spacing.Small)
+    ) {
+        Column(
+            Modifier.fillMaxWidth().padding(Spacing.Large),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.Small)
+        ) {
+            val business = caller?.business
+            AvatarStyled(
+                name = caller?.title,
+                size = AvatarSize,
+                business = business != null,
+                businessIcon = businessIcon(business?.iconName)
+            ) {
+                caller?.contact?.photoThumbUri?.let { uri ->
+                    AsyncImage(model = uri, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                }
+            }
             Text(
-                text = stringResource(R.string.recents_stats_heading),
-                style = MaterialTheme.typography.titleMedium,
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { heading() }
             )
-            StatLine(R.string.recents_stats_total, stats.total.toString())
-            StatLine(R.string.recents_stats_missed, stats.missed.toString())
-            StatLine(R.string.recents_stats_incoming, stats.incoming.toString())
-            StatLine(R.string.recents_stats_outgoing, stats.outgoing.toString())
-            StatLine(R.string.recents_stats_duration, formatDurationClock(stats.totalDurationSeconds))
+            business?.let { BusinessCategoryLine(it.category, it.iconName) }
+            if (caller != null && caller.displayName != null && caller.formattedNumber.isNotBlank()) {
+                Text(text = caller.formattedNumber, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
+    }
+}
+
+@Composable
+private fun ActionButton(action: DetailAction) {
+    val modifier = Modifier.heightIn(min = Spacing.MinTarget)
+    val content: @Composable RowScope.() -> Unit = {
+        Icon(action.icon, contentDescription = null, modifier = Modifier.size(18.dp))
+        Text(stringResource(action.label), modifier = Modifier.padding(start = Spacing.Small))
+    }
+    when (action.id) {
+        DetailActionId.CALL -> Button(onClick = action.onClick, modifier = modifier, content = content)
+        DetailActionId.DELETE -> FilledTonalButton(
+            onClick = action.onClick,
+            modifier = modifier,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            ),
+            content = content
+        )
+        else -> FilledTonalButton(onClick = action.onClick, modifier = modifier, content = content)
+    }
+}
+
+@Composable
+private fun StatsGroup(stats: CallStats) {
+    SettingsGroup(
+        title = stringResource(R.string.recents_stats_heading),
+        modifier = Modifier.padding(horizontal = Spacing.Medium, vertical = Spacing.Small)
+    ) {
+        StatLine(R.string.recents_stats_total, stats.total.toString())
+        StatLine(R.string.recents_stats_missed, stats.missed.toString())
+        StatLine(R.string.recents_stats_incoming, stats.incoming.toString())
+        StatLine(R.string.recents_stats_outgoing, stats.outgoing.toString())
+        StatLine(R.string.recents_stats_duration, formatDurationClock(stats.totalDurationSeconds))
     }
 }
 
 @Composable
 private fun StatLine(label: Int, value: String) {
-    Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = stringResource(label), modifier = Modifier.weight(1f).padding(end = 8.dp))
-        Text(text = value, style = MaterialTheme.typography.titleSmall)
-    }
+    SettingsRow(
+        title = stringResource(label),
+        modifier = Modifier.heightIn(min = Spacing.MinTarget),
+        trailing = { Text(text = value, style = MaterialTheme.typography.titleMedium) }
+    )
 }
 
 @Composable
 private fun CallEntryRow(entry: CallLogEntry) {
-    ListItem(
+    Row(
         // One item for TalkBack: type, date, SIM and duration.
-        modifier = Modifier.semantics(mergeDescendants = true) {},
-        leadingContent = { CallTypeIcon(entry.type, Modifier.size(24.dp)) },
-        supportingContent = {
-            Column {
-                Text(dateTimeText(entry.dateMillis))
-                val sim = entry.sim
-                if (sim != null) Text(simText(sim))
-            }
-        },
-        trailingContent = {
-            if (entry.durationSeconds > 0) Text(formatDurationClock(entry.durationSeconds), style = MaterialTheme.typography.labelLarge)
-        }
+        modifier = Modifier.fillMaxWidth().heightIn(min = Spacing.RowHeight).semantics(mergeDescendants = true) {}
+            .padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)
     ) {
-        Text(stringResource(entry.type.label()), color = entry.type.tint())
+        CallTypeIcon(entry.type, Modifier.size(24.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(entry.type.label()), style = MaterialTheme.typography.titleMedium, color = entry.type.tint())
+            Text(dateTimeText(entry.dateMillis), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val sim = entry.sim
+            if (sim != null) StatusChip(text = simText(sim), modifier = Modifier.padding(top = Spacing.XSmall))
+        }
+        if (entry.durationSeconds > 0) Text(formatDurationClock(entry.durationSeconds), style = MaterialTheme.typography.labelLarge)
     }
 }

@@ -3,6 +3,7 @@ package com.qtekfun.ultimatephone.settings
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -21,7 +22,9 @@ data class UserSettings(
     /** SIM remembered per number (E.164), set when the user explicitly picks a SIM for it. */
     val simByNumber: Map<String, String> = emptyMap(),
     /** ISO region that overrides the SIM country for numbers without a country code. */
-    val regionOverride: String? = null
+    val regionOverride: String? = null,
+    /** Use the Material You colours of the wallpaper instead of the brand teal and mint. Off by default. */
+    val useSystemColors: Boolean = false
 )
 
 interface SettingsRepository {
@@ -34,6 +37,8 @@ interface SettingsRepository {
     suspend fun rememberSim(numberE164: String, simKey: String)
 
     suspend fun setRegionOverride(region: String?)
+
+    suspend fun setUseSystemColors(enabled: Boolean)
 }
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -46,7 +51,8 @@ class DataStoreSettingsRepository(context: Context, scope: CoroutineScope) : Set
             themeMode = prefs[THEME]?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } } ?: ThemeMode.SYSTEM,
             defaultSimKey = prefs[DEFAULT_SIM],
             simByNumber = SimMemoryCodec.decode(prefs[SIM_BY_NUMBER].orEmpty()),
-            regionOverride = prefs[REGION]
+            regionOverride = prefs[REGION],
+            useSystemColors = prefs[SYSTEM_COLORS] ?: false
         )
     }.stateIn(scope, SharingStarted.Eagerly, UserSettings())
 
@@ -69,10 +75,15 @@ class DataStoreSettingsRepository(context: Context, scope: CoroutineScope) : Set
         store.edit { if (region == null) it.remove(REGION) else it[REGION] = region.uppercase() }
     }
 
+    override suspend fun setUseSystemColors(enabled: Boolean) {
+        store.edit { it[SYSTEM_COLORS] = enabled }
+    }
+
     private companion object {
         val THEME = stringPreferencesKey("theme_mode")
         val DEFAULT_SIM = stringPreferencesKey("default_sim")
         val SIM_BY_NUMBER = stringPreferencesKey("sim_by_number")
         val REGION = stringPreferencesKey("region_override")
+        val SYSTEM_COLORS = booleanPreferencesKey("use_system_colors")
     }
 }

@@ -8,32 +8,29 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FolderOff
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,17 +44,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
+import com.qtekfun.ultimatephone.core.designsystem.ConfirmDialog
+import com.qtekfun.ultimatephone.core.designsystem.EmptyState
+import com.qtekfun.ultimatephone.core.designsystem.GroupedItem
+import com.qtekfun.ultimatephone.core.designsystem.ScreenScaffold
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
 import com.qtekfun.ultimatephone.core.recording.RecordingFormatters
 import com.qtekfun.ultimatephone.core.recording.RecordingNames
 import com.qtekfun.ultimatephone.core.recording.RecordingStorage
 
 /** Settings > Call recording > Recordings. */
 @Suppress("DEPRECATION") // The Slider overload with a plain value is the simple one; SliderState needs hoisting for nothing here.
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordingsRoute(onBack: () -> Unit, viewModel: RecordingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,38 +87,39 @@ fun RecordingsRoute(onBack: () -> Unit, viewModel: RecordingsViewModel = hiltVie
     val playFailedText = stringResource(R.string.recording_play_failed)
     LaunchedEffect(playFailed) { if (playFailed) Toast.makeText(context, playFailedText, Toast.LENGTH_LONG).show() }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.recording_list_title)) },
-                windowInsets = WindowInsets(0),
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.recording_back)) }
-                }
-            )
-        },
-        contentWindowInsets = WindowInsets(0)
-    ) { padding ->
+    ScreenScaffold(title = stringResource(R.string.recording_list_title), onBack = onBack) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
             when {
                 state.loading -> Unit
-                !state.hasFolder -> EmptyText(R.string.recording_list_no_folder)
-                state.items.isEmpty() -> EmptyText(R.string.recording_list_empty)
+                !state.hasFolder -> EmptyState(
+                    icon = Icons.Filled.FolderOff,
+                    title = stringResource(R.string.recording_list_title),
+                    body = stringResource(R.string.recording_list_no_folder),
+                    modifier = Modifier.align(Alignment.Center)
+                )
+                state.items.isEmpty() -> EmptyState(
+                    icon = Icons.Filled.Mic,
+                    title = stringResource(R.string.recording_list_title),
+                    body = stringResource(R.string.recording_list_empty),
+                    modifier = Modifier.align(Alignment.Center)
+                )
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    contentPadding = PaddingValues(vertical = Spacing.Small)
                 ) {
-                    items(state.items, key = { it.uri.toString() }) { item ->
-                        RecordingCard(
-                            item = item,
-                            player = player?.takeIf { it.uri == item.uri },
-                            onPlay = { viewModel.togglePlay(item) },
-                            onSeek = viewModel::seek,
-                            onShare = { share(context, item) },
-                            onRename = { toRename = item },
-                            onDelete = { toDelete = item }
-                        )
+                    items(state.items.size, key = { state.items[it].uri.toString() }) { index ->
+                        val item = state.items[index]
+                        GroupedItem(index = index, count = state.items.size) {
+                            RecordingCard(
+                                item = item,
+                                player = player?.takeIf { it.uri == item.uri },
+                                onPlay = { viewModel.togglePlay(item) },
+                                onSeek = viewModel::seek,
+                                onShare = { share(context, item) },
+                                onRename = { toRename = item },
+                                onDelete = { toDelete = item }
+                            )
+                        }
                     }
                 }
             }
@@ -126,17 +127,14 @@ fun RecordingsRoute(onBack: () -> Unit, viewModel: RecordingsViewModel = hiltVie
     }
 
     toDelete?.let { item ->
-        AlertDialog(
-            onDismissRequest = { toDelete = null },
-            title = { Text(stringResource(R.string.recording_delete_title)) },
-            text = { Text(stringResource(R.string.recording_delete_message, item.name)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    toDelete = null
-                    viewModel.delete(item)
-                }) { Text(stringResource(R.string.recording_delete)) }
-            },
-            dismissButton = { TextButton(onClick = { toDelete = null }) { Text(stringResource(R.string.recording_cancel)) } }
+        ConfirmDialog(
+            title = stringResource(R.string.recording_delete_title),
+            body = stringResource(R.string.recording_delete_message, item.name),
+            confirmLabel = stringResource(R.string.recording_delete),
+            dismissLabel = stringResource(R.string.recording_cancel),
+            onConfirm = { viewModel.delete(item) },
+            onDismiss = { toDelete = null },
+            destructive = true
         )
     }
     toRename?.let { item ->
@@ -148,13 +146,6 @@ fun RecordingsRoute(onBack: () -> Unit, viewModel: RecordingsViewModel = hiltVie
                 viewModel.rename(item, it)
             }
         )
-    }
-}
-
-@Composable
-private fun EmptyText(text: Int) {
-    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-        Text(stringResource(text), style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -180,56 +171,54 @@ private fun RecordingCard(
         ?: stringResource(R.string.recording_item_subtitle_no_duration, date, size)
     val playing = player?.playing == true
 
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
-            Column(modifier = Modifier.semantics(mergeDescendants = true) {}) {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            if (player != null && player.ready) {
-                val time =
-                    stringResource(
-                        R.string.recording_player_time,
-                        RecordingFormatters.duration(player.positionMs.toLong()),
-                        RecordingFormatters.duration(player.durationMs.toLong())
-                    )
-                val positionLabel = stringResource(R.string.recording_position)
-                Slider(
-                    value = player.positionMs.toFloat(),
-                    onValueChange = { onSeek(it.toInt()) },
-                    valueRange = 0f..player.durationMs.coerceAtLeast(1).toFloat(),
-                    modifier = Modifier.padding(end = 8.dp).semantics {
-                        contentDescription = positionLabel
-                        stateDescription = time
-                    }
+    Column(modifier = Modifier.padding(start = Spacing.Medium, end = Spacing.Small, top = Spacing.Medium - Spacing.XSmall, bottom = Spacing.XSmall)) {
+        Column(modifier = Modifier.semantics(mergeDescendants = true) {}) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (player != null && player.ready) {
+            val time =
+                stringResource(
+                    R.string.recording_player_time,
+                    RecordingFormatters.duration(player.positionMs.toLong()),
+                    RecordingFormatters.duration(player.durationMs.toLong())
                 )
-                Text(time, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = 4.dp))
+            val positionLabel = stringResource(R.string.recording_position)
+            Slider(
+                value = player.positionMs.toFloat(),
+                onValueChange = { onSeek(it.toInt()) },
+                valueRange = 0f..player.durationMs.coerceAtLeast(1).toFloat(),
+                modifier = Modifier.padding(end = Spacing.Small).semantics {
+                    contentDescription = positionLabel
+                    stateDescription = time
+                }
+            )
+            Text(time, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(bottom = Spacing.XSmall))
+        }
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            // Each button names the recording it acts on, since TalkBack reads them one by one.
+            val playLabel =
+                stringResource(R.string.recording_action_for, stringResource(if (playing) R.string.recording_pause else R.string.recording_play), title)
+            IconButton(onClick = onPlay) {
+                Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, contentDescription = playLabel)
             }
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                // Each button names the recording it acts on, since TalkBack reads them one by one.
-                val playLabel =
-                    stringResource(R.string.recording_action_for, stringResource(if (playing) R.string.recording_pause else R.string.recording_play), title)
-                IconButton(onClick = onPlay) {
-                    Icon(if (playing) Icons.Filled.Pause else Icons.Filled.PlayArrow, contentDescription = playLabel)
-                }
-                IconButton(onClick = onShare) {
-                    Icon(
-                        Icons.Filled.Share,
-                        contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_share), title)
-                    )
-                }
-                IconButton(onClick = onRename) {
-                    Icon(
-                        Icons.Filled.Edit,
-                        contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_rename), title)
-                    )
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_delete), title)
-                    )
-                }
+            IconButton(onClick = onShare) {
+                Icon(
+                    Icons.Filled.Share,
+                    contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_share), title)
+                )
+            }
+            IconButton(onClick = onRename) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_rename), title)
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.recording_action_for, stringResource(R.string.recording_delete), title)
+                )
             }
         }
     }
@@ -240,6 +229,7 @@ private fun RenameDialog(item: RecordingItem, onDismiss: () -> Unit, onConfirm: 
     var typed by remember { mutableStateOf(item.name.removeSuffix(RecordingNames.extensionOf(item.name))) }
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.extraLarge,
         title = { Text(stringResource(R.string.recording_rename_title)) },
         text = {
             OutlinedTextField(
@@ -251,11 +241,15 @@ private fun RenameDialog(item: RecordingItem, onDismiss: () -> Unit, onConfirm: 
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(typed) }, enabled = RecordingNames.renamed(typed, item.name) != null) {
-                Text(stringResource(R.string.recording_rename_confirm))
-            }
+            TextButton(
+                onClick = { onConfirm(typed) },
+                enabled = RecordingNames.renamed(typed, item.name) != null,
+                modifier = Modifier.heightIn(min = Spacing.MinTarget)
+            ) { Text(stringResource(R.string.recording_rename_confirm)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.recording_cancel)) } }
+        dismissButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = Spacing.MinTarget)) { Text(stringResource(R.string.recording_cancel)) }
+        }
     )
 }
 

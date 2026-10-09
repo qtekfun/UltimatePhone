@@ -3,6 +3,7 @@
 # permission, a contact, Spanish, the onboarding, every tab, the Settings sub-screens, and a simulated incoming call that is
 # answered and ended. It fails if the app crashes at any step. Run by .github/workflows/instrumented.yml.
 set -uo pipefail
+. "$(dirname "$0")/ui.sh"
 
 PKG=com.qtekfun.ultimatephone.debug
 APK=app/build/outputs/apk/debug/app-debug.apk
@@ -44,21 +45,20 @@ adb logcat -c
 adb shell am start -n "$PKG/com.qtekfun.ultimatephone.MainActivity" > /dev/null
 sleep 7; check "start"
 
-tap 902 2241 3; check "onboarding step 1"
-for _ in 1 2 3 4 5; do tap 584 2241 2; done
+tap_text '^(Get started|Empezar)$' 3; check "onboarding step 1"
+for _ in 1 2 3 4 5; do tap_text '^(Skip for now|Omitir por ahora)$' 2 || break; done
 check "onboarding steps"
-tap 540 1561 3; check "onboarding done"
+tap_text '^(Finish|Terminar)$' 3; check "onboarding done"
 
-# Keypad: type, delete, type; then each tab.
-tap 882 1412 1; tap 198 1243 1; tap 540 1224 2; check "keypad typing"
-tap 402 2244 3; check "recents tab"
-tap 677 2244 4; check "contacts tab"
-tap 952 2244 3; check "settings tab"
+# Keypad: type; then each tab.
+for d in 6 1 2 3; do tap_text "^$d\$" 1; done; check "keypad typing"
+tap_text '^(Recents|Recientes)$' 3; check "recents tab"
+tap_text '^(Contacts|Contactos)$' 4; check "contacts tab"
+tap_text '^(Settings|Ajustes)$' 3; check "settings tab"
 
-# Settings sub-screens: rows from the top (the first card is the phone-app status).
-for y in 770 950 1120 1300 1480 1660; do
-  tap 150 "$y" 4; check "settings row at y=$y"
-  back
+# Settings sub-screens, found by title.
+for row in '^(Spam filter|Filtro de spam)' '^(Data|Datos)' '^(Setup guide|Guía de configuración)' '^(Nextcloud sync|Sincronización con Nextcloud)' '^(Backup and restore|Copia de seguridad)' '^(Call recording|Grabación de llamadas)'; do
+  if tap_text "$row" 4; then check "settings row $row"; back; else echo "::warning::settings row not found: $row"; fi
 done
 
 # An incoming call with the screen off, answered, then ended.

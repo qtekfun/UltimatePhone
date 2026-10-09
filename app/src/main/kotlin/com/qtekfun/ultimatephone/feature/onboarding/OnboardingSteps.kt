@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -32,6 +34,11 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.qtekfun.ultimatephone.R
+import com.qtekfun.ultimatephone.core.designsystem.BannerKind
+import com.qtekfun.ultimatephone.core.designsystem.SettingsGroup
+import com.qtekfun.ultimatephone.core.designsystem.SettingsRow
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
+import com.qtekfun.ultimatephone.core.designsystem.StatusChip
 import com.qtekfun.ultimatephone.data.NetworkState
 import com.qtekfun.ultimatephone.data.PackCatalog
 import com.qtekfun.ultimatephone.data.RegionGroup
@@ -60,7 +67,9 @@ internal fun DataStep(state: OnboardingUiState, viewModel: OnboardingViewModel) 
                 Text(stringResource(R.string.onboarding_data_cached), style = MaterialTheme.typography.bodySmall)
                 OutlinedButton(onClick = viewModel::retryCatalog, enabled = !state.catalogRefreshing) { Text(stringResource(R.string.data_retry)) }
             }
-            state.regions.forEach { group -> RegionRow(group, group.region in state.selectedRegions) { group.region?.let(viewModel::toggleRegion) } }
+            SettingsGroup {
+                state.regions.forEach { group -> RegionRow(group, group.region in state.selectedRegions) { group.region?.let(viewModel::toggleRegion) } }
+            }
             SelectionTotal(state)
         }
     }
@@ -70,13 +79,13 @@ internal fun DataStep(state: OnboardingUiState, viewModel: OnboardingViewModel) 
 private fun RegionRow(group: RegionGroup, selected: Boolean, onToggle: () -> Unit) {
     val name = group.region?.let { PackCatalog.regionName(it) }.orEmpty()
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(value = selected, role = Role.Checkbox, onValueChange = {
+        modifier = Modifier.fillMaxWidth().heightIn(min = Spacing.RowHeight).toggleable(value = selected, role = Role.Checkbox, onValueChange = {
             onToggle()
-        }).padding(vertical = 4.dp),
+        }).padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(checked = selected, onCheckedChange = null)
-        Column(modifier = Modifier.padding(start = 12.dp)) {
+        Column(modifier = Modifier.padding(start = Spacing.Medium)) {
             Text(name, style = MaterialTheme.typography.titleMedium)
             Text(
                 stringResource(R.string.onboarding_data_size, SizeFormat.format(group.downloadBytes), SizeFormat.format(group.installedBytes)),
@@ -99,7 +108,8 @@ private fun SelectionTotal(state: OnboardingUiState) {
                 SizeFormat.format(state.selectedInstalledBytes)
             )
         },
-        style = MaterialTheme.typography.bodyMedium
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -111,7 +121,7 @@ internal fun NextcloudStep(formOpen: Boolean, onOpenForm: () -> Unit, onCloseFor
     if (formOpen) {
         // The form tests the connection, saves the account and turns sync on. Its "Not now" only folds it away, so the step
         // still offers "Set up later" and the usual skip.
-        NextcloudSetupContent(onDone = onConnected, onSkip = onCloseForm, scrollable = false)
+        SettingsGroup { NextcloudSetupContent(onDone = onConnected, onSkip = onCloseForm, scrollable = false, modifier = CardContentPadding) }
     } else {
         Button(onClick = onOpenForm, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.onboarding_nextcloud_now)) }
     }
@@ -125,30 +135,26 @@ internal fun BatteryStep(state: OnboardingUiState) {
     val context = LocalContext.current
     StepTitle(R.string.onboarding_battery_title, R.string.onboarding_battery_body)
     if (state.manufacturer.isNotBlank()) {
-        Text(
-            stringResource(R.string.onboarding_battery_detected, state.manufacturer, stringResource(guideName(state.guideId))),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary
+        StatusChip(
+            text = stringResource(R.string.onboarding_battery_detected, state.manufacturer, stringResource(guideName(state.guideId))),
+            icon = Icons.Filled.PhoneAndroid
         )
     }
     state.topics.forEach { topic ->
         var failed by remember(topic.topic) { mutableStateOf(false) }
-        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(topicTitle(topic.topic)), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-                Text(guideText(topic.textKey, topic.topic), style = MaterialTheme.typography.bodyMedium)
-                if (topic.intents.isNotEmpty()) {
-                    OutlinedButton(onClick = {
-                        failed = !SystemSettingsLauncher.open(context, topic)
-                    }) { Text(stringResource(R.string.onboarding_open_settings)) }
-                }
-                if (failed) {
-                    Text(
-                        stringResource(R.string.onboarding_open_failed),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+        StepCard(topicTitle(topic.topic), guideText(topic.textKey, topic.topic)) {
+            if (topic.intents.isNotEmpty()) {
+                FilledTonalButton(
+                    onClick = { failed = !SystemSettingsLauncher.open(context, topic) },
+                    modifier = Modifier.heightIn(min = Spacing.MinTarget)
+                ) { Text(stringResource(R.string.onboarding_open_settings)) }
+            }
+            if (failed) {
+                Text(
+                    stringResource(R.string.onboarding_open_failed),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
@@ -185,8 +191,10 @@ private fun guideName(id: String): Int = when (id) {
 @Composable
 internal fun SummaryStep(state: OnboardingUiState, onFinish: (download: Boolean) -> Unit) {
     StepTitle(R.string.onboarding_summary_title, R.string.onboarding_summary_body)
-    SummaryLine(R.string.onboarding_summary_phone, state.roles.dialerHeld)
-    SummaryLine(R.string.onboarding_summary_screening, state.roles.screeningHeld)
+    SettingsGroup {
+        SummaryLine(R.string.onboarding_summary_phone, state.roles.dialerHeld)
+        SummaryLine(R.string.onboarding_summary_screening, state.roles.screeningHeld)
+    }
     val regionNames = state.selectedRegions.sorted().joinToString { PackCatalog.regionName(it) }
     Text(
         if (state.selectedRegions.isEmpty()) {
@@ -219,7 +227,7 @@ internal fun SummaryStep(state: OnboardingUiState, onFinish: (download: Boolean)
             style = MaterialTheme.typography.bodyMedium
         )
     }
-    Button(onClick = { onFinish(downloading) }, modifier = Modifier.fillMaxWidth()) {
+    Button(onClick = { onFinish(downloading) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
         Text(stringResource(if (downloading) R.string.onboarding_summary_finish_download else R.string.onboarding_summary_finish))
     }
     if (downloading) {
@@ -229,9 +237,16 @@ internal fun SummaryStep(state: OnboardingUiState, onFinish: (download: Boolean)
 
 @Composable
 private fun SummaryLine(label: Int, done: Boolean) {
-    Text(
-        stringResource(label) + ": " + stringResource(if (done) R.string.onboarding_summary_yes else R.string.onboarding_summary_not_yet),
-        style = MaterialTheme.typography.bodyLarge
+    // One item for TalkBack: "<label>, <state>". The chip carries a check mark, so the state is not colour alone.
+    SettingsRow(
+        title = stringResource(label),
+        trailing = {
+            StatusChip(
+                text = stringResource(if (done) R.string.onboarding_summary_yes else R.string.onboarding_summary_not_yet),
+                icon = if (done) Icons.Filled.CheckCircle else null,
+                kind = if (done) BannerKind.Success else BannerKind.Info
+            )
+        }
     )
 }
 

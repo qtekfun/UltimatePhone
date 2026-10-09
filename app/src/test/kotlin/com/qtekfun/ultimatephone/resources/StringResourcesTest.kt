@@ -19,7 +19,8 @@ class StringResourcesTest {
 
     private val resDirs: List<File> = listOf(
         File("src/main/res"),
-        File("../core/telecom/src/main/res")
+        File("../core/telecom/src/main/res"),
+        File("../core/designsystem/src/main/res")
     ).filter { it.isDirectory }
 
     private fun load(qualifier: String): Map<String, Entry> {
@@ -59,7 +60,7 @@ class StringResourcesTest {
 
     @Test
     fun resourceDirectoriesAreFound() {
-        assertTrue("res dirs not found from ${File(".").absolutePath}", resDirs.size == 2)
+        assertTrue("res dirs not found from ${File(".").absolutePath}", resDirs.size == 3)
         assertTrue(en.isNotEmpty())
     }
 

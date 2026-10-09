@@ -2,8 +2,6 @@ package com.qtekfun.ultimatephone.feature.recents
 
 import android.text.format.DateUtils
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMade
 import androidx.compose.material.icons.automirrored.filled.CallMissed
@@ -12,21 +10,20 @@ import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.PhoneCallback
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CallEnd
+import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material.icons.filled.Voicemail
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.calllog.CallType
 import com.qtekfun.ultimatephone.core.calllog.DaySection
+import com.qtekfun.ultimatephone.core.designsystem.StatusChip
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -69,14 +66,7 @@ fun simText(sim: SimAccount): String = if (sim.slot >= 0) stringResource(R.strin
 
 @Composable
 fun SimBadge(sim: SimAccount, modifier: Modifier = Modifier) {
-    Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondaryContainer, modifier = modifier) {
-        Text(
-            text = simText(sim),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-        )
-    }
+    StatusChip(text = simText(sim), icon = Icons.Filled.SimCard, modifier = modifier)
 }
 
 @Composable

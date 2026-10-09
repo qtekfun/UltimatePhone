@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="crash_title">UltimatePhone closed unexpectedly</string>
+    <string name="crash_body">Nothing has been sent anywhere. This is what the app recorded on this phone, with phone numbers hidden. You can copy it or share it to report the problem, then close this screen.</string>
+    <string name="crash_copy">Copy the report</string>
+    <string name="crash_share">Share the report</string>
+    <string name="crash_close">Close and delete the report</string>
+    <string name="crash_copied">Copied</string>
+</resources>

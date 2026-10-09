@@ -1,6 +1,8 @@
 package com.qtekfun.ultimatephone
 
 import android.app.Application
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import com.qtekfun.ultimatephone.core.contacts.ContactsRepository
 import com.qtekfun.ultimatephone.core.phonenumber.LibPhoneNormalizer
@@ -8,6 +10,8 @@ import com.qtekfun.ultimatephone.core.telecom.CallerLabel
 import com.qtekfun.ultimatephone.core.telecom.CallerLabelResolver
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.TelecomCalls
+import com.qtekfun.ultimatephone.crash.CrashReportActivity
+import com.qtekfun.ultimatephone.crash.CrashReporter
 import com.qtekfun.ultimatephone.data.BusinessFinder
 import com.qtekfun.ultimatephone.data.CallerLabelProvider
 import com.qtekfun.ultimatephone.data.DataStartup
@@ -62,13 +66,32 @@ class UltimatePhoneApp : Application() {
     @ApplicationScope
     lateinit var appScope: CoroutineScope
 
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        // First thing, before Hilt builds anything: if the process dies, the next start can show why.
+        CrashReporter.install(base)
+    }
+
     override fun onCreate() {
         super.onCreate()
+        showPreviousCrash()
         DebugStrictMode.install()
         // Callers are named from the contacts first, then from the installed business packs. The spam verdict plugs in later.
         // Only the wiring is done here; the repositories behind it are created when the first call needs a name.
         TelecomCalls.labelResolver = LazyCallerLabelResolver { CallerLabelProvider(contacts.get(), businesses.get()) }
         appScope.launch { warmUp() }
+    }
+
+    /** If the last run crashed, put its report in front of the user. Starting an activity from a background start can be refused; that is fine. */
+    @Suppress("TooGenericExceptionCaught") // Never let the crash screen itself take the app down.
+    private fun showPreviousCrash() {
+        try {
+            if (CrashReporter.pending(this) != null) {
+                startActivity(Intent(this, CrashReportActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not show the crash report: ${e.javaClass.simpleName}")
+        }
     }
 
     /** Runs on the application scope (Dispatchers.Default). Each step is independent, so one failing does not stop the rest. */

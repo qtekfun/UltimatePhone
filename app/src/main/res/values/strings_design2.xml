@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared state descriptions -->
+    <string name="design2_expanded">Expanded</string>
+    <string name="design2_collapsed">Collapsed</string>
+
+    <!-- Recents -->
+    <string name="design2_recents_empty_title">No calls here</string>
+</resources>

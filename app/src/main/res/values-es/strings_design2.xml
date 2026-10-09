@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Descripciones de estado compartidas -->
+    <string name="design2_expanded">Expandido</string>
+    <string name="design2_collapsed">Contraído</string>
+
+    <!-- Recientes -->
+    <string name="design2_recents_empty_title">No hay llamadas</string>
+</resources>

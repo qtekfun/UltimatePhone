@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Appearance -->
+    <string name="design_system_colors_title">Use system colours</string>
+    <string name="design_system_colors_summary">Follow your wallpaper (Material You) instead of the app\'s teal and mint.</string>
+</resources>

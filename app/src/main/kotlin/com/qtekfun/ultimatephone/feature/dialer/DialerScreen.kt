@@ -8,15 +8,21 @@ import android.media.ToneGenerator
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -32,18 +39,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -74,12 +73,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
-import com.qtekfun.ultimatephone.core.designsystem.Avatar
-import com.qtekfun.ultimatephone.core.designsystem.callColors
+import com.qtekfun.ultimatephone.core.designsystem.AvatarStyled
+import com.qtekfun.ultimatephone.core.designsystem.BannerKind
+import com.qtekfun.ultimatephone.core.designsystem.CallButtonKind
+import com.qtekfun.ultimatephone.core.designsystem.CallPillButton
+import com.qtekfun.ultimatephone.core.designsystem.InfoBanner
+import com.qtekfun.ultimatephone.core.designsystem.SegmentedChoice
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
+import com.qtekfun.ultimatephone.core.designsystem.StatusChip
+import com.qtekfun.ultimatephone.core.designsystem.UiAction
+import com.qtekfun.ultimatephone.core.designsystem.motionEffectsSpec
+import com.qtekfun.ultimatephone.core.designsystem.pressScale
+import com.qtekfun.ultimatephone.core.designsystem.tabularFigures
 import com.qtekfun.ultimatephone.data.BusinessCategories
 import com.qtekfun.ultimatephone.data.BusinessHit
-import com.qtekfun.ultimatephone.feature.data.BusinessAvatar
-import com.qtekfun.ultimatephone.feature.data.BusinessCategoryLine
+import com.qtekfun.ultimatephone.feature.data.businessCategoryLabel
+import com.qtekfun.ultimatephone.feature.data.businessIcon
 
 private data class Key(val char: Char, val letters: String = "")
 
@@ -90,7 +99,6 @@ private val KEYS = listOf(
     listOf(Key('*'), Key('0', "+"), Key('#'))
 )
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewModel: DialerViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -141,18 +149,14 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
             onPaste = { text -> viewModel.paste(text) }
         )
         if (state.sims.size > 1) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(vertical = 4.dp)
-            ) {
-                state.sims.forEach { sim ->
-                    FilterChip(
-                        selected = sim.key == state.selectedSimKey,
-                        onClick = { viewModel.selectSim(sim.key) },
-                        label = { Text(simLabel(sim.slot, sim.label)) }
-                    )
-                }
-            }
+            // One segment per SIM: the one used for the next call is filled and checked.
+            SegmentedChoice(
+                options = state.sims,
+                selected = state.sims.firstOrNull { it.key == state.selectedSimKey },
+                onSelected = { sim -> viewModel.selectSim(sim.key) },
+                label = { sim -> simLabel(sim.slot, sim.label) },
+                modifier = Modifier.padding(vertical = Spacing.Small)
+            )
         }
     }
 
@@ -160,10 +164,13 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
         // The keypad and the call button never give way: the suggestions are what shrinks (down to nothing) on a short screen.
         val landscape = maxWidth > maxHeight
         val compact = maxHeight < COMPACT_HEIGHT
-        val keyHeight = if (compact) 52.dp else 64.dp
-        val callSize = if (compact) 64.dp else 72.dp
+        val keyHeight = if (compact) 52.dp else 68.dp
+        val callSize = if (compact) 64.dp else 76.dp
         if (landscape) {
-            Row(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxSize().padding(horizontal = Spacing.Medium),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)
+            ) {
                 Column(modifier = Modifier.weight(1f).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
                     if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
                     suggestions(Modifier.weight(1f).fillMaxWidth())
@@ -175,37 +182,38 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
                     verticalArrangement = Arrangement.Center
                 ) {
                     Keypad(keyHeight = 48.dp, onKey = onKey, onLongZero = onLongZero)
-                    CallButton(size = callSize) { placeCall { viewModel.call() } }
+                    DialCallButton(size = callSize) { placeCall { viewModel.call() } }
                 }
             }
         } else {
             // With very large text the whole screen scrolls instead of squeezing the keypad.
             val bigText = LocalDensity.current.fontScale >= BIG_FONT_SCALE
             Column(
-                modifier = Modifier.fillMaxSize().then(if (bigText) Modifier.verticalScroll(rememberScrollState()) else Modifier).padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxSize().then(if (bigText) Modifier.verticalScroll(rememberScrollState()) else Modifier)
+                    .padding(horizontal = Spacing.Medium),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
                 suggestions(if (bigText) Modifier.fillMaxWidth().heightIn(max = 120.dp) else Modifier.weight(1f).fillMaxWidth())
                 numberAndSims()
                 Keypad(keyHeight = keyHeight, onKey = onKey, onLongZero = onLongZero)
-                CallButton(size = callSize) { placeCall { viewModel.call() } }
+                DialCallButton(size = callSize) { placeCall { viewModel.call() } }
             }
         }
     }
 }
 
+/** The big green call pill under the keypad. */
 @Composable
-private fun CallButton(size: Dp, onClick: () -> Unit) {
-    val colors = callColors()
-    FilledIconButton(
+private fun DialCallButton(size: Dp, onClick: () -> Unit) {
+    CallPillButton(
+        kind = CallButtonKind.Answer,
+        label = stringResource(R.string.dialer_call),
         onClick = onClick,
-        modifier = Modifier.padding(vertical = 8.dp).size(width = size * 2, height = size),
-        shape = RoundedCornerShape(size / 2),
-        colors = IconButtonDefaults.filledIconButtonColors(containerColor = colors.answer, contentColor = colors.onAnswer)
-    ) {
-        Icon(Icons.Filled.Call, contentDescription = stringResource(R.string.dialer_call), modifier = Modifier.size(32.dp))
-    }
+        modifier = Modifier.padding(vertical = Spacing.Small).width(size * 2.6f),
+        height = size,
+        showLabel = false
+    )
 }
 
 @Composable
@@ -213,16 +221,13 @@ private fun simLabel(slot: Int, label: String): String = if (slot >= 0) stringRe
 
 @Composable
 private fun DefaultPhoneBanner(onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.phone_role_banner_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-            Text(stringResource(R.string.phone_role_banner_body), style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = onClick) { Text(stringResource(R.string.phone_role_banner_action)) }
-        }
-    }
+    InfoBanner(
+        kind = BannerKind.Info,
+        title = stringResource(R.string.phone_role_banner_title),
+        body = stringResource(R.string.phone_role_banner_body),
+        action = UiAction(stringResource(R.string.phone_role_banner_action), onClick),
+        modifier = Modifier.padding(top = Spacing.Small)
+    )
 }
 
 @Composable
@@ -234,45 +239,62 @@ private fun Suggestions(
     onBusinessClick: (BusinessHit) -> Unit
 ) {
     val callLabel = stringResource(R.string.dialer_call)
-    LazyColumn(modifier = modifier, reverseLayout = true, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    LazyColumn(modifier = modifier, reverseLayout = true, verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
         items(suggestions, key = { it.lookupKey + it.number }) { suggestion ->
-            Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TARGET)
-                    .combinedClickable(role = Role.Button, onClickLabel = callLabel, onClick = { onClick(suggestion) })
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Avatar(name = suggestion.displayName)
-                Column {
+            SuggestionCard(callLabel = callLabel, onClick = { onClick(suggestion) }) {
+                AvatarStyled(name = suggestion.displayName, size = 44.dp)
+                Column(modifier = Modifier.weight(1f)) {
                     Text(suggestion.displayName, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(suggestion.number, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        suggestion.number,
+                        style = MaterialTheme.typography.bodyMedium.tabularFigures(),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
         items(businesses, key = { "business:" + it.e164 }) { hit ->
-            Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TARGET)
-                    .combinedClickable(role = Role.Button, onClickLabel = callLabel, onClick = { onBusinessClick(hit) })
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                BusinessAvatar(BusinessCategories.iconName(hit.category))
-                Column {
+            val iconName = BusinessCategories.iconName(hit.category)
+            SuggestionCard(callLabel = callLabel, onClick = { onBusinessClick(hit) }) {
+                AvatarStyled(name = null, size = 44.dp, business = true, businessIcon = businessIcon(iconName))
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.XSmall)) {
                     Text(hit.name, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    BusinessCategoryLine(BusinessCategories.normalized(hit.category), BusinessCategories.iconName(hit.category))
+                    StatusChip(
+                        text = stringResource(businessCategoryLabel(BusinessCategories.normalized(hit.category))),
+                        icon = businessIcon(iconName)
+                    )
                 }
             }
         }
     }
 }
 
+/** One suggestion: a tonal card that is a single "Call" button (at least 48 dp, whole card). */
+@Composable
+private fun SuggestionCard(callLabel: String, onClick: () -> Unit, content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TARGET)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable(role = Role.Button, onClickLabel = callLabel, onClick = onClick)
+            .padding(horizontal = Spacing.Medium, vertical = Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.Medium),
+        content = content
+    )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Unit, onPaste: (String) -> Unit) {
     val context = LocalContext.current
-    Row(modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically) {
+    // A pill that holds the number and the delete button; empty until a digit is typed.
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.Small).heightIn(min = 72.dp)
+            .clip(RoundedCornerShape(36.dp)).background(MaterialTheme.colorScheme.surfaceContainer)
+            .padding(start = Spacing.Large, end = Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
             modifier = Modifier.weight(1f).combinedClickable(onClick = {}, onLongClickLabel = stringResource(R.string.dialer_paste), onLongClick = {
                 val clip = context.getSystemService(ClipboardManager::class.java).primaryClip?.getItemAt(0)?.coerceToText(context)?.toString()
@@ -283,7 +305,7 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
             // Long numbers shrink, and if they still do not fit the start is cut, so the last digits stay visible.
             Text(
                 text = text,
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = numberFontSizeSp(text.length).sp),
+                style = MaterialTheme.typography.displaySmall.tabularFigures().copy(fontSize = (numberFontSizeSp(text.length) * NUMBER_SCALE).sp),
                 // Two lines with very large text, so a long number is not cut to a few digits.
                 maxLines = if (LocalDensity.current.fontScale >= BIG_FONT_SCALE) 2 else 1,
                 overflow = TextOverflow.StartEllipsis,
@@ -291,7 +313,7 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
                 modifier = Modifier.semantics { contentDescription = text }
             )
         }
-        if (text.isNotEmpty()) {
+        AnimatedVisibility(visible = text.isNotEmpty()) {
             // One control: tap deletes a digit, long press clears the number. TalkBack offers both as actions.
             Box(
                 modifier = Modifier.minimumInteractiveComponentSize().clip(CircleShape).combinedClickable(
@@ -309,40 +331,59 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Keypad(keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
         KEYS.forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { key ->
-                    // "2 A B C" would be read letter by letter: say the digit (or the symbol's name) only.
-                    val keyName = when (key.char) {
-                        '*' -> stringResource(R.string.incall_key_star)
-                        '#' -> stringResource(R.string.incall_key_pound)
-                        else -> key.char.toString()
-                    }
-                    val plusLabel = if (key.char == '0') stringResource(R.string.dialer_key_plus) else null
-                    Surface(
-                        shape = RoundedCornerShape(28.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).heightIn(min = keyHeight).semantics { contentDescription = keyName }.combinedClickable(
-                            role = Role.Button,
-                            onLongClickLabel = plusLabel,
-                            onClick = { onKey(key.char) },
-                            onLongClick = { if (key.char == '0') onLongZero() else onKey(key.char) }
-                        )
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.clearAndSetSemantics {}
-                        ) {
-                            Text(key.char.toString(), style = MaterialTheme.typography.headlineSmall)
-                            if (key.letters.isNotEmpty()) Text(key.letters, style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small + Spacing.XSmall)) {
+                row.forEach { key -> DialKey(key, keyHeight, onKey, onLongZero, Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+/** A rounded-square key: a subtle tonal fill that turns into the primary container while pressed, with a spring press. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun DialKey(key: Key, keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit, modifier: Modifier) {
+    // "2 A B C" would be read letter by letter: say the digit (or the symbol's name) only.
+    val keyName = when (key.char) {
+        '*' -> stringResource(R.string.incall_key_star)
+        '#' -> stringResource(R.string.incall_key_pound)
+        else -> key.char.toString()
+    }
+    val plusLabel = if (key.char == '0') stringResource(R.string.dialer_key_plus) else null
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (pressed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+        animationSpec = motionEffectsSpec(),
+        label = "keyFill"
+    )
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = fill,
+        modifier = modifier.heightIn(min = keyHeight).pressScale(interaction).semantics { contentDescription = keyName }.combinedClickable(
+            interactionSource = interaction,
+            indication = LocalIndication.current,
+            role = Role.Button,
+            onLongClickLabel = plusLabel,
+            onClick = { onKey(key.char) },
+            onLongClick = { if (key.char == '0') onLongZero() else onKey(key.char) }
+        )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.clearAndSetSemantics {}
+        ) {
+            Text(key.char.toString(), style = MaterialTheme.typography.headlineMedium)
+            if (key.letters.isNotEmpty()) {
+                Text(
+                    key.letters,
+                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = KEY_LETTER_SPACING),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -380,3 +421,6 @@ private const val TONE_VOLUME = 80
 private val MIN_TARGET = 48.dp
 private val COMPACT_HEIGHT = 640.dp
 private const val BIG_FONT_SCALE = 1.5f
+
+private const val NUMBER_SCALE = 1.15f
+private val KEY_LETTER_SPACING = 1.5.sp

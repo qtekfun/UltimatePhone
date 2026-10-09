@@ -9,44 +9,43 @@ import android.provider.ContactsContract
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,9 +57,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -68,20 +64,30 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.contacts.ContactDetail
 import com.qtekfun.ultimatephone.core.contacts.ContactGroupState
+import com.qtekfun.ultimatephone.core.designsystem.ConfirmDialog
+import com.qtekfun.ultimatephone.core.designsystem.EmptyState
 import com.qtekfun.ultimatephone.core.designsystem.PermissionGate
+import com.qtekfun.ultimatephone.core.designsystem.ScreenScaffold
+import com.qtekfun.ultimatephone.core.designsystem.SettingsGroup
+import com.qtekfun.ultimatephone.core.designsystem.SettingsRow
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
+
+private val GroupModifier = Modifier.padding(horizontal = Spacing.Medium)
+private val DetailAvatarSize = 112.dp
 
 @Composable
 fun ContactDetailScreen(onBack: () -> Unit, onEdit: (String) -> Unit, onDialFallback: (String) -> Unit) {
     PermissionGate(
         permissions = listOf(Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS),
         rationale = stringResource(R.string.contacts_permission_rationale),
-        buttonLabel = stringResource(R.string.contacts_permission_button)
+        buttonLabel = stringResource(R.string.contacts_permission_button),
+        icon = Icons.Filled.AccountCircle
     ) {
         ContactDetailContentScreen(onBack, onEdit, onDialFallback)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ContactDetailContentScreen(
     onBack: () -> Unit,
@@ -114,45 +120,35 @@ private fun ContactDetailContentScreen(
         }
     }
 
-    Scaffold(
+    ScreenScaffold(
+        title = contact?.displayName?.ifBlank { null } ?: if (contact != null) stringResource(R.string.contact_unnamed) else "",
+        onBack = onBack,
         snackbarHost = { SnackbarHost(snackbar) },
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.contact_back)) }
-                },
-                actions = {
-                    if (contact != null) {
-                        val starLabel = stringResource(if (contact.starred) R.string.contact_unstar else R.string.contact_star)
-                        IconButton(onClick = { viewModel.toggleStar(contact.starred) }) {
-                            Icon(if (contact.starred) Icons.Filled.Star else Icons.Outlined.StarBorder, contentDescription = starLabel)
-                        }
-                        IconButton(onClick = {
-                            onEdit(contact.lookupKey)
-                        }) { Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.contact_edit)) }
-                        IconButton(onClick = { exportLauncher.launch(exportFileName(single = true)) }) {
-                            Icon(Icons.Outlined.FileDownload, contentDescription = stringResource(R.string.contactsadv_export_one))
-                        }
-                        IconButton(onClick = { share(context, contact.lookupKey) }) {
-                            Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.contact_share))
-                        }
-                        IconButton(onClick = {
-                            confirmDelete = true
-                        }) { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.contact_delete)) }
-                    }
+        actions = {
+            if (contact != null) {
+                val starLabel = stringResource(if (contact.starred) R.string.contact_unstar else R.string.contact_star)
+                IconButton(onClick = { viewModel.toggleStar(contact.starred) }) {
+                    Icon(if (contact.starred) Icons.Filled.Star else Icons.Outlined.StarBorder, contentDescription = starLabel)
                 }
-            )
+                IconButton(onClick = { onEdit(contact.lookupKey) }) {
+                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.contact_edit))
+                }
+                DetailMenu(
+                    onExport = { exportLauncher.launch(exportFileName(single = true)) },
+                    onShare = { share(context, contact.lookupKey) },
+                    onDelete = { confirmDelete = true }
+                )
+            }
         }
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
             when (val current = state) {
                 ContactDetailState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingIndicator() }
-                ContactDetailState.NotFound -> Text(
-                    stringResource(R.string.contact_not_found),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center).padding(24.dp)
+                ContactDetailState.NotFound -> EmptyState(
+                    icon = Icons.Filled.PersonOff,
+                    title = stringResource(R.string.contact_not_found),
+                    body = stringResource(R.string.design2_contact_missing_body),
+                    modifier = Modifier.align(Alignment.Center)
                 )
                 is ContactDetailState.Ready -> DetailBody(
                     contact = current.contact,
@@ -170,18 +166,46 @@ private fun ContactDetailContentScreen(
 
     if (confirmDelete && contact != null) {
         val shownName = contact.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
-        AlertDialog(
-            onDismissRequest = { confirmDelete = false },
-            title = { Text(stringResource(R.string.contact_delete_title)) },
-            text = { Text(stringResource(R.string.contact_delete_message, shownName)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDelete = false
-                    viewModel.delete(onDeleted = onBack)
-                }) { Text(stringResource(R.string.contact_delete)) }
-            },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.contact_cancel)) } }
+        ConfirmDialog(
+            title = stringResource(R.string.contact_delete_title),
+            body = stringResource(R.string.contact_delete_message, shownName),
+            confirmLabel = stringResource(R.string.contact_delete),
+            dismissLabel = stringResource(R.string.contact_cancel),
+            onConfirm = { viewModel.delete(onDeleted = onBack) },
+            onDismiss = { confirmDelete = false },
+            destructive = true
         )
+    }
+}
+
+@Composable
+private fun DetailMenu(onExport: () -> Unit, onShare: () -> Unit, onDelete: () -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.contactsadv_menu_more)) }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }, shape = MaterialTheme.shapes.medium) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.contactsadv_export_one)) },
+                onClick = {
+                    open = false
+                    onExport()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.contact_share)) },
+                onClick = {
+                    open = false
+                    onShare()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.contact_delete), color = MaterialTheme.colorScheme.error) },
+                onClick = {
+                    open = false
+                    onDelete()
+                }
+            )
+        }
     }
 }
 
@@ -190,74 +214,86 @@ private fun ContactDetailContentScreen(
 private fun DetailBody(contact: ContactDetail, groups: List<ContactGroupState>, onEditGroups: () -> Unit, onCall: (String) -> Unit) {
     val context = LocalContext.current
     val name = contact.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ContactAvatar(name = name, photoUri = contact.photoUri, size = 112.dp)
-            Text(name, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
-            if (contact.organization.isNotBlank()) {
-                Text(contact.organization, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = Spacing.Large),
+        verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
+    ) {
+        // The name is the screen title above; the header card shows who it is.
+        Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.surfaceContainer, modifier = GroupModifier.fillMaxWidth()) {
+            Column(
+                Modifier.fillMaxWidth().padding(Spacing.Large),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.Small)
+            ) {
+                ContactAvatar(name = name, photoUri = contact.photoUri, size = DetailAvatarSize)
+                if (contact.organization.isNotBlank()) {
+                    Text(
+                        contact.organization,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
 
         if (contact.phones.isNotEmpty()) {
-            Section(R.string.contact_section_phones)
-            contact.phones.forEach { stored ->
-                val number = stored.value.value
-                ListItem(
-                    headlineContent = { Text(number) },
-                    supportingContent = { Text(stored.typeLabel) },
-                    trailingContent = {
-                        // The whole row calls; the button is the same action for sighted users, so TalkBack skips it.
-                        FilledTonalIconButton(onClick = { onCall(number) }, modifier = Modifier.clearAndSetSemantics {}) {
-                            Icon(Icons.Filled.Call, contentDescription = null)
-                        }
-                    },
-                    modifier = Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.contact_call, number)) { onCall(number) }
-                )
+            SettingsGroup(title = stringResource(R.string.contact_section_phones), modifier = GroupModifier) {
+                contact.phones.forEach { stored ->
+                    val number = stored.value.value
+                    SettingsRow(
+                        title = number,
+                        summary = stored.typeLabel,
+                        icon = Icons.Filled.Call,
+                        onClick = { onCall(number) },
+                        onClickLabel = stringResource(R.string.contact_call, number),
+                        trailing = {}
+                    )
+                }
             }
         }
         if (contact.emails.isNotEmpty()) {
-            Section(R.string.contact_section_emails)
-            contact.emails.forEach { stored ->
-                val address = stored.value.value
-                ListItem(
-                    headlineContent = { Text(address) },
-                    supportingContent = { Text(stored.typeLabel) },
-                    trailingContent = { Icon(Icons.Filled.Email, contentDescription = null) },
-                    modifier = Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.contact_email_to, address)) {
-                        sendEmail(context, address)
-                    }
-                )
+            SettingsGroup(title = stringResource(R.string.contact_section_emails), modifier = GroupModifier) {
+                contact.emails.forEach { stored ->
+                    val address = stored.value.value
+                    SettingsRow(
+                        title = address,
+                        summary = stored.typeLabel,
+                        icon = Icons.Filled.Email,
+                        onClick = { sendEmail(context, address) },
+                        onClickLabel = stringResource(R.string.contact_email_to, address),
+                        trailing = {}
+                    )
+                }
             }
         }
         contact.birthday?.let { birthday ->
-            Section(R.string.contact_section_birthday)
-            ListItem(headlineContent = { Text(birthdayText(context, birthday)) })
-        }
-        if (contact.notes.isNotBlank()) {
-            Section(R.string.contact_section_notes)
-            ListItem(headlineContent = { Text(contact.notes) })
-        }
-        contact.account?.let { account ->
-            Section(R.string.contact_section_account)
-            ListItem(headlineContent = { Text(accountText(context, account)) })
-        }
-        if (groups.isNotEmpty()) GroupsSection(groups, onEditGroups)
-    }
-}
-
-@Composable
-private fun GroupsSection(groups: List<ContactGroupState>, onEdit: () -> Unit) {
-    Section(R.string.contactsadv_detail_groups)
-    val joined = groups.filter { it.member }.joinToString(", ") { it.group.title }
-    ListItem(
-        headlineContent = { Text(joined.ifEmpty { stringResource(R.string.contactsadv_detail_groups_none) }) },
-        trailingContent = {
-            TextButton(onClick = onEdit, modifier = Modifier.defaultMinSize(minHeight = 48.dp)) {
-                Text(stringResource(R.string.contactsadv_detail_edit_groups))
+            SettingsGroup(title = stringResource(R.string.contact_section_birthday), modifier = GroupModifier) {
+                SettingsRow(title = birthdayText(context, birthday), icon = Icons.Filled.Cake)
             }
         }
-    )
+        if (contact.notes.isNotBlank()) {
+            SettingsGroup(title = stringResource(R.string.contact_section_notes), modifier = GroupModifier) {
+                SettingsRow(title = contact.notes, icon = Icons.Filled.Notes)
+            }
+        }
+        contact.account?.let { account ->
+            SettingsGroup(title = stringResource(R.string.contact_section_account), modifier = GroupModifier) {
+                SettingsRow(title = accountText(context, account), icon = Icons.Filled.AccountCircle)
+            }
+        }
+        if (groups.isNotEmpty()) {
+            val joined = groups.filter { it.member }.joinToString(", ") { it.group.title }
+            SettingsGroup(title = stringResource(R.string.contactsadv_detail_groups), modifier = GroupModifier) {
+                SettingsRow(
+                    title = joined.ifEmpty { stringResource(R.string.contactsadv_detail_groups_none) },
+                    icon = Icons.Filled.Groups,
+                    onClick = onEditGroups,
+                    onClickLabel = stringResource(R.string.contactsadv_detail_edit_groups)
+                )
+            }
+        }
+    }
 }
 
 /** Tick the groups the contact belongs to; a change is written at once. A group of an account this contact is not in cannot be ticked. */
@@ -265,13 +301,14 @@ private fun GroupsSection(groups: List<ContactGroupState>, onEdit: () -> Unit) {
 private fun GroupsDialog(groups: List<ContactGroupState>, onToggle: (Long, Boolean) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.extraLarge,
         title = { Text(stringResource(R.string.contactsadv_detail_groups_dialog)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 groups.forEach { entry ->
                     val enabled = entry.canChange || entry.member
                     Row(
-                        Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp).toggleable(
+                        Modifier.fillMaxWidth().heightIn(min = Spacing.MinTarget).toggleable(
                             value = entry.member,
                             enabled = enabled,
                             role = Role.Checkbox,
@@ -280,7 +317,7 @@ private fun GroupsDialog(groups: List<ContactGroupState>, onToggle: (Long, Boole
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(checked = entry.member, onCheckedChange = null, enabled = enabled)
-                        Column(Modifier.padding(start = 12.dp)) {
+                        Column(Modifier.padding(start = Spacing.Medium)) {
                             Text(entry.group.title, style = MaterialTheme.typography.bodyLarge)
                             if (!entry.canChange && !entry.member) {
                                 Text(
@@ -294,17 +331,9 @@ private fun GroupsDialog(groups: List<ContactGroupState>, onToggle: (Long, Boole
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.contactsadv_done)) } }
-    )
-}
-
-@Composable
-private fun Section(title: Int) {
-    Text(
-        text = stringResource(title),
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp).semantics { heading() }
+        confirmButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = Spacing.MinTarget)) { Text(stringResource(R.string.contactsadv_done)) }
+        }
     )
 }
 

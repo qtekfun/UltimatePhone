@@ -1,12 +1,9 @@
 package com.qtekfun.ultimatephone.feature.data
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -30,13 +27,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.qtekfun.ultimatephone.R
+import com.qtekfun.ultimatephone.core.designsystem.AvatarStyled
 import com.qtekfun.ultimatephone.data.BusinessCategories
 
 /** Material icon for an icon name from [BusinessCategories]. Unknown names get a generic shop. */
@@ -97,7 +94,5 @@ fun BusinessCategoryLine(category: String?, iconName: String?, modifier: Modifie
 /** Round avatar of a business: its category icon instead of initials. */
 @Composable
 fun BusinessAvatar(iconName: String?, modifier: Modifier = Modifier, size: Dp = 40.dp) {
-    Box(modifier = modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.tertiaryContainer), contentAlignment = Alignment.Center) {
-        Icon(businessIcon(iconName), contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(size / 2))
-    }
+    AvatarStyled(name = null, modifier = modifier, size = size, business = true, businessIcon = businessIcon(iconName))
 }

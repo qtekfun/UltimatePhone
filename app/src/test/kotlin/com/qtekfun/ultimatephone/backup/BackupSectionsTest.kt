@@ -50,6 +50,10 @@ private class FakeSettings : SettingsRepository {
     override suspend fun setRegionOverride(region: String?) {
         settings.value = settings.value.copy(regionOverride = region)
     }
+
+    override suspend fun setUseSystemColors(enabled: Boolean) {
+        settings.value = settings.value.copy(useSystemColors = enabled)
+    }
 }
 
 private class FakeSpamSettings : SpamSettingsRepository {

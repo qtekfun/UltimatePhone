@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.BuildConfig
 import com.qtekfun.ultimatephone.R
+import com.qtekfun.ultimatephone.core.designsystem.SwitchRow
 import com.qtekfun.ultimatephone.core.designsystem.ThemeMode
 import com.qtekfun.ultimatephone.navigation.ONBOARDING_ROUTE
 import com.qtekfun.ultimatephone.navigation.SETTINGS_BACKUP_ROUTE
@@ -85,6 +86,12 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
         ThemeMode.entries.forEach { mode ->
             RadioRow(stringResource(themeLabel(mode)), state.settings.themeMode == mode) { viewModel.setTheme(mode) }
         }
+        SwitchRow(
+            title = stringResource(R.string.design_system_colors_title),
+            summary = stringResource(R.string.design_system_colors_summary),
+            checked = state.settings.useSystemColors,
+            onCheckedChange = viewModel::setUseSystemColors
+        )
 
         if (state.sims.size > 1) {
             Section(R.string.settings_default_sim)

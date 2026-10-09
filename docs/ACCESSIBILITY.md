@@ -66,7 +66,8 @@ Test script (about 15 minutes, TalkBack on, then again with the font size at the
 
 - The dialer keypad and the in-call keys are touch-first; TalkBack users enter digits by double tap on each key (no typing field with a system keyboard).
 - The A-Z fast scroller is not available to TalkBack users (the list itself is fully scrollable and has headings).
-- Colours come from the dynamic Material You scheme chosen by the wallpaper; contrast of text on those surfaces is guaranteed by Material, but a very low-contrast wallpaper could in theory reduce it. The call green and red come from `:core:designsystem` and keep at least 4.5:1 (checked by its unit test) in light and dark.
+- Colours are the brand teal and mint scheme by default (every text pair is at least 4.5:1, checked by `BrandColorsTest`, see `docs/DESIGN.md`). With "Use system colours" on, they come from the dynamic Material You scheme chosen by the wallpaper; contrast of text on those surfaces is guaranteed by Material, but a very low-contrast wallpaper could in theory reduce it. The call green and red come from `:core:designsystem` and keep at least 4.5:1 (checked by its unit test) in light and dark.
+- Animations (key press, mute/hold/record state changes, the ringing pulse, tab transitions) are skipped when the system animation scale is 0.
 - A few labels that Android itself defines (names of OEM settings pages in the battery guide) are quoted as the manufacturer writes them and can differ by model and language.
 - Section titles for the system pickers (file chooser, contact picker) and the permission dialogs follow the system language and TalkBack settings, not the app.
 - Not verified without a device: real TalkBack speech output and focus order on each OEM, behaviour at display size "largest" on small phones, and the font scale above 2.0.

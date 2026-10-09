@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         whyNumber = WhyFlaggedLink.consume(intent)
         setContent {
             val prefs by settings.settings.collectAsStateWithLifecycle()
-            UltimatePhoneTheme(mode = prefs.themeMode) {
+            UltimatePhoneTheme(mode = prefs.themeMode, useSystemColors = prefs.useSystemColors) {
                 AppNavHost(initialDialNumber = dialNumber, whyFlaggedNumber = whyNumber, onWhyFlaggedHandled = { whyNumber = null })
             }
         }

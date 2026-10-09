@@ -176,7 +176,9 @@ private fun GroupRow(group: ContactGroup, onRename: () -> Unit, onDelete: () -> 
     val account = if (group.account.isLocal) "" else accountText(context, group.account) + " · "
     val readOnly = if (group.editable) "" else " · " + stringResource(R.string.contactsadv_groups_read_only)
     Row(
-        Modifier.fillMaxWidth().heightIn(min = Spacing.RowHeight).padding(start = Spacing.Medium, top = Spacing.Small, bottom = Spacing.Small, end = Spacing.Small),
+        Modifier.fillMaxWidth().heightIn(
+            min = Spacing.RowHeight
+        ).padding(start = Spacing.Medium, top = Spacing.Small, bottom = Spacing.Small, end = Spacing.Small),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)
     ) {

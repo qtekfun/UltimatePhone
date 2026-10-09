@@ -105,7 +105,9 @@ fun SpamListRoute(onBack: () -> Unit, viewModel: SpamListViewModel = hiltViewMod
 private fun EntryRow(entry: ListEntry, onRemove: () -> Unit) {
     val title = if (entry.kind == EntryKind.PREFIX) stringResource(R.string.spam_entry_prefix, entry.value) else entry.value
     Row(
-        Modifier.fillMaxWidth().heightIn(min = Spacing.RowHeight).padding(start = Spacing.Medium, top = Spacing.Small, bottom = Spacing.Small, end = Spacing.Small),
+        Modifier.fillMaxWidth().heightIn(
+            min = Spacing.RowHeight
+        ).padding(start = Spacing.Medium, top = Spacing.Small, bottom = Spacing.Small, end = Spacing.Small),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.Small)
     ) {

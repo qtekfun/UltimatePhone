@@ -1,0 +1,1 @@
+Call recording now switches to another microphone source when the first one records only silence, and says so if none works.

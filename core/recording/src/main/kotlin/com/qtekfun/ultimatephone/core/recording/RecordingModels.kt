@@ -34,7 +34,9 @@ enum class CaptureSource(val androidSource: Int, val isLine: Boolean) {
     VOICE_CALL(MediaRecorder.AudioSource.VOICE_CALL, true),
     VOICE_DOWNLINK(MediaRecorder.AudioSource.VOICE_DOWNLINK, true),
     MICROPHONE(MediaRecorder.AudioSource.MIC, false),
-    VOICE_RECOGNITION(MediaRecorder.AudioSource.VOICE_RECOGNITION, false)
+    VOICE_RECOGNITION(MediaRecorder.AudioSource.VOICE_RECOGNITION, false),
+    UNPROCESSED(MediaRecorder.AudioSource.UNPROCESSED, false),
+    CAMCORDER(MediaRecorder.AudioSource.CAMCORDER, false)
 }
 
 /** Why a recording did not start or had to end. */

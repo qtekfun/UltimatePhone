@@ -18,6 +18,7 @@ import com.qtekfun.ultimatephone.core.recording.RecordingStorage
 import com.qtekfun.ultimatephone.core.recording.SessionEvent
 import com.qtekfun.ultimatephone.core.recording.SessionMachine
 import com.qtekfun.ultimatephone.core.recording.SessionState
+import com.qtekfun.ultimatephone.core.recording.SilenceWatch
 import com.qtekfun.ultimatephone.di.ApplicationScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -25,6 +26,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -80,6 +82,7 @@ class RecordingEngine @Inject constructor(
     private var testing = false
     private var targetUri: Uri? = null
     private var targetFd: ParcelFileDescriptor? = null
+    private var watcher: Job? = null
 
     private fun dispatch(event: SessionEvent) = sessionState.update { SessionMachine.reduce(it, event) }
 
@@ -180,7 +183,62 @@ class RecordingEngine @Inject constructor(
         targetFd = started.fd
         dispatch(SessionEvent.Started(started.source, System.currentTimeMillis()))
         // The user may have pressed Stop while the file was being prepared.
-        if (sessionState.value is SessionState.Stopping) finish(null)
+        if (sessionState.value is SessionState.Stopping) finish(null) else watchForSilence(tree, config.format, started.source)
+    }
+
+    /**
+     * Some phones start a microphone source and then deliver only silence while a call is going on. Listens to the level
+     * and moves to the next microphone source when nothing is heard, ending as [FailureReason.NO_AUDIO] if all stay silent.
+     */
+    private fun watchForSilence(tree: Uri, format: RecordingFormat, source: CaptureSource) {
+        if (source.isLine) return
+        val watch = SilenceWatch(SilenceWatch.MICROPHONES).also { it.startedOn(source, System.currentTimeMillis()) }
+        watcher?.cancel()
+        watcher = scope.launch(Dispatchers.IO) {
+            while (true) {
+                delay(WATCH_STEP_MS)
+                val done = lock.withLock {
+                    if (sessionState.value !is SessionState.Recording) return@withLock true
+                    when (val verdict = watch.onPeak(capture.peak(), System.currentTimeMillis())) {
+                        SilenceWatch.Verdict.Keep -> false
+                        is SilenceWatch.Verdict.Swap -> !swapTo(tree, format, verdict.next)
+                        SilenceWatch.Verdict.GiveUp -> {
+                            discardCurrent()
+                            dispatch(SessionEvent.Error(FailureReason.NO_AUDIO))
+                            true
+                        }
+                    }
+                }
+                if (done) break
+            }
+        }
+    }
+
+    /** Replaces the silent file with a new one recorded from [next]. False when that failed (the session then ends). */
+    private fun swapTo(tree: Uri, format: RecordingFormat, next: CaptureSource): Boolean {
+        val request = pending
+        discardCurrent()
+        val name = request?.let {
+            RecordingNames.build(System.currentTimeMillis(), it.incoming, it.number, it.contactName, false, format)
+        }
+        val attempt = name?.let { tryStart(tree, it, format, next) }
+        if (attempt is Attempt.Started) {
+            targetUri = attempt.uri
+            targetFd = attempt.fd
+            return true
+        }
+        pending = null
+        dispatch(SessionEvent.Error(FailureReason.AUDIO_SOURCE_FAILED))
+        return false
+    }
+
+    /** Stops the recorder and removes its file. */
+    private fun discardCurrent() {
+        capture.stop()
+        runCatching { targetFd?.close() }
+        targetFd = null
+        targetUri?.let(storage::delete)
+        targetUri = null
     }
 
     private sealed interface Attempt {
@@ -294,6 +352,7 @@ class RecordingEngine @Inject constructor(
     }
 
     private companion object {
+        const val WATCH_STEP_MS = 500L
         const val TEST_STEPS = 12
         const val TEST_STEP_MS = 250L
     }

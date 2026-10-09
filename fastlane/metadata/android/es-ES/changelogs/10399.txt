@@ -1,0 +1,1 @@
+La grabación de llamadas cambia a otra fuente de micrófono cuando la primera graba solo silencio, y avisa si ninguna funciona.

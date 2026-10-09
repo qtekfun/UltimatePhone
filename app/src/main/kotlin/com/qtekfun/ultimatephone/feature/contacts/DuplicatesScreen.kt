@@ -3,43 +3,35 @@ package com.qtekfun.ultimatephone.feature.contacts
 import android.Manifest
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,11 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -68,7 +56,16 @@ import com.qtekfun.ultimatephone.core.contacts.DuplicateReason
 import com.qtekfun.ultimatephone.core.contacts.LabeledValue
 import com.qtekfun.ultimatephone.core.contacts.MergeSource
 import com.qtekfun.ultimatephone.core.contacts.MergedContact
+import com.qtekfun.ultimatephone.core.designsystem.BannerKind
+import com.qtekfun.ultimatephone.core.designsystem.ConfirmDialog
+import com.qtekfun.ultimatephone.core.designsystem.EmptyState
+import com.qtekfun.ultimatephone.core.designsystem.GroupedItem
+import com.qtekfun.ultimatephone.core.designsystem.InfoBanner
 import com.qtekfun.ultimatephone.core.designsystem.PermissionGate
+import com.qtekfun.ultimatephone.core.designsystem.ScreenScaffold
+import com.qtekfun.ultimatephone.core.designsystem.SectionHeader
+import com.qtekfun.ultimatephone.core.designsystem.SettingsRow
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
 
 @Composable
 fun DuplicatesScreen(onBack: () -> Unit) {
@@ -81,7 +78,7 @@ fun DuplicatesScreen(onBack: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun DuplicatesContentScreen(onBack: () -> Unit, viewModel: DuplicatesViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -104,22 +101,16 @@ private fun DuplicatesContentScreen(onBack: () -> Unit, viewModel: DuplicatesVie
     }
     BackHandler(enabled = review != null) { viewModel.closeReview() }
 
-    Scaffold(
+    ScreenScaffold(
+        title = stringResource(if (review == null) R.string.contactsadv_dup_title else R.string.contactsadv_review_title),
+        onBack = { if (review != null) viewModel.closeReview() else onBack() },
         snackbarHost = { SnackbarHost(snackbar) },
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(if (review == null) R.string.contactsadv_dup_title else R.string.contactsadv_review_title)) },
-                navigationIcon = {
-                    IconButton(onClick = { if (review != null) viewModel.closeReview() else onBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.contact_back))
-                    }
-                },
-                actions = {
-                    if (review == null && state.clusters.size > 1) {
-                        TextButton(onClick = viewModel::ignoreAll) { Text(stringResource(R.string.contactsadv_dup_ignore_all)) }
-                    }
+        actions = {
+            if (review == null && state.clusters.size > 1) {
+                TextButton(onClick = viewModel::ignoreAll, modifier = Modifier.heightIn(min = Spacing.MinTarget)) {
+                    Text(stringResource(R.string.contactsadv_dup_ignore_all))
                 }
-            )
+            }
         }
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
@@ -132,10 +123,11 @@ private fun DuplicatesContentScreen(onBack: () -> Unit, viewModel: DuplicatesVie
                     onMerge = { confirming = true },
                     onNotDuplicates = { viewModel.notDuplicates(review.cluster) }
                 )
-                state.clusters.isEmpty() -> Text(
-                    stringResource(R.string.contactsadv_dup_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.Center).padding(24.dp)
+                state.clusters.isEmpty() -> EmptyState(
+                    icon = Icons.Filled.CheckCircle,
+                    title = stringResource(R.string.contactsadv_dup_empty),
+                    body = stringResource(R.string.design2_dup_empty_body),
+                    modifier = Modifier.align(Alignment.Center)
                 )
                 else -> ClusterList(state.clusters, viewModel::open)
             }
@@ -145,33 +137,24 @@ private fun DuplicatesContentScreen(onBack: () -> Unit, viewModel: DuplicatesVie
     val merged = review?.merged
     if (confirming && review != null && merged != null) {
         val name = merged.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
-        AlertDialog(
-            onDismissRequest = { confirming = false },
-            title = { Text(stringResource(R.string.contactsadv_review_confirm_title)) },
-            text = { Text(stringResource(R.string.contactsadv_review_confirm_message, review.included.size, name)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirming = false
-                    viewModel.confirmMerge()
-                }) { Text(stringResource(R.string.contactsadv_review_merge)) }
-            },
-            dismissButton = { TextButton(onClick = { confirming = false }) { Text(stringResource(R.string.contact_cancel)) } }
+        ConfirmDialog(
+            title = stringResource(R.string.contactsadv_review_confirm_title),
+            body = stringResource(R.string.contactsadv_review_confirm_message, review.included.size, name),
+            confirmLabel = stringResource(R.string.contactsadv_review_merge),
+            dismissLabel = stringResource(R.string.contact_cancel),
+            onConfirm = viewModel::confirmMerge,
+            onDismiss = { confirming = false }
         )
     }
 }
 
 @Composable
 private fun ClusterList(clusters: List<DuplicateCluster>, onOpen: (DuplicateCluster) -> Unit) {
-    LazyColumn(Modifier.fillMaxSize()) {
-        item {
-            Text(
-                stringResource(R.string.contactsadv_dup_count, clusters.size),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp).semantics { heading() }
-            )
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = Spacing.Medium)) {
+        item { SectionHeader(stringResource(R.string.contactsadv_dup_count, clusters.size)) }
+        items(clusters.size, key = { clusters[it].id }) { index ->
+            GroupedItem(index = index, count = clusters.size) { ClusterRow(clusters[index], onOpen) }
         }
-        items(clusters, key = { it.id }) { cluster -> ClusterRow(cluster, onOpen) }
     }
 }
 
@@ -184,14 +167,12 @@ private fun ClusterRow(cluster: DuplicateCluster, onOpen: (DuplicateCluster) -> 
     val confidence = stringResource(
         if (cluster.confidence == DuplicateConfidence.HIGH) R.string.contactsadv_dup_confidence_high else R.string.contactsadv_dup_confidence_medium
     )
-    ListItem(
-        headlineContent = { Text(names, maxLines = 2, overflow = TextOverflow.Ellipsis) },
-        supportingContent = {
-            Text("$reasons · $confidence · " + pluralStringResource(R.plurals.contactsadv_dup_members, cluster.members.size, cluster.members.size))
-        },
-        modifier = Modifier.defaultMinSize(minHeight = 56.dp).clickable(role = Role.Button) { onOpen(cluster) }
+    SettingsRow(
+        title = names,
+        summary = "$reasons · $confidence · " + pluralStringResource(R.plurals.contactsadv_dup_members, cluster.members.size, cluster.members.size),
+        icon = Icons.Filled.People,
+        onClick = { onOpen(cluster) }
     )
-    HorizontalDivider()
 }
 
 private fun reasonText(reason: DuplicateReason): Int = when (reason) {
@@ -203,62 +184,63 @@ private fun reasonText(reason: DuplicateReason): Int = when (reason) {
 @Composable
 private fun ReviewBody(review: ReviewState, busy: Boolean, onToggle: (String) -> Unit, onMerge: () -> Unit, onNotDuplicates: () -> Unit) {
     val context = LocalContext.current
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 8.dp)) {
-        Text(
-            stringResource(R.string.contactsadv_review_nothing_deleted),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = Spacing.Small),
+        verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
+    ) {
+        InfoBanner(
+            kind = BannerKind.Info,
+            title = stringResource(R.string.contactsadv_review_nothing_deleted),
+            modifier = Modifier.padding(horizontal = Spacing.Medium)
         )
         // Side by side: one card per contact, scrolling sideways when they do not fit.
-        Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = Spacing.Medium),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)
+        ) {
             review.sources.forEach { source ->
                 SourceCard(source, included = source.lookupKey in review.included, onToggle = { onToggle(source.lookupKey) }, context = context)
             }
         }
         val merged = review.merged
         if (merged != null) {
-            Text(
-                stringResource(R.string.contactsadv_review_result),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 8.dp).semantics { heading() }
-            )
-            MergedCard(merged, review.sources, context)
+            Column {
+                SectionHeader(stringResource(R.string.contactsadv_review_result))
+                MergedCard(merged, review.sources, context)
+            }
         }
         if (review.included.size < 2) {
-            Text(
-                stringResource(R.string.contactsadv_review_need_two),
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }
+            InfoBanner(
+                kind = BannerKind.Warning,
+                title = stringResource(R.string.contactsadv_review_need_two),
+                modifier = Modifier.padding(horizontal = Spacing.Medium),
+                liveRegion = true
             )
         }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onNotDuplicates, enabled = !busy, modifier = Modifier.weight(1f).defaultMinSize(minHeight = 48.dp)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = Spacing.Medium), horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)) {
+            OutlinedButton(onClick = onNotDuplicates, enabled = !busy, modifier = Modifier.weight(1f).defaultMinSize(minHeight = Spacing.MinTarget)) {
                 Text(stringResource(R.string.contactsadv_review_not_dups))
             }
-            Button(onClick = onMerge, enabled = review.canMerge && !busy, modifier = Modifier.weight(1f).defaultMinSize(minHeight = 48.dp)) {
+            Button(onClick = onMerge, enabled = review.canMerge && !busy, modifier = Modifier.weight(1f).defaultMinSize(minHeight = Spacing.MinTarget)) {
                 Text(stringResource(R.string.contactsadv_review_merge))
             }
         }
     }
 }
 
+private val SourceCardWidth = 260.dp
+private val IncludedBorder = 2.dp
+
 @Composable
 private fun SourceCard(source: MergeSource, included: Boolean, onToggle: () -> Unit, context: android.content.Context) {
     val name = source.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
-    val container = if (included) {
-        CardDefaults.outlinedCardColors()
-    } else {
-        CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        )
-    }
-    Card(
-        colors = container,
-        border = BorderStroke(1.dp, if (included) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
-        modifier = Modifier.width(260.dp)
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = if (included) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(IncludedBorder, if (included) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
+        modifier = Modifier.width(SourceCardWidth)
     ) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(Spacing.Medium), verticalArrangement = Arrangement.spacedBy(Spacing.XSmall)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val description = stringResource(R.string.contactsadv_review_include, name)
                 Checkbox(checked = included, onCheckedChange = { onToggle() }, modifier = Modifier.semantics { contentDescription = description })
@@ -270,20 +252,8 @@ private fun SourceCard(source: MergeSource, included: Boolean, onToggle: () -> U
             FieldBlock(R.string.contactsadv_field_birthday, listOfNotNull(source.birthday?.let { birthdayText(context, it) }))
             FieldBlock(R.string.contactsadv_field_notes, source.notes)
             FieldBlock(R.string.contactsadv_field_account, listOfNotNull(source.account?.let { accountText(context, it) }))
-            FieldBlock(
-                R.string.contactsadv_field_photo,
-                listOf(
-                    stringResource(
-                        if (source.photoUri !=
-                            null
-                        ) {
-                            R.string.contactsadv_photo_yes
-                        } else {
-                            R.string.contactsadv_photo_no
-                        }
-                    )
-                )
-            )
+            val photoText = stringResource(if (source.photoUri != null) R.string.contactsadv_photo_yes else R.string.contactsadv_photo_no)
+            FieldBlock(R.string.contactsadv_field_photo, listOf(photoText))
             if (source.starred) FieldBlock(R.string.contactsadv_field_favorite, listOf(stringResource(R.string.contactsadv_yes)))
         }
     }
@@ -292,11 +262,13 @@ private fun SourceCard(source: MergeSource, included: Boolean, onToggle: () -> U
 @Composable
 private fun MergedCard(merged: MergedContact, sources: List<MergeSource>, context: android.content.Context) {
     val name = merged.displayName.ifBlank { stringResource(R.string.contact_unnamed) }
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.Medium)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(Spacing.Medium), verticalArrangement = Arrangement.spacedBy(Spacing.XSmall)) {
             Text(name, style = MaterialTheme.typography.titleLarge)
             FieldBlock(R.string.contactsadv_field_other_names, merged.alternativeNames)
             FieldBlock(R.string.contactsadv_field_organization, listOf(merged.organization))
@@ -322,7 +294,7 @@ private fun valueLine(value: LabeledValue) = value.value
 private fun FieldBlock(title: Int, lines: List<String>) {
     val shown = lines.filter { it.isNotBlank() }
     if (shown.isEmpty()) return
-    Column(Modifier.padding(top = 4.dp)) {
+    Column(Modifier.padding(top = Spacing.XSmall)) {
         Text(stringResource(title), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         shown.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
     }

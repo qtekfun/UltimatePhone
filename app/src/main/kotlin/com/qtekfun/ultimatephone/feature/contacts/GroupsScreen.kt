@@ -1,22 +1,23 @@
 package com.qtekfun.ultimatephone.feature.contacts
 
 import android.Manifest
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,16 +29,13 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,14 +47,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qtekfun.ultimatephone.R
 import com.qtekfun.ultimatephone.core.contacts.ContactAccount
 import com.qtekfun.ultimatephone.core.contacts.ContactGroup
+import com.qtekfun.ultimatephone.core.designsystem.ConfirmDialog
+import com.qtekfun.ultimatephone.core.designsystem.EmptyState
+import com.qtekfun.ultimatephone.core.designsystem.GroupedItem
 import com.qtekfun.ultimatephone.core.designsystem.PermissionGate
+import com.qtekfun.ultimatephone.core.designsystem.ScreenScaffold
+import com.qtekfun.ultimatephone.core.designsystem.Spacing
 
 @Composable
 fun GroupsScreen(onBack: () -> Unit) {
@@ -93,18 +96,16 @@ private fun GroupsContentScreen(onBack: () -> Unit, viewModel: GroupsViewModel =
         }
     }
 
-    Scaffold(
+    ScreenScaffold(
+        title = stringResource(R.string.contactsadv_groups_title),
+        onBack = onBack,
         snackbarHost = { SnackbarHost(snackbar) },
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.contactsadv_groups_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.contact_back)) }
-                }
-            )
-        },
         floatingActionButton = {
-            FloatingActionButton(onClick = { dialog = GroupDialog.Create }) {
+            FloatingActionButton(
+                onClick = { dialog = GroupDialog.Create },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.contactsadv_groups_add))
             }
         }
@@ -113,15 +114,18 @@ private fun GroupsContentScreen(onBack: () -> Unit, viewModel: GroupsViewModel =
             val list = groups
             when {
                 list == null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingIndicator() }
-                list.isEmpty() -> Text(
-                    stringResource(R.string.contactsadv_groups_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center).padding(24.dp)
+                list.isEmpty() -> EmptyState(
+                    icon = Icons.Filled.Groups,
+                    title = stringResource(R.string.design2_groups_empty_title),
+                    body = stringResource(R.string.contactsadv_groups_empty),
+                    modifier = Modifier.align(Alignment.Center)
                 )
-                else -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 88.dp)) {
-                    items(list, key = { it.id }) { group ->
-                        GroupRow(group, onRename = { dialog = GroupDialog.Rename(group) }, onDelete = { dialog = GroupDialog.Delete(group) })
+                else -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = FabClearance)) {
+                    items(list.size, key = { list[it].id }) { index ->
+                        val group = list[index]
+                        GroupedItem(index = index, count = list.size) {
+                            GroupRow(group, onRename = { dialog = GroupDialog.Rename(group) }, onDelete = { dialog = GroupDialog.Delete(group) })
+                        }
                     }
                 }
             }
@@ -152,45 +156,47 @@ private fun GroupsContentScreen(onBack: () -> Unit, viewModel: GroupsViewModel =
                 viewModel.rename(current.group, name)
             }
         )
-        is GroupDialog.Delete -> AlertDialog(
-            onDismissRequest = { dialog = null },
-            title = { Text(stringResource(R.string.contactsadv_groups_delete_title)) },
-            text = { Text(stringResource(R.string.contactsadv_groups_delete_message, current.group.title)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    dialog = null
-                    viewModel.delete(current.group)
-                }) { Text(stringResource(R.string.contact_delete)) }
-            },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.contact_cancel)) } }
+        is GroupDialog.Delete -> ConfirmDialog(
+            title = stringResource(R.string.contactsadv_groups_delete_title),
+            body = stringResource(R.string.contactsadv_groups_delete_message, current.group.title),
+            confirmLabel = stringResource(R.string.contact_delete),
+            dismissLabel = stringResource(R.string.contact_cancel),
+            onConfirm = { viewModel.delete(current.group) },
+            onDismiss = { dialog = null },
+            destructive = true
         )
     }
 }
+
+private val FabClearance = 88.dp
 
 @Composable
 private fun GroupRow(group: ContactGroup, onRename: () -> Unit, onDelete: () -> Unit) {
     val context = LocalContext.current
     val account = if (group.account.isLocal) "" else accountText(context, group.account) + " · "
     val readOnly = if (group.editable) "" else " · " + stringResource(R.string.contactsadv_groups_read_only)
-    ListItem(
-        headlineContent = { Text(group.title) },
-        supportingContent = { Text(account + pluralStringResource(R.plurals.contactsadv_groups_members, group.memberCount, group.memberCount) + readOnly) },
-        trailingContent = if (group.editable) {
-            {
-                Row {
-                    IconButton(onClick = onRename) {
-                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.contactsadv_groups_rename_desc, group.title))
-                    }
-                    IconButton(onClick = onDelete) {
-                        Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.contactsadv_groups_delete_desc, group.title))
-                    }
-                }
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = Spacing.RowHeight).padding(start = Spacing.Medium, top = Spacing.Small, bottom = Spacing.Small, end = Spacing.Small),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.Medium)
+    ) {
+        Column(Modifier.weight(1f).semantics(mergeDescendants = true) {}) {
+            Text(group.title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                account + pluralStringResource(R.plurals.contactsadv_groups_members, group.memberCount, group.memberCount) + readOnly,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (group.editable) {
+            IconButton(onClick = onRename) {
+                Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.contactsadv_groups_rename_desc, group.title))
             }
-        } else {
-            null
-        },
-        modifier = Modifier.fillMaxWidth()
-    )
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.contactsadv_groups_delete_desc, group.title))
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -209,6 +215,7 @@ private fun GroupNameDialog(
     var expanded by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.extraLarge,
         title = { Text(stringResource(title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -220,7 +227,7 @@ private fun GroupNameDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (accounts != null && accounts.size > 1) {
-                    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = Modifier.padding(top = 12.dp)) {
+                    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }, modifier = Modifier.padding(top = Spacing.Medium)) {
                         OutlinedTextField(
                             value = accountText(context, account),
                             onValueChange = {},
@@ -229,7 +236,7 @@ private fun GroupNameDialog(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         )
-                        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, shape = MaterialTheme.shapes.medium) {
                             accounts.forEach { candidate ->
                                 DropdownMenuItem(
                                     text = { Text(accountText(context, candidate)) },

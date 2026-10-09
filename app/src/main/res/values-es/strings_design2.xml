@@ -6,4 +6,13 @@
 
     <!-- Recientes -->
     <string name="design2_recents_empty_title">No hay llamadas</string>
+
+    <!-- Contactos -->
+    <string name="design2_contacts_empty_title">Aún no hay contactos</string>
+    <string name="design2_contacts_noresult_title">No se ha encontrado nada</string>
+    <string name="design2_contact_missing_body">Puede que se haya eliminado o unido a otro contacto.</string>
+    <string name="design2_groups_empty_title">Sin grupos</string>
+    <string name="design2_dup_empty_body">Tus contactos no tienen personas repetidas.</string>
+    <string name="design2_import_idle_body">Elige un archivo vCard (.vcf) para añadir sus contactos a este teléfono.</string>
+    <string name="design2_import_failed_body">Prueba con otro archivo.</string>
 </resources>

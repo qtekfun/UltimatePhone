@@ -1,7 +1,7 @@
 package com.qtekfun.ultimatephone.core.designsystem
 
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CornerBasedShape
@@ -41,7 +41,13 @@ fun groupedItemShape(index: Int, count: Int): Shape {
  * [SettingsGroup] cannot wrap the lazy items. [color] is the selected-row colour when a row is selected.
  */
 @Composable
-fun GroupedItem(index: Int, count: Int, modifier: Modifier = Modifier, color: Color = MaterialTheme.colorScheme.surfaceContainer, content: @Composable ColumnScope.() -> Unit) {
+fun GroupedItem(
+    index: Int,
+    count: Int,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surfaceContainer,
+    content: @Composable ColumnScope.() -> Unit
+) {
     Surface(
         shape = groupedItemShape(index, count),
         color = color,

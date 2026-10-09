@@ -143,6 +143,28 @@ Small pill for a category, a SIM, "Recording", "Spam". One TalkBack item. Not cl
 Initials on a colour picked from the name; a **person icon** for unknown numbers and names without letters (never "#"); a
 business variant with a shop (or category) icon. Photo in `content`. Decorative for TalkBack. The old `Avatar(name, ...)` calls it.
 
+### `GroupedItem(index, count, color) { row }`
+For lazy lists, where a `SettingsGroup` cannot wrap the items: each item is a `surfaceContainer` card with the side margin,
+rounded only at the first and last item of a run (`groupedItemShape`) and separated by a 1 dp gap instead of a divider. Use `color`
+for the selected state (`secondaryContainer`), together with a check mark or a state description.
+```kotlin
+LazyColumn { items(list.size) { i -> GroupedItem(index = i, count = list.size) { SettingsRow(title = list[i].name, onClick = {}) } } }
+```
+
+### `SearchPill(value, onValueChange, placeholder, clearLabel)`
+Pill-shaped search field (tonal container, search icon, clear button once there is text), at least 56 dp.
+
+### `ChoiceChip(label, selected, onClick)`
+Filter chip in the app's style: pill, `primaryContainer` when selected and a check mark in front, so selection is never colour alone.
+
+### `ConfirmDialog(title, body, confirmLabel, dismissLabel, onConfirm, onDismiss, destructive)`
+The one confirmation dialog: 28 dp corners, dismiss on the left, confirm on the right, both buttons at least 48 dp. `destructive`
+paints the confirm label in the error colour (the verb, such as "Delete", still carries the meaning). Dialogs with fields
+(`AlertDialog`) use `shape = MaterialTheme.shapes.extraLarge` and the same button order.
+
+### `PermissionGate(permissions, rationale, buttonLabel, icon, title) { content }`
+Until the permissions are granted it shows an `EmptyState` (tonal `icon`, `title`, the rationale and the button).
+
 ### Call parts
 - `CallButton(kind = Answer | Decline | End, label, onClick, size = 80.dp)`: big round button with its label underneath.
 - `CallPillButton(kind, label, onClick, height, showLabel)`: wide pill; icon only for the keypad's green call button, with label
@@ -180,3 +202,30 @@ business variant with a shop (or category) icon. Photo in `content`. Decorative 
 | Onboarding | text on a plain page, thin progress bar | header icon per step, stepper, cards in `SettingsGroup`s |
 | Navigation | default bar | tonal bar, fade-through between tabs (no animation when reduced) |
 | Unknown number avatar | "#" | person icon |
+| Settings | flat list of text rows between divider lines, radio rows for the theme, plain text for the diagnostics | status `InfoBanner` (success / info / warning), grouped `SettingsRow`s with tonal icons, theme `SegmentedChoice`, region row, diagnostics as an expandable group |
+| Recents | thin app bar, default chips, avatar list with dividers, "#" for unknown numbers | large collapsing bar, pill `ChoiceChip`s, rounded day groups with `AvatarStyled` or the business icon, type icon + word (missed in the error colour too), `StatusChip` for spam and SIM, `EmptyState` |
+| Call detail | centred avatar, tonal buttons, grey elevated stats card | header card, filled Call button plus tonal actions, stats as a `SettingsGroup`, calls as grouped rows |
+| Contacts | small title, square search box, list with unbounded rows | large bar, `SearchPill`, favourites and letter groups as rounded cards (letter index kept), detail with header card and grouped sections, editor with grouped fields, `EmptyState`s |
+| Spam / Data | headings with dividers, grey cards, thin radio buttons | grouped rows, banners for the role and the data status, segmented pickers per level, pack rows with `StatusChip` (installed / update) and trailing actions |
+| Sync / Backup / Recording settings | forms and buttons on a plain page | grouped fields and rows, state banners (success / error / warning) instead of coloured text |
+| Dialogs | default Material, text buttons in mixed order | `ConfirmDialog` and 28 dp `AlertDialog`s: dismiss left, confirm right, destructive label in the error colour |
+
+## 8. Screens
+
+Which screen uses which pattern (all inside `ScreenScaffold`; the `NavHost` container already applied the insets).
+
+| Screen (package) | Pattern |
+|---|---|
+| Settings (`feature/settings`) | tab screen: banner, then `SettingsGroup`s of `SettingsRow` / `SwitchRow`; theme `SegmentedChoice`; SIM `RadioRow`s; region dialog; diagnostics group that expands (state description Expanded / Collapsed) |
+| Recents (`feature/recents`) | `PermissionGate` > large bar (selection mode changes the title and actions) > `ChoiceChip` row > `GroupedItem` rows per day with sticky `SectionHeader`; `EmptyState` when empty |
+| Call detail (`feature/recents`) | header card > action buttons > stats `SettingsGroup` > `GroupedItem` call rows; `ConfirmDialog` |
+| Contacts list (`feature/contacts`) | `SearchPill` + group `ChoiceChip`s > `GroupedItem` runs with `SectionHeader`s and the letter index; FAB in `primaryContainer`; overflow menu |
+| Contact detail / editor | header card + `SettingsGroup` sections (phones, emails, birthday, notes, account, groups); editor `FormGroup`s of text fields and an error `InfoBanner` |
+| Groups, duplicates, vCard import | `GroupedItem` lists, `EmptyState`s, review cards, `InfoBanner` explanations, `SettingsGroup` options |
+| Spam home | role `InfoBanner`, `SettingsGroup`s with `SegmentedChoice` per level, `SwitchRow`, link rows |
+| Own list / allowed / why flagged | `GroupedItem` rows with a separate delete button, `EmptyState`; why-flagged is a read-only `SettingsGroup` plus banners |
+| Data | status banners, one `SettingsGroup` per region with pack rows (chip + trailing text actions + progress), update switches, storage, sources, attribution |
+| Sync, Backup, Recording settings, Recordings | grouped fields and rows, state `InfoBanner`s with live regions, `ConfirmDialog`s; recordings as `GroupedItem` cards with the player |
+
+Before and after: the old screens are in `fastlane/metadata/android/en-US/images/phoneScreenshots/`; the new ones have no screenshots
+yet (no device was available while redesigning), so they must be checked by eye on a phone in light, dark, large font and TalkBack.

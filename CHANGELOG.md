@@ -3,6 +3,10 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.3]
+
+- Call recording: when a microphone source starts but records only silence during a call, the app now notices after a few seconds and switches to another microphone source (voice recognition, unprocessed, camcorder). If every source stays silent the recording ends with a clear "no audio" message instead of leaving an empty file.
+
 ## [0.1.2]
 
 - Updated the HTTP library used for Nextcloud sync (OkHttp 4.12 to 5.5).

@@ -74,6 +74,13 @@
         </activity>
 
         <!-- The call screen, shown over the lock screen. Opened by the in-call service through this action. -->
+        <!-- Shows the crash of the previous run. Plain views: it must work even when the normal screens are what crashed. -->
+        <activity
+            android:name=".crash.CrashReportActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity="" />
+
         <activity
             android:name=".incall.InCallActivity"
             android:exported="false"

@@ -119,6 +119,10 @@ private fun GroupedListSample() {
     var query by remember { mutableStateOf("") }
     Column(Modifier.padding(vertical = Spacing.Medium)) {
         SearchPill(value = query, onValueChange = { query = it }, placeholder = "Search", clearLabel = "Clear")
+        Row(Modifier.padding(horizontal = Spacing.Medium), horizontalArrangement = Arrangement.spacedBy(Spacing.Small)) {
+            ChoiceChip(label = "All", selected = true, onClick = {})
+            ChoiceChip(label = "Missed", selected = false, onClick = {})
+        }
         listOf("Ada Lovelace", "Alan Turing", "Grace Hopper").forEachIndexed { index, name ->
             GroupedItem(index = index, count = 3) {
                 SettingsRow(title = name, summary = "Mobile", icon = Icons.Filled.Contacts, onClick = {})
@@ -134,6 +138,20 @@ private fun GroupedListLightPreview() = Themed(false) { GroupedListSample() }
 @Preview(name = "Grouped list dark", showBackground = true)
 @Composable
 private fun GroupedListDarkPreview() = Themed(true) { GroupedListSample() }
+
+@Preview(name = "Confirm dialog", showBackground = true)
+@Composable
+private fun ConfirmDialogPreview() = Themed(false) {
+    ConfirmDialog(
+        title = "Delete history?",
+        body = "Every call of this number is removed from the call log.",
+        confirmLabel = "Delete",
+        dismissLabel = "Cancel",
+        onConfirm = {},
+        onDismiss = {},
+        destructive = true
+    )
+}
 
 @Preview(name = "Screen scaffold", showBackground = true)
 @Composable

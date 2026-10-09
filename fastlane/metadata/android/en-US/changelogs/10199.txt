@@ -1,0 +1,1 @@
+New look, bigger End call button, and a crash report on the phone if the app ever closes.

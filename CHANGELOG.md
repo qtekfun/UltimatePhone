@@ -3,6 +3,12 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.1]
+
+- New look: a brand palette (deep teal and mint; system colours are an option in Settings), grouped settings lists, large title bars, a redesigned keypad and call screens (bigger End call, pulsing ring while ringing), a step-by-step setup guide and consistent screens everywhere.
+- If the app ever closes unexpectedly, the next start shows what happened with Copy and Share buttons (phone numbers hidden, nothing is sent).
+- Start-up fix carried from 0.1.0-rc2: versions 0.1.0-rc1 close on first start; update to this one.
+
 ## [0.1.0]
 
 First version. A phone app with contacts and a spam filter that decides on your device.

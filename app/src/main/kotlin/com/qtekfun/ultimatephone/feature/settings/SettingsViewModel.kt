@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qtekfun.ultimatephone.core.designsystem.ThemeMode
+import com.qtekfun.ultimatephone.core.recording.RecordingCapability
 import com.qtekfun.ultimatephone.core.telecom.CapabilityProbe
 import com.qtekfun.ultimatephone.core.telecom.DeviceCapabilities
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.RoleController
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
+import com.qtekfun.ultimatephone.recording.RecordingSettings
 import com.qtekfun.ultimatephone.settings.SettingsRepository
 import com.qtekfun.ultimatephone.settings.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,13 +29,16 @@ data class SettingsUiState(
     val isDefaultPhoneApp: Boolean = false,
     val phoneRoleAvailable: Boolean = true,
     val effectiveRegion: String = "",
-    val capabilities: DeviceCapabilities? = null
+    val capabilities: DeviceCapabilities? = null,
+    /** Whether this phone can record calls at all; false hides the recording feature so the user is not misled. */
+    val recordingAvailable: Boolean = true
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: SettingsRepository,
+    private val recordingSettings: RecordingSettings,
     private val simRepository: SimRepository,
     private val roles: RoleController,
     private val regions: RegionProvider
@@ -45,6 +50,12 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             repository.settings.collect { refresh(it) }
         }
+        viewModelScope.launch {
+            // The recording feature is hidden once the phone is known to block recording (capability unavailable).
+            recordingSettings.config.collect { config ->
+                _state.value = _state.value.copy(recordingAvailable = config.capability != RecordingCapability.UNAVAILABLE)
+            }
+        }
     }
 
     /** Re-reads what can change while the app is away (role, SIMs, permissions). */
@@ -55,7 +66,8 @@ class SettingsViewModel @Inject constructor(
             isDefaultPhoneApp = roles.isDefaultDialer(),
             phoneRoleAvailable = roles.isDialerRoleAvailable(),
             effectiveRegion = regions.defaultRegion(),
-            capabilities = _state.value.capabilities
+            capabilities = _state.value.capabilities,
+            recordingAvailable = _state.value.recordingAvailable
         )
     }
 
@@ -69,6 +81,8 @@ class SettingsViewModel @Inject constructor(
     fun setTheme(mode: ThemeMode) = viewModelScope.launch { repository.setThemeMode(mode) }
 
     fun setUseSystemColors(enabled: Boolean) = viewModelScope.launch { repository.setUseSystemColors(enabled) }
+
+    fun setLockPortrait(enabled: Boolean) = viewModelScope.launch { repository.setLockPortrait(enabled) }
 
     fun setDefaultSim(key: String?) = viewModelScope.launch { repository.setDefaultSim(key) }
 

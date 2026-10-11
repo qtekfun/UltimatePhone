@@ -3,4 +3,6 @@
     <!-- Settings > Appearance -->
     <string name="design_system_colors_title">Use system colours</string>
     <string name="design_system_colors_summary">Follow your wallpaper (Material You) instead of the app\'s teal and mint.</string>
+    <string name="settings_lock_portrait_title">Lock portrait orientation</string>
+    <string name="settings_lock_portrait_summary">Keep the app upright instead of rotating with the phone.</string>
 </resources>

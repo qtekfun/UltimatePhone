@@ -54,6 +54,10 @@ private class FakeSettings : SettingsRepository {
     override suspend fun setUseSystemColors(enabled: Boolean) {
         settings.value = settings.value.copy(useSystemColors = enabled)
     }
+
+    override suspend fun setLockPortrait(enabled: Boolean) {
+        settings.value = settings.value.copy(lockPortrait = enabled)
+    }
 }
 
 private class FakeSpamSettings : SpamSettingsRepository {

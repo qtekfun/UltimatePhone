@@ -168,4 +168,24 @@ class PoliciesTest {
         assertTrue(CaptureSource.VOICE_CALL.isLine)
         assertFalse(CaptureSource.MICROPHONE.isLine)
     }
+
+    @Test
+    fun `one silent call is not enough to block the microphone`() {
+        val decision = MicrophoneAvailabilityPolicy.onSilentRecording(previousSilentCalls = 0)
+        assertEquals(1, decision.silentCalls)
+        assertFalse(decision.blocked)
+    }
+
+    @Test
+    fun `reaching the limit of silent calls blocks the microphone`() {
+        val decision = MicrophoneAvailabilityPolicy.onSilentRecording(previousSilentCalls = MicrophoneAvailabilityPolicy.MAX_SILENT_CALLS - 1)
+        assertEquals(MicrophoneAvailabilityPolicy.MAX_SILENT_CALLS, decision.silentCalls)
+        assertTrue(decision.blocked)
+    }
+
+    @Test
+    fun `staying silent past the limit keeps the microphone blocked`() {
+        val decision = MicrophoneAvailabilityPolicy.onSilentRecording(previousSilentCalls = MicrophoneAvailabilityPolicy.MAX_SILENT_CALLS)
+        assertTrue(decision.blocked)
+    }
 }

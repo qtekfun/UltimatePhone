@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
@@ -80,7 +81,7 @@ fun SettingsScreen(onRequestPhoneRole: () -> Unit, onOpen: (String) -> Unit, vie
             verticalArrangement = Arrangement.spacedBy(Spacing.Medium)
         ) {
             PhoneAppBanner(state, onRequestPhoneRole)
-            NavigationGroup(onOpen)
+            NavigationGroup(state.recordingAvailable, onOpen)
             AppearanceGroup(state, viewModel)
             if (state.sims.size > 1) SimGroup(state, viewModel)
             SettingsGroup(title = stringResource(R.string.settings_region), modifier = GroupModifier) {
@@ -132,7 +133,7 @@ private fun PhoneAppBanner(state: SettingsUiState, onRequestPhoneRole: () -> Uni
 }
 
 @Composable
-private fun NavigationGroup(onOpen: (String) -> Unit) {
+private fun NavigationGroup(recordingAvailable: Boolean, onOpen: (String) -> Unit) {
     SettingsGroup(title = stringResource(R.string.settings_spam), modifier = GroupModifier) {
         SettingsRow(
             title = stringResource(R.string.settings_spam_title),
@@ -164,12 +165,15 @@ private fun NavigationGroup(onOpen: (String) -> Unit) {
             icon = Icons.Filled.Backup,
             onClick = { onOpen(SETTINGS_BACKUP_ROUTE) }
         )
-        SettingsRow(
-            title = stringResource(R.string.recording_row_title),
-            summary = stringResource(R.string.recording_row_summary),
-            icon = Icons.Filled.Mic,
-            onClick = { onOpen(SETTINGS_RECORDING_ROUTE) }
-        )
+        // Hidden when the phone is known to block call recording, so the feature does not mislead the user.
+        if (recordingAvailable) {
+            SettingsRow(
+                title = stringResource(R.string.recording_row_title),
+                summary = stringResource(R.string.recording_row_summary),
+                icon = Icons.Filled.Mic,
+                onClick = { onOpen(SETTINGS_RECORDING_ROUTE) }
+            )
+        }
     }
 }
 
@@ -189,6 +193,13 @@ private fun AppearanceGroup(state: SettingsUiState, viewModel: SettingsViewModel
             icon = Icons.Filled.Palette,
             checked = state.settings.useSystemColors,
             onCheckedChange = viewModel::setUseSystemColors
+        )
+        SwitchRow(
+            title = stringResource(R.string.settings_lock_portrait_title),
+            summary = stringResource(R.string.settings_lock_portrait_summary),
+            icon = Icons.Filled.ScreenRotation,
+            checked = state.settings.lockPortrait,
+            onCheckedChange = viewModel::setLockPortrait
         )
     }
 }

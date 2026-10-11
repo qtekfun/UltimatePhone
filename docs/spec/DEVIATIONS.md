@@ -104,3 +104,18 @@ Each entry: what the spec says, what reality requires, what was done instead.
 - **Not verified on a device:** everything that depends on the framework (`MediaRecorder` sources during a call,
   foreground service start rules, the SAF provider of a given phone) was reasoned from the documentation and is
   unit-tested only in its pure parts.
+
+## D-013 · Recording hides itself on phones whose system silences in-call capture
+- **Spec (05):** call recording captures the microphone and reports plainly what the phone allows
+  (`LINE_CAPTURE`, `MICROPHONE_ONLY`, `UNAVAILABLE`).
+- **Reality:** on recent realme/ColorOS builds (confirmed on a realme GT 8 Pro, RMX5210, Android 16) the framework
+  silences every microphone source during a call for non-privileged apps. `AudioPolicyService.updateUidStates_l()`
+  logs `allowCapture[0] ... canCaptureIfInCallOrCommunication[0] isInCall[1]` and `AF::RecordTrack: setSilenced`,
+  even while the app holds the dialer role, RECORD_AUDIO, a microphone foreground service and is the top activity
+  (`isTopOrLatestActive[1]`). Only apps with the privileged `CAPTURE_AUDIO_OUTPUT` permission may record in a call.
+  The same app records normally on a vivo V2602A and an older OPPO, so this is per-ROM, not a bug.
+- **Done:** there is no API to know this before a call, so it is learned from the result. When every microphone source
+  stays silent for a whole recording (`FailureReason.NO_AUDIO`), it is counted; `MicrophoneAvailabilityPolicy` marks
+  recording `UNAVAILABLE` after two such calls in a row (one may be a quiet or muted moment). The capability is stored
+  with the system build, so a system update re-checks. While unavailable the recording entry in Settings and the Record
+  button on the call screen are hidden, so the feature does not mislead the user on a phone that cannot record.

@@ -39,6 +39,8 @@ data class RecordingConfig(
     val capability: RecordingCapability? = null,
     val lineSource: CaptureSource? = null,
     val silentAttempts: Int = 0,
+    /** Recordings in a row whose every microphone source stayed silent; at the policy limit recording is marked unavailable. */
+    val micSilentCalls: Int = 0,
     val micWarningShown: Boolean = false,
     val autoStartBlocked: Boolean = false
 )
@@ -71,6 +73,9 @@ interface RecordingSettings {
 
     suspend fun saveSilentAttempts(attempts: Int)
 
+    /** Records how many recordings in a row gave only silence from the microphone (0 clears it after a good recording). */
+    suspend fun saveMicSilentCalls(calls: Int)
+
     /** Forgets what was detected, so the next recording checks again. */
     suspend fun resetCapability()
 
@@ -100,6 +105,7 @@ class DataStoreRecordingSettings(context: Context, private val build: String = B
             capability = if (sameBuild) p[CAPABILITY]?.let { name -> RecordingCapability.entries.firstOrNull { it.name == name } } else null,
             lineSource = if (sameBuild) p[LINE_SOURCE]?.let { name -> CaptureSource.entries.firstOrNull { it.name == name } } else null,
             silentAttempts = if (sameBuild) p[SILENT] ?: 0 else 0,
+            micSilentCalls = if (sameBuild) p[MIC_SILENT] ?: 0 else 0,
             micWarningShown = p[MIC_WARNING] ?: false,
             autoStartBlocked = p[AUTO_BLOCKED] ?: false
         )
@@ -147,6 +153,18 @@ class DataStoreRecordingSettings(context: Context, private val build: String = B
             it[CAPABILITY_BUILD] = build
             if (lineSource == null) it.remove(LINE_SOURCE) else it[LINE_SOURCE] = lineSource.name
             it[SILENT] = 0
+            it[MIC_SILENT] = 0
+        }
+    }
+
+    override suspend fun saveMicSilentCalls(calls: Int) {
+        store.edit {
+            if (it[CAPABILITY_BUILD] != build) {
+                it.remove(CAPABILITY)
+                it.remove(LINE_SOURCE)
+            }
+            it[MIC_SILENT] = calls
+            it[CAPABILITY_BUILD] = build
         }
     }
 
@@ -168,6 +186,7 @@ class DataStoreRecordingSettings(context: Context, private val build: String = B
             it.remove(LINE_SOURCE)
             it.remove(CAPABILITY_BUILD)
             it.remove(SILENT)
+            it.remove(MIC_SILENT)
         }
     }
 
@@ -193,6 +212,7 @@ class DataStoreRecordingSettings(context: Context, private val build: String = B
         val CAPABILITY_BUILD = stringPreferencesKey("capability_build")
         val LINE_SOURCE = stringPreferencesKey("line_source")
         val SILENT = intPreferencesKey("silent_attempts")
+        val MIC_SILENT = intPreferencesKey("mic_silent_calls")
         val MIC_WARNING = booleanPreferencesKey("mic_warning_shown")
         val AUTO_BLOCKED = booleanPreferencesKey("auto_start_blocked")
     }

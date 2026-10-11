@@ -85,6 +85,30 @@ data class ProbeResult(val source: CaptureSource, val started: Boolean, val peak
  */
 data class CapabilityDecision(val capability: RecordingCapability, val source: CaptureSource, val persist: Boolean, val silentAttempts: Int)
 
+/**
+ * Outcome of [MicrophoneAvailabilityPolicy.onSilentRecording].
+ *
+ * @property silentCalls how many recordings in a row delivered only silence from every microphone source.
+ * @property blocked whether the system is now taken to block recording on this phone, so [RecordingCapability.UNAVAILABLE]
+ * should be saved and the recording feature hidden.
+ */
+data class MicSilenceDecision(val silentCalls: Int, val blocked: Boolean)
+
+/**
+ * Some systems (seen on recent realme/ColorOS builds) silence every microphone source while a call is up, so a non-privileged
+ * app can never record. One silent call may just be a quiet or muted moment; several in a row mean the phone blocks it. After
+ * that the feature is marked unavailable, which hides it until a system update (the saved capability is stamped per build).
+ */
+object MicrophoneAvailabilityPolicy {
+    /** After this many recordings whose every microphone source stayed silent, recording is considered blocked. */
+    const val MAX_SILENT_CALLS = 2
+
+    fun onSilentRecording(previousSilentCalls: Int): MicSilenceDecision {
+        val count = previousSilentCalls + 1
+        return MicSilenceDecision(silentCalls = count, blocked = count >= MAX_SILENT_CALLS)
+    }
+}
+
 object CapabilityDetector {
     /** After this many recordings whose line source started but stayed silent, the line is considered unusable. */
     const val MAX_SILENT_ATTEMPTS = 3

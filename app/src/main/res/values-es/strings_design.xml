@@ -3,4 +3,6 @@
     <!-- Ajustes > Apariencia -->
     <string name="design_system_colors_title">Usar los colores del sistema</string>
     <string name="design_system_colors_summary">Sigue los colores de tu fondo de pantalla (Material You) en lugar del verde azulado de la app.</string>
+    <string name="settings_lock_portrait_title">Bloquear orientación vertical</string>
+    <string name="settings_lock_portrait_summary">Mantén la app en vertical en lugar de girar con el teléfono.</string>
 </resources>

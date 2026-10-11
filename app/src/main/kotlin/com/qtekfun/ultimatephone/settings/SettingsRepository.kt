@@ -24,7 +24,9 @@ data class UserSettings(
     /** ISO region that overrides the SIM country for numbers without a country code. */
     val regionOverride: String? = null,
     /** Use the Material You colours of the wallpaper instead of the brand teal and mint. Off by default. */
-    val useSystemColors: Boolean = false
+    val useSystemColors: Boolean = false,
+    /** Keep the screens in portrait instead of following the device rotation. Off by default. */
+    val lockPortrait: Boolean = false
 )
 
 interface SettingsRepository {
@@ -39,6 +41,8 @@ interface SettingsRepository {
     suspend fun setRegionOverride(region: String?)
 
     suspend fun setUseSystemColors(enabled: Boolean)
+
+    suspend fun setLockPortrait(enabled: Boolean)
 }
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -52,7 +56,8 @@ class DataStoreSettingsRepository(context: Context, scope: CoroutineScope) : Set
             defaultSimKey = prefs[DEFAULT_SIM],
             simByNumber = SimMemoryCodec.decode(prefs[SIM_BY_NUMBER].orEmpty()),
             regionOverride = prefs[REGION],
-            useSystemColors = prefs[SYSTEM_COLORS] ?: false
+            useSystemColors = prefs[SYSTEM_COLORS] ?: false,
+            lockPortrait = prefs[LOCK_PORTRAIT] ?: false
         )
     }.stateIn(scope, SharingStarted.Eagerly, UserSettings())
 
@@ -79,11 +84,16 @@ class DataStoreSettingsRepository(context: Context, scope: CoroutineScope) : Set
         store.edit { it[SYSTEM_COLORS] = enabled }
     }
 
+    override suspend fun setLockPortrait(enabled: Boolean) {
+        store.edit { it[LOCK_PORTRAIT] = enabled }
+    }
+
     private companion object {
         val THEME = stringPreferencesKey("theme_mode")
         val DEFAULT_SIM = stringPreferencesKey("default_sim")
         val SIM_BY_NUMBER = stringPreferencesKey("sim_by_number")
         val REGION = stringPreferencesKey("region_override")
         val SYSTEM_COLORS = booleanPreferencesKey("use_system_colors")
+        val LOCK_PORTRAIT = booleanPreferencesKey("lock_portrait")
     }
 }

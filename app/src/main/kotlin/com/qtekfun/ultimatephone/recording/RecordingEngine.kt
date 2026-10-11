@@ -10,6 +10,7 @@ import com.qtekfun.ultimatephone.core.recording.CaptureSource
 import com.qtekfun.ultimatephone.core.recording.FailureReason
 import com.qtekfun.ultimatephone.core.recording.LineCaptureProbe
 import com.qtekfun.ultimatephone.core.recording.MediaCapture
+import com.qtekfun.ultimatephone.core.recording.MicrophoneAvailabilityPolicy
 import com.qtekfun.ultimatephone.core.recording.Readiness
 import com.qtekfun.ultimatephone.core.recording.RecordingCapability
 import com.qtekfun.ultimatephone.core.recording.RecordingFormat
@@ -204,6 +205,7 @@ class RecordingEngine @Inject constructor(
                         is SilenceWatch.Verdict.Swap -> !swapTo(tree, format, verdict.next)
                         SilenceWatch.Verdict.GiveUp -> {
                             discardCurrent()
+                            markMicrophoneSilent()
                             dispatch(SessionEvent.Error(FailureReason.NO_AUDIO))
                             true
                         }
@@ -230,6 +232,16 @@ class RecordingEngine @Inject constructor(
         pending = null
         dispatch(SessionEvent.Error(FailureReason.AUDIO_SOURCE_FAILED))
         return false
+    }
+
+    /**
+     * Every microphone source stayed silent for the whole recording. Some systems silence the microphone during a call for
+     * non-privileged apps; one such call may be a quiet moment, so it is counted, and once the policy limit is reached the
+     * capability is saved as unavailable. That hides the feature until a system build change clears the saved capability.
+     */
+    private suspend fun markMicrophoneSilent() {
+        val decision = MicrophoneAvailabilityPolicy.onSilentRecording(settings.current().micSilentCalls)
+        if (decision.blocked) settings.saveCapability(RecordingCapability.UNAVAILABLE, null) else settings.saveMicSilentCalls(decision.silentCalls)
     }
 
     /** Stops the recorder and removes its file. */
@@ -299,13 +311,15 @@ class RecordingEngine @Inject constructor(
     }
 
     /** Closes the recorder and the file; an empty file is deleted. [error] ends the session as failed instead of stopped. */
-    private fun finish(error: FailureReason?) {
+    private suspend fun finish(error: FailureReason?) {
         val valid = capture.stop()
         runCatching { targetFd?.close() }
         targetFd = null
         val uri = targetUri
         targetUri = null
         if (!valid && uri != null) storage.delete(uri)
+        // A recording with sound clears any run of silent calls, so one quiet call does not count towards blocking.
+        if (valid && settings.current().micSilentCalls > 0) settings.saveMicSilentCalls(0)
         pending = null
         dispatch(if (error != null) SessionEvent.Error(error) else SessionEvent.Stopped(valid))
     }

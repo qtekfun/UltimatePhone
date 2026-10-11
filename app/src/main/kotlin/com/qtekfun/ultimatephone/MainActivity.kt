@@ -1,10 +1,12 @@
 package com.qtekfun.ultimatephone
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -31,6 +33,7 @@ class MainActivity : ComponentActivity() {
         whyNumber = WhyFlaggedLink.consume(intent)
         setContent {
             val prefs by settings.settings.collectAsStateWithLifecycle()
+            LaunchedEffect(prefs.lockPortrait) { requestedOrientation = orientationFor(prefs.lockPortrait) }
             UltimatePhoneTheme(mode = prefs.themeMode, useSystemColors = prefs.useSystemColors) {
                 AppNavHost(initialDialNumber = dialNumber, whyFlaggedNumber = whyNumber, onWhyFlaggedHandled = { whyNumber = null })
             }
@@ -46,3 +49,6 @@ class MainActivity : ComponentActivity() {
     /** `tel:` links and the system "dial" action carry the number the user wants to call. */
     private fun numberFrom(intent: Intent): String? = intent.data?.takeIf { it.scheme == "tel" }?.schemeSpecificPart?.takeIf { it.isNotBlank() }
 }
+
+/** Portrait when the user locked the orientation, otherwise whatever the device decides. */
+fun orientationFor(lockPortrait: Boolean): Int = if (lockPortrait) ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED

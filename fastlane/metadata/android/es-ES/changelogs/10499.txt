@@ -1,0 +1,1 @@
+Nuevo interruptor para mantener la app en vertical en lugar de girar. La grabación de llamadas se oculta en los teléfonos donde el sistema la bloquea en silencio, en lugar de guardar grabaciones vacías.

@@ -1,0 +1,1 @@
+New switch to keep the app in portrait instead of rotating. Call recording now hides itself on phones where the system silently blocks it, instead of saving empty recordings.

@@ -59,18 +59,18 @@ import com.qtekfun.ultimatephone.feature.spam.spamWhyRoute
  * without an account or a network and its steps can be skipped.
  */
 @Composable
-fun AppNavHost(initialDialNumber: String?, whyFlaggedNumber: String? = null, onWhyFlaggedHandled: () -> Unit = {}) {
+fun AppNavHost(initialDialNumber: String?, whyFlaggedNumber: String? = null, onWhyFlaggedHandled: () -> Unit = {}, historyRequests: Int = 0) {
     val gate: OnboardingGateViewModel = hiltViewModel()
     val onboardingCompleted by gate.completed.collectAsStateWithLifecycle()
     when (onboardingCompleted) {
         null -> Box(Modifier.fillMaxSize())
         false -> OnboardingRoute(onFinished = {})
-        true -> MainContent(initialDialNumber, whyFlaggedNumber, onWhyFlaggedHandled)
+        true -> MainContent(initialDialNumber, whyFlaggedNumber, onWhyFlaggedHandled, historyRequests)
     }
 }
 
 @Composable
-private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, onWhyFlaggedHandled: () -> Unit) {
+private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, onWhyFlaggedHandled: () -> Unit, historyRequests: Int) {
     val navController = rememberNavController()
     val roleViewModel: RoleViewModel = hiltViewModel()
     val roleLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
@@ -78,6 +78,16 @@ private fun MainContent(initialDialNumber: String?, whyFlaggedNumber: String?, o
     // A new tel: link while the app is already open must reach the keypad too, not only the first one.
     LaunchedEffect(initialDialNumber) {
         if (!initialDialNumber.isNullOrBlank()) navController.openDialer(initialDialNumber)
+    }
+    // Asked for by the missed-call notification: open the history tab, as the bottom bar would.
+    LaunchedEffect(historyRequests) {
+        if (historyRequests > 0) {
+            navController.navigate(TopLevelDestination.RECENTS.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
     }
     // Asked for by the call screen: open the explanation of its spam warning. Until the setup guide is done this is not reached.
     LaunchedEffect(whyFlaggedNumber) {

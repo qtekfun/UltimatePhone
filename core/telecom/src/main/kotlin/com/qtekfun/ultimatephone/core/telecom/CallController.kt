@@ -38,6 +38,9 @@ interface CallController {
 
     fun setHold(id: String, hold: Boolean)
 
+    /** Sends the tones waiting after a ";" in the number ([send] true), or drops them. */
+    fun continuePostDial(id: String, send: Boolean)
+
     fun setMuted(muted: Boolean)
 
     fun setRoute(route: AudioRoute)

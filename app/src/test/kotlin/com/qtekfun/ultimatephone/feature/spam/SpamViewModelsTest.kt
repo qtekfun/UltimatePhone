@@ -225,6 +225,8 @@ class InCallSpamTest {
 
         override fun setHold(id: String, hold: Boolean) = Unit
 
+        override fun continuePostDial(id: String, send: Boolean) = Unit
+
         override fun setMuted(muted: Boolean) = Unit
 
         override fun setRoute(route: AudioRoute) = Unit

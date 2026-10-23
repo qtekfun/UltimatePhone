@@ -64,4 +64,11 @@
     <string name="incall_remember_sim">Recordar para este número</string>
     <string name="incall_cancel_call">Cancelar llamada</string>
     <string name="incall_no_sim_choices">Ninguna SIM puede hacer esta llamada</string>
+    <string name="incall_post_dial_title">¿Enviar estos tonos?</string>
+    <string name="incall_post_dial_send">Enviar</string>
+    <string name="incall_post_dial_skip">No enviar</string>
+    <string name="dialer_voicemail">Llamar al buzón de voz</string>
+    <string name="dialer_add_pause">Añadir una pausa</string>
+    <string name="dialer_add_wait">Añadir una espera</string>
+    <string name="dialer_secret_code_refused">Los códigos secretos solo funcionan si UltimatePhone es la app de teléfono</string>
 </resources>

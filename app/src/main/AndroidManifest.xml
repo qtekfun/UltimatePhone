@@ -71,6 +71,12 @@
                 <action android:name="android.intent.action.CALL_BUTTON" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <!-- The call history: what the system's missed-call notification and other apps open. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/calls" />
+            </intent-filter>
         </activity>
 
         <!-- The call screen, shown over the lock screen. Opened by the in-call service through this action. -->

@@ -24,6 +24,8 @@ class UltimateInCallService : InCallService() {
         override fun onChildrenChanged(call: Call, children: MutableList<Call>) = TelecomCalls.onCallChanged()
 
         override fun onParentChanged(call: Call, parent: Call?) = TelecomCalls.onCallChanged()
+
+        override fun onPostDialWait(call: Call, remainingPostDialSequence: String) = TelecomCalls.onPostDialWait(call, remainingPostDialSequence)
     }
 
     override fun onCreate() {

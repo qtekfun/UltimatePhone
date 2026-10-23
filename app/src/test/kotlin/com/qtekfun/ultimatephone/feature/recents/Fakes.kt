@@ -86,6 +86,8 @@ class FakePlacer(var succeeds: Boolean = true) : CallPlacer {
         this.lastUsed += lastUsed
         return succeeds
     }
+
+    override fun callVoicemail(sim: SimAccount?): Boolean = succeeds
 }
 
 /** 9-digit numbers (with or without +34) are valid Spanish numbers; everything else is unknown. */

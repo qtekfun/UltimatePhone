@@ -113,6 +113,8 @@ class InCallViewModel @Inject constructor(
 
     fun hangup(call: CallInfo) = controller.hangup(call.id)
 
+    fun continuePostDial(call: CallInfo, send: Boolean) = controller.continuePostDial(call.id, send)
+
     fun toggleHold(call: CallInfo) = controller.setHold(call.id, call.status != CallStatus.HOLDING)
 
     fun toggleMute() = controller.setMuted(!audio.value.muted)

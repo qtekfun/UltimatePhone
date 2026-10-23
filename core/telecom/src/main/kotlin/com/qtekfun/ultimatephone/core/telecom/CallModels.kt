@@ -55,7 +55,9 @@ data class CallInfo(
     val businessCategory: String? = null,
     val businessIcon: String? = null,
     /** The SIMs the user can pick from while [status] is [CallStatus.SELECT_SIM]; empty otherwise. */
-    val simChoices: List<SimAccount> = emptyList()
+    val simChoices: List<SimAccount> = emptyList(),
+    /** Tones after a wait (";") in the dialled number, waiting for the user to send them; null when nothing waits. */
+    val postDialWait: String? = null
 ) {
     /** What to show as the title of the call. */
     val title: String get() = contactName ?: displayNumber

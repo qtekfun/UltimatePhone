@@ -46,6 +46,11 @@ private class RecordingPlacer : CallPlacer {
         calls += number to sim
         return true
     }
+
+    override fun callVoicemail(sim: SimAccount?): Boolean {
+        calls += "voicemail" to sim
+        return true
+    }
 }
 
 class PreferredSimCallPlacerTest {
@@ -103,6 +108,20 @@ class PreferredSimCallPlacerTest {
     fun aRemovedSimIsIgnored() {
         placer(prefs = UserSettings(defaultSimKey = "gone")).placeCall("600111222", lastUsed = sim("gone2"))
         assertNull(delegate.calls.single().second)
+    }
+
+    @Test
+    fun theSimIsRememberedForTheNumberNotForTheExtension() {
+        placer(prefs = UserSettings(simByNumber = mapOf("+34912345678" to "sim2"))).placeCall("912345678,22")
+        assertEquals("912345678,22" to sim2, delegate.calls.single())
+    }
+
+    @Test
+    fun voicemailFollowsTheDefaultSim() {
+        placer(prefs = UserSettings(defaultSimKey = "sim2")).callVoicemail()
+        placer().callVoicemail(sim1)
+        placer().callVoicemail()
+        assertEquals(listOf("voicemail" to sim2, "voicemail" to sim1, "voicemail" to null), delegate.calls)
     }
 
     @Test

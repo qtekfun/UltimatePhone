@@ -8,12 +8,14 @@ import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.EmergencyNumbers
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.RoleController
+import com.qtekfun.ultimatephone.core.telecom.SecretCodes
 import com.qtekfun.ultimatephone.core.telecom.SimRegionProvider
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
 import com.qtekfun.ultimatephone.core.telecom.TelecomCallPlacer
 import com.qtekfun.ultimatephone.core.telecom.TelecomCalls
 import com.qtekfun.ultimatephone.core.telecom.TelecomSimRepository
 import com.qtekfun.ultimatephone.core.telecom.TelephonyEmergencyNumbers
+import com.qtekfun.ultimatephone.core.telecom.TelephonySecretCodes
 import com.qtekfun.ultimatephone.settings.CallSimPreferences
 import com.qtekfun.ultimatephone.settings.DataStoreSettingsRepository
 import com.qtekfun.ultimatephone.settings.PreferredSimCallPlacer
@@ -55,6 +57,10 @@ object CoreModule {
     @Provides
     @Singleton
     fun emergencyNumbers(@ApplicationContext context: Context): EmergencyNumbers = TelephonyEmergencyNumbers(context)
+
+    @Provides
+    @Singleton
+    fun secretCodes(@ApplicationContext context: Context): SecretCodes = TelephonySecretCodes(context)
 
     /** Every call the app starts goes through the SIM preferences (remembered, last used, default). */
     @Provides

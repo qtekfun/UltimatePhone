@@ -158,6 +158,7 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                             onWhyFlagged = primary.number?.let { number -> { onWhyFlagged(number) } },
                             onDtmfDown = { viewModel.dtmfDown(primary, it) },
                             onDtmfUp = { viewModel.dtmfUp(primary) },
+                            onPostDial = { send -> viewModel.continuePostDial(primary, send) },
                             recordingStatus = {
                                 RecordingStatus(recording, viewModel::stopRecording, viewModel::dismissMicWarning, viewModel::dismissRecordingFailure)
                             }
@@ -246,6 +247,7 @@ private fun InfoPane(
     onWhyFlagged: (() -> Unit)?,
     onDtmfDown: (Char) -> Unit,
     onDtmfUp: () -> Unit,
+    onPostDial: (Boolean) -> Unit,
     recordingStatus: @Composable () -> Unit
 ) {
     Column(
@@ -255,6 +257,7 @@ private fun InfoPane(
         recordingStatus()
         if (other != null) OtherCallCard(other, onSwap = onSwap)
         CallHeader(call, layout, showAvatar = !showKeypad)
+        call.postDialWait?.let { tones -> PostDialCard(tones, onPostDial) }
         CallSpamPanel(ui = spam, ringing = call.status == CallStatus.RINGING, onNotSpam = onNotSpam, onMarkSpam = onMarkSpam, onWhyFlagged = onWhyFlagged)
         if (showKeypad) {
             Spacer(Modifier.size(Spacing.Medium))
@@ -343,6 +346,28 @@ private fun CallChips(call: CallInfo) {
         if (sim != null) {
             val label = if (sim.slot >= 0) stringResource(R.string.dialer_sim_slot, sim.slot + 1) else sim.label
             StatusChip(text = label, icon = Icons.Filled.SimCard)
+        }
+    }
+}
+
+/** The number had a wait (";"): the tones after it are sent only when the user says so, for example once a menu answers. */
+@Composable
+private fun PostDialCard(tones: String, onAnswer: (Boolean) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(top = Spacing.Medium).semantics { liveRegion = LiveRegionMode.Polite },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(Spacing.Medium)) {
+            Text(stringResource(R.string.incall_post_dial_title), style = MaterialTheme.typography.titleMedium)
+            Text(tones, style = MaterialTheme.typography.headlineSmall.tabularFigures(), modifier = Modifier.padding(top = Spacing.XSmall))
+            Row(modifier = Modifier.fillMaxWidth().padding(top = Spacing.Small), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = { onAnswer(false) }, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)) {
+                    Text(stringResource(R.string.incall_post_dial_skip))
+                }
+                Button(onClick = { onAnswer(true) }, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)) {
+                    Text(stringResource(R.string.incall_post_dial_send))
+                }
+            }
         }
     }
 }

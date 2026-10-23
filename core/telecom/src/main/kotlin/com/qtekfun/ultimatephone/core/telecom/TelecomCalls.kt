@@ -29,6 +29,9 @@ object TelecomCalls : CallController {
     private val nextId = java.util.concurrent.atomic.AtomicLong()
     private val labels = ConcurrentHashMap<String, CallerLabel>()
 
+    /** Tones each call is waiting to send after a ";", until the user answers. */
+    private val postDialWaits = ConcurrentHashMap<String, String>()
+
     /** Display form of each live call's number, formatted once per call instead of on every state change. */
     private val displays = ConcurrentHashMap<String, String>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -66,7 +69,7 @@ object TelecomCalls : CallController {
         val id = idOf(call)
         synchronized(lock) { live[id] = call }
         rebuild()
-        val number = call.details.handle?.schemeSpecificPart
+        val number = numberOf(call.details)
         val resolver = labelResolver
         if (number != null && resolver != null) {
             scope.launch {
@@ -80,6 +83,11 @@ object TelecomCalls : CallController {
 
     internal fun onCallChanged() = rebuild()
 
+    internal fun onPostDialWait(call: Call, remaining: String) {
+        postDialWaits[idOf(call)] = remaining
+        rebuild()
+    }
+
     internal fun onCallRemoved(call: Call) {
         val id = idOf(call)
         synchronized(lock) {
@@ -88,6 +96,7 @@ object TelecomCalls : CallController {
         }
         labels.remove(id)
         displays.remove(id)
+        postDialWaits.remove(id)
         rebuild()
     }
 
@@ -109,7 +118,7 @@ object TelecomCalls : CallController {
 
     private fun toInfo(id: String, call: Call): CallInfo {
         val details = call.details
-        val number = details.handle?.schemeSpecificPart
+        val number = numberOf(details)
         val label = labels[id]
         return CallInfo(
             id = id,
@@ -129,9 +138,13 @@ object TelecomCalls : CallController {
             isBusiness = label?.isBusiness == true,
             businessCategory = label?.businessCategory,
             businessIcon = label?.businessIcon,
-            simChoices = if (details.state == Call.STATE_SELECT_PHONE_ACCOUNT) simChoices(details) else emptyList()
+            simChoices = if (details.state == Call.STATE_SELECT_PHONE_ACCOUNT) simChoices(details) else emptyList(),
+            postDialWait = postDialWaits[id]
         )
     }
+
+    /** The number the network dialled: tones after a pause or wait are not part of who the call is with. */
+    private fun numberOf(details: Call.Details): String? = details.handle?.schemeSpecificPart?.let(PostDial::networkPart)
 
     /**
      * The accounts Telecom offers for a call waiting for a SIM. Telecom lists them in the call's extras; when a build leaves
@@ -168,6 +181,12 @@ object TelecomCalls : CallController {
 
     override fun selectSim(id: String, sim: SimAccount) {
         callFor(id)?.takeIf { it.details.state == Call.STATE_SELECT_PHONE_ACCOUNT }?.phoneAccountSelected(sim.handle, false)
+    }
+
+    override fun continuePostDial(id: String, send: Boolean) {
+        postDialWaits.remove(id)
+        callFor(id)?.postDialContinue(send)
+        rebuild()
     }
 
     override fun setHold(id: String, hold: Boolean) {

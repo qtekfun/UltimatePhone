@@ -8,8 +8,10 @@ import com.qtekfun.ultimatephone.core.phonenumber.PhoneNormalizer
 import com.qtekfun.ultimatephone.core.phonenumber.e164OrNull
 import com.qtekfun.ultimatephone.core.telecom.CallPlacer
 import com.qtekfun.ultimatephone.core.telecom.EmergencyNumbers
+import com.qtekfun.ultimatephone.core.telecom.PostDial
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.RoleController
+import com.qtekfun.ultimatephone.core.telecom.SecretCodes
 import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.core.telecom.SimRepository
 import com.qtekfun.ultimatephone.data.BusinessHit
@@ -22,6 +24,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +33,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,6 +50,12 @@ data class DialerUiState(
     val needsDefaultPhoneApp: Boolean = false
 )
 
+/** One-off things the keypad has to tell the user. */
+sealed interface DialerEvent {
+    /** A secret code was typed but the system did not let the app pass it on. */
+    data object SecretCodeRefused : DialerEvent
+}
+
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class DialerViewModel @Inject constructor(
@@ -56,8 +67,12 @@ class DialerViewModel @Inject constructor(
     private val regions: RegionProvider,
     private val roles: RoleController,
     private val businessSearch: BusinessNameSearch,
-    private val emergency: EmergencyNumbers
+    private val emergency: EmergencyNumbers,
+    private val secretCodes: SecretCodes
 ) : ViewModel() {
+    private val eventChannel = Channel<DialerEvent>(Channel.BUFFERED)
+    val events: Flow<DialerEvent> = eventChannel.receiveAsFlow()
+
     private val number = MutableStateFlow("")
     private val explicitSimKey = MutableStateFlow<String?>(null)
     private val sims = MutableStateFlow(emptyList<SimAccount>())
@@ -70,7 +85,7 @@ class DialerViewModel @Inject constructor(
     // query per pack; both are bounded in size, and everything runs off the main thread.
     private val suggestions = number.debounce { if (it.isEmpty()) 0L else SUGGEST_DEBOUNCE_MS }.mapLatest { typed ->
         val digits = DialerInput.searchDigits(typed)
-        if (digits.isEmpty() || typed.any { it == '*' || it == '#' }) {
+        if (digits.isEmpty() || typed.any { it == '*' || it == '#' } || PostDial.hasPostDial(typed)) {
             Suggested()
         } else {
             val found = contacts.suggest(digits)
@@ -88,10 +103,10 @@ class DialerViewModel @Inject constructor(
             prefs
         ->
         val region = regions.defaultRegion()
-        val remembered = normalizer.normalize(typed, region).e164OrNull()?.let { prefs.simByNumber[it] }
+        val remembered = normalizer.normalize(PostDial.networkPart(typed), region).e164OrNull()?.let { prefs.simByNumber[it] }
         DialerUiState(
             number = typed,
-            displayNumber = if (typed.length > MIN_FORMAT_LENGTH) normalizer.formatForDisplay(typed, region) else typed,
+            displayNumber = displayOf(typed, region),
             suggestions = suggested.contacts,
             businessSuggestions = suggested.businesses,
             sims = available,
@@ -119,9 +134,31 @@ class DialerViewModel @Inject constructor(
         number.value = DialerInput.sanitizePaste(value)
     }
 
-    fun press(key: Char) = number.update { DialerInput.append(it, key) }
+    /** The number formatted for reading; the pause and wait digits after it are shown as typed. */
+    private fun displayOf(typed: String, region: String?): String {
+        val network = PostDial.networkPart(typed)
+        val formatted = if (network.length > MIN_FORMAT_LENGTH) normalizer.formatForDisplay(network, region) else network
+        return formatted + typed.substring(network.length)
+    }
 
-    fun pressPlus() = number.update { DialerInput.plusInsteadOfZero(it) }
+    fun press(key: Char) {
+        number.update { DialerInput.append(it, key) }
+        // As in the stock keypad, a secret code is passed on as soon as its last key is typed, without calling.
+        DialerInput.secretCode(number.value)?.let { code ->
+            number.value = ""
+            if (!secretCodes.send(code)) eventChannel.trySend(DialerEvent.SecretCodeRefused)
+        }
+    }
+
+    /** Long press: "+", a pause or a wait (see [DialerInput.longPress]). @return true when it was 1 and should call the voicemail. */
+    fun longPress(key: Char): Boolean {
+        if (key == '1' && number.value.isEmpty()) return true
+        number.update { DialerInput.longPress(it, key) }
+        return false
+    }
+
+    /** Calls the voicemail on the SIM the keypad shows. */
+    fun callVoicemail(): Boolean = callPlacer.callVoicemail(state.value.selectedSimKey?.let { key -> sims.value.firstOrNull { it.key == key } })
 
     fun backspace() = number.update { DialerInput.backspace(it) }
 
@@ -148,7 +185,7 @@ class DialerViewModel @Inject constructor(
             available.firstOrNull { it.key == state.value.selectedSimKey }
         }
         val explicit = explicitSimKey.value
-        val e164 = normalizer.normalize(typed, regions.defaultRegion()).e164OrNull()
+        val e164 = normalizer.normalize(PostDial.networkPart(typed), regions.defaultRegion()).e164OrNull()
         if (explicit != null && e164 != null) viewModelScope.launch { settings.rememberSim(e164, explicit) }
         return callPlacer.placeCall(typed, sim)
     }

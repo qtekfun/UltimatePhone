@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -39,6 +40,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Voicemail
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -128,9 +130,13 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
         tones.play(char)
         viewModel.press(char)
     }
-    val onLongZero = {
+    val onLongPress: (Char) -> Unit = { char ->
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        viewModel.pressPlus()
+        if (viewModel.longPress(char)) placeCall { viewModel.callVoicemail() }
+    }
+    val secretCodeRefused = stringResource(R.string.dialer_secret_code_refused)
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { Toast.makeText(context, secretCodeRefused, Toast.LENGTH_LONG).show() }
     }
     val suggestions: @Composable (Modifier) -> Unit = { modifier ->
         Suggestions(
@@ -181,7 +187,7 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Keypad(keyHeight = 48.dp, onKey = onKey, onLongZero = onLongZero)
+                    Keypad(keyHeight = 48.dp, onKey = onKey, onLongPress = onLongPress)
                     DialCallButton(size = callSize) { placeCall { viewModel.call() } }
                 }
             }
@@ -196,7 +202,7 @@ fun DialerScreen(initialNumber: String?, onRequestPhoneRole: () -> Unit, viewMod
                 if (state.needsDefaultPhoneApp) DefaultPhoneBanner(onRequestPhoneRole)
                 suggestions(if (bigText) Modifier.fillMaxWidth().heightIn(max = 120.dp) else Modifier.weight(1f).fillMaxWidth())
                 numberAndSims()
-                Keypad(keyHeight = keyHeight, onKey = onKey, onLongZero = onLongZero)
+                Keypad(keyHeight = keyHeight, onKey = onKey, onLongPress = onLongPress)
                 DialCallButton(size = callSize) { placeCall { viewModel.call() } }
             }
         }
@@ -332,11 +338,11 @@ private fun NumberField(text: String, onBackspace: () -> Unit, onClear: () -> Un
 }
 
 @Composable
-private fun Keypad(keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit) {
+private fun Keypad(keyHeight: Dp, onKey: (Char) -> Unit, onLongPress: (Char) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.Small)) {
         KEYS.forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.Small + Spacing.XSmall)) {
-                row.forEach { key -> DialKey(key, keyHeight, onKey, onLongZero, Modifier.weight(1f)) }
+                row.forEach { key -> DialKey(key, keyHeight, onKey, onLongPress, Modifier.weight(1f)) }
             }
         }
     }
@@ -345,14 +351,21 @@ private fun Keypad(keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit)
 /** A rounded-square key: a subtle tonal fill that turns into the primary container while pressed, with a spring press. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun DialKey(key: Key, keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: () -> Unit, modifier: Modifier) {
+private fun DialKey(key: Key, keyHeight: Dp, onKey: (Char) -> Unit, onLongPress: (Char) -> Unit, modifier: Modifier) {
     // "2 A B C" would be read letter by letter: say the digit (or the symbol's name) only.
     val keyName = when (key.char) {
         '*' -> stringResource(R.string.incall_key_star)
         '#' -> stringResource(R.string.incall_key_pound)
         else -> key.char.toString()
     }
-    val plusLabel = if (key.char == '0') stringResource(R.string.dialer_key_plus) else null
+    // What a long press does, for TalkBack: "+", the voicemail, a pause or a wait.
+    val longLabel = when (key.char) {
+        '0' -> stringResource(R.string.dialer_key_plus)
+        '1' -> stringResource(R.string.dialer_voicemail)
+        '*' -> stringResource(R.string.dialer_add_pause)
+        '#' -> stringResource(R.string.dialer_add_wait)
+        else -> null
+    }
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val fill by animateColorAsState(
@@ -367,9 +380,9 @@ private fun DialKey(key: Key, keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: 
             interactionSource = interaction,
             indication = LocalIndication.current,
             role = Role.Button,
-            onLongClickLabel = plusLabel,
+            onLongClickLabel = longLabel,
             onClick = { onKey(key.char) },
-            onLongClick = { if (key.char == '0') onLongZero() else onKey(key.char) }
+            onLongClick = { onLongPress(key.char) }
         )
     ) {
         Column(
@@ -378,7 +391,14 @@ private fun DialKey(key: Key, keyHeight: Dp, onKey: (Char) -> Unit, onLongZero: 
             modifier = Modifier.clearAndSetSemantics {}
         ) {
             Text(key.char.toString(), style = MaterialTheme.typography.headlineMedium)
-            if (key.letters.isNotEmpty()) {
+            if (key.char == '1') {
+                Icon(
+                    Icons.Filled.Voicemail,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(VOICEMAIL_ICON_SIZE)
+                )
+            } else if (key.letters.isNotEmpty()) {
                 Text(
                     key.letters,
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = KEY_LETTER_SPACING),
@@ -418,6 +438,7 @@ private fun rememberDtmfTones(): DtmfTones {
 }
 
 private const val TONE_VOLUME = 80
+private val VOICEMAIL_ICON_SIZE = 14.dp
 private val MIN_TARGET = 48.dp
 private val COMPACT_HEIGHT = 640.dp
 private const val BIG_FONT_SCALE = 1.5f

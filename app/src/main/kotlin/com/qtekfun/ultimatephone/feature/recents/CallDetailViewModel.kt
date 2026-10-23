@@ -92,7 +92,7 @@ class CallDetailViewModel @Inject constructor(
 
     fun call() {
         if (isHiddenNumber(number)) return
-        if (!placer.placeCall(number)) eventChannel.trySend(CallDetailEvent.CallFailed)
+        if (!placer.placeCall(number, lastUsed = uiState.value.entries.firstNotNullOfOrNull { it.sim })) eventChannel.trySend(CallDetailEvent.CallFailed)
     }
 
     fun markSpam() {

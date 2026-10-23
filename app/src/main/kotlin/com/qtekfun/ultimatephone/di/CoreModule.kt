@@ -5,6 +5,7 @@ import com.qtekfun.ultimatephone.core.phonenumber.LibPhoneNormalizer
 import com.qtekfun.ultimatephone.core.phonenumber.PhoneNormalizer
 import com.qtekfun.ultimatephone.core.telecom.CallController
 import com.qtekfun.ultimatephone.core.telecom.CallPlacer
+import com.qtekfun.ultimatephone.core.telecom.EmergencyNumbers
 import com.qtekfun.ultimatephone.core.telecom.RegionProvider
 import com.qtekfun.ultimatephone.core.telecom.RoleController
 import com.qtekfun.ultimatephone.core.telecom.SimRegionProvider
@@ -12,7 +13,11 @@ import com.qtekfun.ultimatephone.core.telecom.SimRepository
 import com.qtekfun.ultimatephone.core.telecom.TelecomCallPlacer
 import com.qtekfun.ultimatephone.core.telecom.TelecomCalls
 import com.qtekfun.ultimatephone.core.telecom.TelecomSimRepository
+import com.qtekfun.ultimatephone.core.telecom.TelephonyEmergencyNumbers
+import com.qtekfun.ultimatephone.settings.CallSimPreferences
 import com.qtekfun.ultimatephone.settings.DataStoreSettingsRepository
+import com.qtekfun.ultimatephone.settings.PreferredSimCallPlacer
+import com.qtekfun.ultimatephone.settings.SettingsCallSimPreferences
 import com.qtekfun.ultimatephone.settings.SettingsRepository
 import dagger.Module
 import dagger.Provides
@@ -49,7 +54,19 @@ object CoreModule {
 
     @Provides
     @Singleton
-    fun callPlacer(@ApplicationContext context: Context): CallPlacer = TelecomCallPlacer(context)
+    fun emergencyNumbers(@ApplicationContext context: Context): EmergencyNumbers = TelephonyEmergencyNumbers(context)
+
+    /** Every call the app starts goes through the SIM preferences (remembered, last used, default). */
+    @Provides
+    @Singleton
+    fun callPlacer(
+        @ApplicationContext context: Context,
+        sims: SimRepository,
+        settings: SettingsRepository,
+        normalizer: PhoneNormalizer,
+        regions: RegionProvider,
+        emergency: EmergencyNumbers
+    ): CallPlacer = PreferredSimCallPlacer(TelecomCallPlacer(context), sims, settings, normalizer, regions, emergency)
 
     @Provides
     @Singleton
@@ -63,6 +80,11 @@ object CoreModule {
     @Singleton
     fun settingsRepository(@ApplicationContext context: Context, @ApplicationScope scope: CoroutineScope): SettingsRepository =
         DataStoreSettingsRepository(context, scope)
+
+    @Provides
+    @Singleton
+    fun callSimPreferences(settings: SettingsRepository, normalizer: PhoneNormalizer, regions: RegionProvider): CallSimPreferences =
+        SettingsCallSimPreferences(settings, normalizer, regions)
 
     /** The SIM's country, unless the user chose a region in Settings. */
     @Provides

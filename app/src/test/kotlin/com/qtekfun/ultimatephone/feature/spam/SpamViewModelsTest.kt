@@ -12,6 +12,7 @@ import com.qtekfun.ultimatephone.core.telecom.AudioState
 import com.qtekfun.ultimatephone.core.telecom.CallController
 import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
+import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.feature.recents.FakeContacts
 import com.qtekfun.ultimatephone.feature.recents.FakeNormalizer
 import com.qtekfun.ultimatephone.feature.recents.FakeRegion
@@ -22,6 +23,12 @@ import com.qtekfun.ultimatephone.screening.DecisionEngine
 import com.qtekfun.ultimatephone.screening.RULE_ES_400_COMMERCIAL
 import com.qtekfun.ultimatephone.screening.RoomDecisionStore
 import com.qtekfun.ultimatephone.screening.ScreeningStats
+import com.qtekfun.ultimatephone.settings.CallSimPreferences
+import com.qtekfun.ultimatephone.settings.FakeSimSettings
+import com.qtekfun.ultimatephone.settings.NoCallSimPreferences
+import com.qtekfun.ultimatephone.settings.SettingsCallSimPreferences
+import com.qtekfun.ultimatephone.settings.UserSettings
+import com.qtekfun.ultimatephone.settings.sim
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -204,6 +211,11 @@ class InCallSpamTest {
     private class Controller(calls: List<CallInfo>) : CallController {
         override val calls = MutableStateFlow(calls)
         override val audio = MutableStateFlow(AudioState.Default)
+        val simSelections = mutableListOf<Pair<String, String>>()
+
+        override fun selectSim(id: String, sim: SimAccount) {
+            simSelections += id to sim.key
+        }
 
         override fun answer(id: String) = Unit
 
@@ -252,10 +264,47 @@ class InCallSpamTest {
     private fun viewModel(
         controller: Controller,
         lists: InMemoryLists = InMemoryLists(),
-        store: RoomDecisionStore = RoomDecisionStore(FakeDecisionDao())
+        store: RoomDecisionStore = RoomDecisionStore(FakeDecisionDao()),
+        simPreferences: CallSimPreferences = NoCallSimPreferences
     ): InCallViewModel {
         val engine = DecisionEngine(FakeContacts(), lists, FakePacks(), builtInRuleSet(), FakeSpamSettings(), FakeNormalizer(), FakeRegion(), store)
-        return InCallViewModel(controller, engine, ListsSpamNumberActions(lists, engine, NoSpamHistory, FakeNormalizer(), FakeRegion()), NoRecording)
+        val actions = ListsSpamNumberActions(lists, engine, NoSpamHistory, FakeNormalizer(), FakeRegion())
+        return InCallViewModel(controller, engine, actions, NoRecording, simPreferences)
+    }
+
+    // The same instances every time: Android's PhoneAccountHandle cannot be compared in JVM tests.
+    private val sims = listOf(sim("sim1", 0), sim("sim2", 1))
+
+    private fun waitingForSim(id: String, number: String?) = call(id, number, incoming = false, status = CallStatus.SELECT_SIM).copy(simChoices = sims)
+
+    @Test
+    fun aCallWaitingForASimIsLeftToTheUserWithoutPreferences() = runTest {
+        val controller = Controller(listOf(waitingForSim("c1", "600111222")))
+        viewModel(controller)
+        assertTrue(controller.simSelections.isEmpty())
+    }
+
+    @Test
+    fun theRememberedOrDefaultSimIsPickedForACallStartedElsewhere() = runTest {
+        val settings = FakeSimSettings(UserSettings(defaultSimKey = "sim1", simByNumber = mapOf("+34600111222" to "sim2")))
+        val controller = Controller(listOf(waitingForSim("c1", "600111222")))
+        viewModel(controller, simPreferences = SettingsCallSimPreferences(settings, FakeNormalizer(), FakeRegion()))
+        controller.calls.value = listOf(waitingForSim("c1", "600111222"), waitingForSim("c2", "699000111"))
+        // Each call is decided once, even when the list is emitted again.
+        assertEquals(listOf("c1" to "sim2", "c2" to "sim1"), controller.simSelections)
+    }
+
+    @Test
+    fun pickingASimPlacesTheCallAndCanRememberIt() = runTest {
+        val settings = FakeSimSettings()
+        val controller = Controller(listOf(waitingForSim("c1", "600111222")))
+        val vm = viewModel(controller, simPreferences = SettingsCallSimPreferences(settings, FakeNormalizer(), FakeRegion()))
+        val call = controller.calls.value.single()
+        vm.selectSim(call, call.simChoices[1], remember = false)
+        assertTrue(settings.settings.value.simByNumber.isEmpty())
+        vm.selectSim(call, call.simChoices[1], remember = true)
+        assertEquals(listOf("c1" to "sim2", "c1" to "sim2"), controller.simSelections)
+        assertEquals(mapOf("+34600111222" to "sim2"), settings.settings.value.simByNumber)
     }
 
     @Test

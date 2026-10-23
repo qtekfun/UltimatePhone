@@ -3,10 +3,22 @@ package com.qtekfun.ultimatephone.core.telecom
 import android.telecom.Call
 
 /** Simplified life cycle of a call, as the UI needs it. */
-enum class CallStatus { CONNECTING, DIALING, RINGING, ACTIVE, HOLDING, DISCONNECTING, DISCONNECTED, OTHER }
+enum class CallStatus {
+    /** Outgoing call waiting for the user to pick the SIM: the phone has several and none is the default for calls. */
+    SELECT_SIM,
+    CONNECTING,
+    DIALING,
+    RINGING,
+    ACTIVE,
+    HOLDING,
+    DISCONNECTING,
+    DISCONNECTED,
+    OTHER
+}
 
 object CallStatusMapper {
     fun fromState(state: Int): CallStatus = when (state) {
+        Call.STATE_SELECT_PHONE_ACCOUNT -> CallStatus.SELECT_SIM
         Call.STATE_CONNECTING -> CallStatus.CONNECTING
         Call.STATE_DIALING, Call.STATE_PULLING_CALL -> CallStatus.DIALING
         Call.STATE_RINGING, Call.STATE_SIMULATED_RINGING -> CallStatus.RINGING
@@ -41,7 +53,9 @@ data class CallInfo(
     /** Set when [contactName] is the name of an identified business; the category id and its icon name. */
     val isBusiness: Boolean = false,
     val businessCategory: String? = null,
-    val businessIcon: String? = null
+    val businessIcon: String? = null,
+    /** The SIMs the user can pick from while [status] is [CallStatus.SELECT_SIM]; empty otherwise. */
+    val simChoices: List<SimAccount> = emptyList()
 ) {
     /** What to show as the title of the call. */
     val title: String get() = contactName ?: displayNumber

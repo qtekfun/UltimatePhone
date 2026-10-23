@@ -1,9 +1,11 @@
 package com.qtekfun.ultimatephone.core.telecom
 
 import android.content.Context
+import android.os.Bundle
 import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.InCallService
+import android.telecom.PhoneAccountHandle
 import android.telecom.VideoProfile
 import com.qtekfun.ultimatephone.core.phonenumber.LibPhoneNormalizer
 import com.qtekfun.ultimatephone.core.phonenumber.PhoneMask
@@ -126,8 +128,28 @@ object TelecomCalls : CallController {
             disconnectLabel = details.disconnectCause?.label?.toString()?.takeIf { it.isNotBlank() },
             isBusiness = label?.isBusiness == true,
             businessCategory = label?.businessCategory,
-            businessIcon = label?.businessIcon
+            businessIcon = label?.businessIcon,
+            simChoices = if (details.state == Call.STATE_SELECT_PHONE_ACCOUNT) simChoices(details) else emptyList()
         )
+    }
+
+    /**
+     * The accounts Telecom offers for a call waiting for a SIM. Telecom lists them in the call's extras; when a build leaves
+     * them out, every call-capable account is offered instead.
+     */
+    private fun simChoices(details: Call.Details): List<SimAccount> {
+        val repository = sims ?: return emptyList()
+        val offered = listOfNotNull(details.intentExtras, details.extras)
+            .firstNotNullOfOrNull { it.handles(Call.AVAILABLE_PHONE_ACCOUNTS)?.takeIf { list -> list.isNotEmpty() } }
+        val all = repository.accounts()
+        return offered?.mapNotNull { handle -> all.firstOrNull { it.handle == handle } ?: repository.find(handle) } ?: all
+    }
+
+    @Suppress("DEPRECATION") // The typed overload needs Android 13; this one works on every Android 12+ build.
+    private fun Bundle.handles(key: String): List<PhoneAccountHandle>? = try {
+        getParcelableArrayList<PhoneAccountHandle>(key)
+    } catch (_: RuntimeException) {
+        null // A malformed bundle from the platform must not take the call screen down.
     }
 
     private fun callFor(id: String): Call? = synchronized(lock) { live[id] }
@@ -142,6 +164,10 @@ object TelecomCalls : CallController {
 
     override fun hangup(id: String) {
         callFor(id)?.disconnect()
+    }
+
+    override fun selectSim(id: String, sim: SimAccount) {
+        callFor(id)?.takeIf { it.details.state == Call.STATE_SELECT_PHONE_ACCOUNT }?.phoneAccountSelected(sim.handle, false)
     }
 
     override fun setHold(id: String, hold: Boolean) {

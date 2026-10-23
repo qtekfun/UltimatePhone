@@ -21,7 +21,8 @@ fun interface CallerLabelResolver {
     suspend fun resolve(number: String): CallerLabel?
 }
 
-/** The UI's view of the calls handled by the in-call service, and the actions it can take. */
+/** The UI's view of the calls handled by the in-call service, and the actions it can take: one per call-screen control. */
+@Suppress("TooManyFunctions")
 interface CallController {
     val calls: StateFlow<List<CallInfo>>
     val audio: StateFlow<AudioState>
@@ -31,6 +32,9 @@ interface CallController {
     fun reject(id: String)
 
     fun hangup(id: String)
+
+    /** Places a call waiting in [CallStatus.SELECT_SIM] on [sim]. */
+    fun selectSim(id: String, sim: SimAccount)
 
     fun setHold(id: String, hold: Boolean)
 

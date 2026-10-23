@@ -18,6 +18,13 @@ class SettingsLogicTest {
     }
 
     @Test
+    fun lastUsedSimBeatsDefaultButNotRemembered() {
+        assertEquals("simB", SimChooser.choose(null, null, "simA", available, lastUsed = "simB"))
+        assertEquals("simA", SimChooser.choose(null, "simA", null, available, lastUsed = "simB"))
+        assertEquals("simA", SimChooser.choose(null, null, "simA", available, lastUsed = "gone"))
+    }
+
+    @Test
     fun defaultIsUsedLast() {
         assertEquals("simA", SimChooser.choose(null, null, "simA", available))
     }

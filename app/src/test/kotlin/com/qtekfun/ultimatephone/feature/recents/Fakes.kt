@@ -79,9 +79,11 @@ class FakeSims(private val sims: List<SimAccount> = emptyList()) : SimRepository
 
 class FakePlacer(var succeeds: Boolean = true) : CallPlacer {
     val placed = mutableListOf<String>()
+    val lastUsed = mutableListOf<SimAccount?>()
 
-    override fun placeCall(number: String, sim: SimAccount?): Boolean {
+    override fun placeCall(number: String, sim: SimAccount?, lastUsed: SimAccount?): Boolean {
         placed += number
+        this.lastUsed += lastUsed
         return succeeds
     }
 }

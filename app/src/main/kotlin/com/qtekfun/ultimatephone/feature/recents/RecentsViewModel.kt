@@ -195,7 +195,7 @@ class RecentsViewModel internal constructor(
 
     fun callBack(row: RecentsRow) {
         if (row.isPrivate) return
-        if (!placer.placeCall(row.number)) eventChannel.trySend(RecentsEvent.CallFailed)
+        if (!placer.placeCall(row.number, lastUsed = row.sim)) eventChannel.trySend(RecentsEvent.CallFailed)
     }
 
     private companion object {

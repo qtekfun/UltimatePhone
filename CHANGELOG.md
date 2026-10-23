@@ -3,6 +3,12 @@
 All notable changes to UltimatePhone. Versions follow [SemVer](https://semver.org/); the
 same text is kept under `fastlane/metadata/android/*/changelogs` for F-Droid.
 
+## [0.1.5]
+
+- Dual SIM: with two SIMs and no default SIM for calls, the call screen now asks which SIM to use (with "Remember for this number") instead of getting stuck. History, call details and contacts now follow the same SIM choice as the keypad: the SIM remembered for the number, then the SIM of the last call with it, then the default.
+- Keypad: long press on 0 gives "+" again from an empty number. Long press on * and # adds a pause and a wait for extensions, and the call screen offers to send the tones after a wait. Long press on 1 calls the voicemail. Android secret codes (`*#*#…#*#*`) work. The system's missed-call notification opens the call history.
+- Call screen: decline a call with a text message, and "Hold and answer" or "End call and answer" when a second call comes in.
+
 ## [0.1.4]
 
 - Settings: a new switch keeps the app in portrait so it no longer rotates with the phone.

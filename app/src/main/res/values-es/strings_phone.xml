@@ -60,4 +60,8 @@
     <string name="settings_spam_summary">Niveles, tu lista propia, números permitidos y fuentes</string>
     <string name="settings_data_title">Datos</string>
     <string name="settings_data_summary">Regiones, comercios y actualizaciones</string>
+    <string name="incall_choose_sim">Elige la SIM para esta llamada</string>
+    <string name="incall_remember_sim">Recordar para este número</string>
+    <string name="incall_cancel_call">Cancelar llamada</string>
+    <string name="incall_no_sim_choices">Ninguna SIM puede hacer esta llamada</string>
 </resources>

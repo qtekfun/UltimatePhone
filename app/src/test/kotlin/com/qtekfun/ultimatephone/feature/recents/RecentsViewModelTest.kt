@@ -189,6 +189,8 @@ class RecentsViewModelTest {
         vm.events.test {
             vm.callBack(row)
             assertEquals(listOf("600111222"), placer.placed)
+            // The SIM of the call is passed on, so calling back can use the SIM that rang.
+            assertEquals(listOf(row.sim), placer.lastUsed)
             expectNoEvents()
             placer.succeeds = false
             vm.callBack(row)

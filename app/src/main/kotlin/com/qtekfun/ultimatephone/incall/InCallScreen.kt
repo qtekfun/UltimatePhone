@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -39,8 +40,10 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SimCard
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -89,6 +92,7 @@ import com.qtekfun.ultimatephone.core.telecom.AudioRoute
 import com.qtekfun.ultimatephone.core.telecom.CallDurationFormatter
 import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
+import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.feature.data.businessCategoryLabel
 import com.qtekfun.ultimatephone.feature.data.businessIcon
 import com.qtekfun.ultimatephone.feature.spam.CallSpamPanel
@@ -160,7 +164,14 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                         )
                     }
                     val controls: @Composable (Modifier) -> Unit = { modifier ->
-                        if (primary.status == CallStatus.RINGING) {
+                        if (primary.status == CallStatus.SELECT_SIM) {
+                            SimChoiceControls(
+                                modifier = modifier,
+                                call = primary,
+                                onSelect = { sim, remember -> viewModel.selectSim(primary, sim, remember) },
+                                onCancel = { viewModel.hangup(primary) }
+                            )
+                        } else if (primary.status == CallStatus.RINGING) {
                             RingingControls(layout, modifier, onAnswer = { viewModel.answer(primary) }, onReject = { viewModel.reject(primary) })
                         } else {
                             OngoingControls(
@@ -293,6 +304,7 @@ private fun CallHeader(call: CallInfo, layout: CallLayout, showAvatar: Boolean) 
         CallChips(call)
         val status = when (call.status) {
             CallStatus.RINGING -> stringResource(R.string.incall_incoming)
+            CallStatus.SELECT_SIM -> stringResource(R.string.incall_choose_sim)
             CallStatus.DIALING, CallStatus.CONNECTING -> stringResource(R.string.incall_calling)
             CallStatus.ACTIVE -> CallDurationFormatter.format(elapsed)
             CallStatus.HOLDING -> stringResource(R.string.incall_on_hold, CallDurationFormatter.format(elapsed))
@@ -366,6 +378,58 @@ private fun RingingControls(layout: CallLayout, modifier: Modifier, onAnswer: ()
     ) {
         CallButton(CallButtonKind.Decline, stringResource(R.string.incall_decline), onReject, size = layout.answerSize)
         CallButton(CallButtonKind.Answer, stringResource(R.string.incall_answer), onAnswer, size = layout.answerSize)
+    }
+}
+
+/**
+ * The phone has several SIMs and none is the default for calls: one large button per SIM, an option to remember the choice
+ * for the number, and a way out. The call is not placed until a SIM is picked.
+ */
+@Composable
+private fun SimChoiceControls(modifier: Modifier, call: CallInfo, onSelect: (SimAccount, Boolean) -> Unit, onCancel: () -> Unit) {
+    var rememberChoice by remember(call.id) { mutableStateOf(false) }
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()).padding(vertical = Spacing.Medium),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.Small)
+    ) {
+        if (call.simChoices.isEmpty()) {
+            Text(stringResource(R.string.incall_no_sim_choices), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+        }
+        call.simChoices.forEach { sim ->
+            val slot = if (sim.slot >= 0) stringResource(R.string.dialer_sim_slot, sim.slot + 1) else null
+            Button(
+                onClick = { onSelect(sim, rememberChoice) },
+                modifier = Modifier.fillMaxWidth().widthIn(max = HANGUP_MAX_WIDTH).heightIn(min = MIN_TOUCH_TARGET)
+            ) {
+                Icon(Icons.Filled.SimCard, contentDescription = null)
+                Spacer(Modifier.width(Spacing.Small))
+                Text(
+                    text = listOfNotNull(slot, sim.label.takeIf { it.isNotBlank() && it != slot }).joinToString(" · "),
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        if (call.number != null && call.simChoices.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .heightIn(min = MIN_TOUCH_TARGET)
+                    .toggleable(value = rememberChoice, role = Role.Checkbox, onValueChange = { rememberChoice = it }),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(checked = rememberChoice, onCheckedChange = null)
+                Spacer(Modifier.width(Spacing.Small))
+                Text(stringResource(R.string.incall_remember_sim), style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+        CallPillButton(
+            kind = CallButtonKind.End,
+            label = stringResource(R.string.incall_cancel_call),
+            onClick = onCancel,
+            modifier = Modifier.padding(top = Spacing.Medium).fillMaxWidth().widthIn(max = HANGUP_MAX_WIDTH)
+        )
     }
 }
 

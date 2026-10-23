@@ -31,6 +31,7 @@ class CallModelsTest {
         assertEquals(CallStatus.HOLDING, CallStatusMapper.fromState(Call.STATE_HOLDING))
         assertEquals(CallStatus.DISCONNECTED, CallStatusMapper.fromState(Call.STATE_DISCONNECTED))
         assertEquals(CallStatus.OTHER, CallStatusMapper.fromState(Call.STATE_NEW))
+        assertEquals(CallStatus.SELECT_SIM, CallStatusMapper.fromState(Call.STATE_SELECT_PHONE_ACCOUNT))
     }
 
     @Test

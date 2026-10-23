@@ -7,7 +7,7 @@ verified on a physical phone except where stated.
 
 | | AC | Status |
 |---|---|---|
-| **F1** | Dialing places the call on the chosen SIM | Implemented; SIM choice logic: unit test (`SimChooser`). **Device:** the call itself. |
+| **F1** | Dialing places the call on the chosen SIM | Implemented; SIM choice logic: unit tests (`SimChooser`, `PreferredSimCallPlacer`, `CallSimPreferences`). Every call the app starts (keypad, history, contacts) follows the remembered, last-used and default SIM; with two SIMs and no default the call screen asks (Telecom `STATE_SELECT_PHONE_ACCOUNT`), also for calls started by other apps. **Device:** the call itself. |
 | F1 | Typing "far" suggests contacts and businesses whose name starts or contains it | T9 matching: unit tests. Business search on the platform SQLite: emulator test (FTS4). Pack download, verification and install: seen working on a Pixel 8 (Spain pack). **Device:** end-to-end typing with an installed pack. |
 | F1 | Results in under 100 ms with 10,000 contacts | Unit test (10,000-contact index). |
 | **F2** | Locked phone: rings, answer without unlocking | Implemented (full-screen intent, show-when-locked). **Device.** |

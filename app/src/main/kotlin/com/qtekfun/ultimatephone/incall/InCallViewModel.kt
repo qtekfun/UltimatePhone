@@ -7,11 +7,14 @@ import com.qtekfun.ultimatephone.core.telecom.AudioState
 import com.qtekfun.ultimatephone.core.telecom.CallController
 import com.qtekfun.ultimatephone.core.telecom.CallInfo
 import com.qtekfun.ultimatephone.core.telecom.CallStatus
+import com.qtekfun.ultimatephone.core.telecom.SimAccount
 import com.qtekfun.ultimatephone.feature.spam.CallSpamUi
 import com.qtekfun.ultimatephone.feature.spam.SpamNumberActions
 import com.qtekfun.ultimatephone.recording.CallRecording
 import com.qtekfun.ultimatephone.recording.RecordingUi
 import com.qtekfun.ultimatephone.screening.DecisionEngine
+import com.qtekfun.ultimatephone.settings.CallSimPreferences
+import com.qtekfun.ultimatephone.settings.NoCallSimPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +27,8 @@ class InCallViewModel @Inject constructor(
     private val controller: CallController,
     private val engine: DecisionEngine,
     private val spamActions: SpamNumberActions,
-    private val recording: CallRecording
+    private val recording: CallRecording,
+    private val simPreferences: CallSimPreferences = NoCallSimPreferences
 ) : ViewModel() {
     val calls: StateFlow<List<CallInfo>> = controller.calls
     val audio: StateFlow<AudioState> = controller.audio
@@ -39,6 +43,9 @@ class InCallViewModel @Inject constructor(
 
     private val seen = HashSet<String>()
 
+    /** Calls already offered to the SIM preferences, so a call the user is choosing for is not picked behind their back. */
+    private val simDecided = HashSet<String>()
+
     init {
         recording.refresh()
         viewModelScope.launch {
@@ -47,6 +54,8 @@ class InCallViewModel @Inject constructor(
                 seen.retainAll(ids)
                 spamState.update { it.filterKeys { id -> id in ids } }
                 current.filter { it.number != null && seen.add(it.id) }.forEach(::decide)
+                simDecided.retainAll(ids)
+                current.filter { it.status == CallStatus.SELECT_SIM && simDecided.add(it.id) }.forEach(::pickPreferredSim)
             }
         }
     }
@@ -61,6 +70,21 @@ class InCallViewModel @Inject constructor(
             val verdict = if (call.incoming) engine.verdictForCall(number) else null
             spamState.update { it + (call.id to (it[call.id] ?: CallSpamUi()).copy(verdict = verdict, hasNumber = isListable(number))) }
         }
+    }
+
+    /**
+     * A call waiting for a SIM, started here or by another app: the SIM remembered for the number or the default SIM of the
+     * app is used at once. Without either, the call screen asks.
+     */
+    private fun pickPreferredSim(call: CallInfo) {
+        simPreferences.preferred(call.number, call.simChoices)?.let { controller.selectSim(call.id, it) }
+    }
+
+    /** The user picked [sim] for a call waiting for one; with [remember] the next call to the number uses it without asking. */
+    fun selectSim(call: CallInfo, sim: SimAccount, remember: Boolean) {
+        controller.selectSim(call.id, sim)
+        val number = call.number
+        if (remember && number != null) viewModelScope.launch { simPreferences.remember(number, sim) }
     }
 
     private fun isListable(number: String) = number.any { it.isDigit() }

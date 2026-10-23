@@ -217,11 +217,19 @@ class InCallSpamTest {
             simSelections += id to sim.key
         }
 
-        override fun answer(id: String) = Unit
+        val actions = mutableListOf<String>()
 
-        override fun reject(id: String) = Unit
+        override fun answer(id: String) {
+            actions += "answer:$id"
+        }
 
-        override fun hangup(id: String) = Unit
+        override fun reject(id: String, message: String?) {
+            actions += "reject:$id:$message"
+        }
+
+        override fun hangup(id: String) {
+            actions += "hangup:$id"
+        }
 
         override fun setHold(id: String, hold: Boolean) = Unit
 
@@ -278,6 +286,31 @@ class InCallSpamTest {
     private val sims = listOf(sim("sim1", 0), sim("sim2", 1))
 
     private fun waitingForSim(id: String, number: String?) = call(id, number, incoming = false, status = CallStatus.SELECT_SIM).copy(simChoices = sims)
+
+    @Test
+    fun endAndAnswerEndsTheOtherCallBeforeAnswering() = runTest {
+        val active = call("c1", "600111222", incoming = false, status = CallStatus.ACTIVE)
+        val ringing = call("c2", "699000111")
+        val held = call("c3", "611000222", incoming = false, status = CallStatus.HOLDING)
+        val controller = Controller(listOf(active, ringing, held))
+        val vm = viewModel(controller)
+        vm.endAndAnswer(ringing)
+        // Not answered while the other call is still up: that would hold it instead.
+        assertEquals(listOf("hangup:c1"), controller.actions)
+        controller.calls.value = listOf(active.copy(status = CallStatus.DISCONNECTED), ringing, held)
+        // The held call is left alone.
+        assertEquals(listOf("hangup:c1", "answer:c2"), controller.actions)
+    }
+
+    @Test
+    fun declineWithAMessageSendsTheTrimmedText() = runTest {
+        val ringing = call("c1", "600111222")
+        val controller = Controller(listOf(ringing))
+        val vm = viewModel(controller)
+        vm.rejectWithMessage(ringing, "  Call you later ")
+        vm.rejectWithMessage(ringing, "   ")
+        assertEquals(listOf("reject:c1:Call you later", "reject:c1:null"), controller.actions)
+    }
 
     @Test
     fun aCallWaitingForASimIsLeftToTheUserWithoutPreferences() = runTest {

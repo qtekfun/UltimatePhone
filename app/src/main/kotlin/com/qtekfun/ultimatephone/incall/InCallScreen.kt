@@ -28,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMerge
 import androidx.compose.material.icons.automirrored.filled.CallSplit
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CallEnd
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SimCard
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,6 +50,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,6 +64,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -173,7 +177,16 @@ fun InCallScreen(viewModel: InCallViewModel, onAddCall: () -> Unit, onFinished: 
                                 onCancel = { viewModel.hangup(primary) }
                             )
                         } else if (primary.status == CallStatus.RINGING) {
-                            RingingControls(layout, modifier, onAnswer = { viewModel.answer(primary) }, onReject = { viewModel.reject(primary) })
+                            RingingControls(
+                                layout = layout,
+                                modifier = modifier,
+                                hasOtherCall = calls.any { it.id != primary.id && it.status != CallStatus.HOLDING },
+                                canMessage = primary.canRespondViaText,
+                                onAnswer = { viewModel.answer(primary) },
+                                onEndAndAnswer = { viewModel.endAndAnswer(primary) },
+                                onReject = { viewModel.reject(primary) },
+                                onRejectWithMessage = { message -> viewModel.rejectWithMessage(primary, message) }
+                            )
                         } else {
                             OngoingControls(
                                 modifier = modifier,
@@ -393,17 +406,80 @@ private fun OtherCallCard(call: CallInfo, onSwap: () -> Unit) {
     }
 }
 
-/** Decline and Answer: big, labelled, at the bottom where the thumb rests. */
+/**
+ * Decline and Answer: big, labelled, at the bottom where the thumb rests. With a call already up, Answer holds it and
+ * "End and answer" ends it first. "Decline with a message" appears when the network can text the caller.
+ */
 @Composable
-private fun RingingControls(layout: CallLayout, modifier: Modifier, onAnswer: () -> Unit, onReject: () -> Unit) {
-    Row(
-        modifier = modifier.padding(vertical = Spacing.Large),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        CallButton(CallButtonKind.Decline, stringResource(R.string.incall_decline), onReject, size = layout.answerSize)
-        CallButton(CallButtonKind.Answer, stringResource(R.string.incall_answer), onAnswer, size = layout.answerSize)
+private fun RingingControls(
+    layout: CallLayout,
+    modifier: Modifier,
+    hasOtherCall: Boolean,
+    canMessage: Boolean,
+    onAnswer: () -> Unit,
+    onEndAndAnswer: () -> Unit,
+    onReject: () -> Unit,
+    onRejectWithMessage: (String) -> Unit
+) {
+    var choosingMessage by remember { mutableStateOf(false) }
+    Column(modifier = modifier.padding(vertical = Spacing.Large), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (hasOtherCall) {
+            TextButton(onClick = onEndAndAnswer, modifier = Modifier.heightIn(min = MIN_TOUCH_TARGET)) {
+                Text(stringResource(R.string.incall_end_and_answer), style = MaterialTheme.typography.titleMedium)
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
+            CallButton(CallButtonKind.Decline, stringResource(R.string.incall_decline), onReject, size = layout.answerSize)
+            val answerLabel = stringResource(if (hasOtherCall) R.string.incall_hold_and_answer else R.string.incall_answer)
+            CallButton(CallButtonKind.Answer, answerLabel, onAnswer, size = layout.answerSize)
+        }
+        if (canMessage) {
+            TextButton(onClick = { choosingMessage = true }, modifier = Modifier.padding(top = Spacing.Small).heightIn(min = MIN_TOUCH_TARGET)) {
+                Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null)
+                Spacer(Modifier.width(Spacing.Small))
+                Text(stringResource(R.string.incall_decline_with_message))
+            }
+        }
     }
+    if (choosingMessage) {
+        QuickResponseDialog(
+            onDismiss = { choosingMessage = false },
+            onSend = { message ->
+                choosingMessage = false
+                onRejectWithMessage(message)
+            }
+        )
+    }
+}
+
+/** The canned replies of the stock call screen, plus one the user writes. */
+@Composable
+private fun QuickResponseDialog(onDismiss: () -> Unit, onSend: (String) -> Unit) {
+    val replies = stringArrayResource(R.array.incall_quick_responses)
+    var custom by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.incall_decline_with_message)) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                replies.forEach { reply ->
+                    TextButton(onClick = { onSend(reply) }, modifier = Modifier.fillMaxWidth().heightIn(min = MIN_TOUCH_TARGET)) {
+                        Text(reply, modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                OutlinedTextField(
+                    value = custom,
+                    onValueChange = { custom = it },
+                    label = { Text(stringResource(R.string.incall_custom_message)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.Small)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSend(custom) }, enabled = custom.isNotBlank()) { Text(stringResource(R.string.incall_send_message)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.incall_message_cancel)) } }
+    )
 }
 
 /**

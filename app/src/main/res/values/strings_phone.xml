@@ -71,4 +71,16 @@
     <string name="dialer_add_pause">Add a pause</string>
     <string name="dialer_add_wait">Add a wait</string>
     <string name="dialer_secret_code_refused">Secret codes only work while UltimatePhone is the phone app</string>
+    <string name="incall_end_and_answer">End call and answer</string>
+    <string name="incall_hold_and_answer">Hold and answer</string>
+    <string name="incall_decline_with_message">Decline with a message</string>
+    <string name="incall_custom_message">Write your own…</string>
+    <string name="incall_send_message">Send</string>
+    <string name="incall_message_cancel">Cancel</string>
+    <string-array name="incall_quick_responses">
+        <item>Can\'t talk now. What\'s up?</item>
+        <item>I\'ll call you right back.</item>
+        <item>I\'ll call you later.</item>
+        <item>Can\'t talk now. Call me later?</item>
+    </string-array>
 </resources>

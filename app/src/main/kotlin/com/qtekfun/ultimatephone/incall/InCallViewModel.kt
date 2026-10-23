@@ -19,8 +19,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 @HiltViewModel
 class InCallViewModel @Inject constructor(
@@ -111,6 +113,25 @@ class InCallViewModel @Inject constructor(
 
     fun reject(call: CallInfo) = controller.reject(call.id)
 
+    /** Declines [call] and texts [message] to the caller. */
+    fun rejectWithMessage(call: CallInfo, message: String) = controller.reject(call.id, message.trim().takeIf { it.isNotEmpty() })
+
+    /**
+     * Ends the call in progress and answers [ringing] once it is gone, as "End and answer" does in the stock call screen; a
+     * call on hold stays on hold. Answering while the other call is still up would hold it instead. If it hangs on, the call
+     * is answered anyway.
+     */
+    fun endAndAnswer(ringing: CallInfo) {
+        val others = calls.value.filter { it.id != ringing.id && it.status != CallStatus.HOLDING }.map { it.id }.toSet()
+        others.forEach(controller::hangup)
+        viewModelScope.launch {
+            withTimeoutOrNull(END_AND_ANSWER_TIMEOUT_MS) {
+                controller.calls.first { current -> current.none { it.id in others && it.status != CallStatus.DISCONNECTED } }
+            }
+            controller.answer(ringing.id)
+        }
+    }
+
     fun hangup(call: CallInfo) = controller.hangup(call.id)
 
     fun continuePostDial(call: CallInfo, send: Boolean) = controller.continuePostDial(call.id, send)
@@ -136,4 +157,8 @@ class InCallViewModel @Inject constructor(
     fun merge() = controller.mergeCalls()
 
     fun swap() = controller.swapCalls()
+
+    private companion object {
+        const val END_AND_ANSWER_TIMEOUT_MS = 3_000L
+    }
 }

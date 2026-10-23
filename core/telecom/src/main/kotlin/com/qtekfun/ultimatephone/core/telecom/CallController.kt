@@ -29,7 +29,8 @@ interface CallController {
 
     fun answer(id: String)
 
-    fun reject(id: String)
+    /** Declines a ringing call; with [message], Telecom texts it to the caller (see [CallInfo.canRespondViaText]). */
+    fun reject(id: String, message: String? = null)
 
     fun hangup(id: String)
 

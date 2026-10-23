@@ -57,7 +57,9 @@ data class CallInfo(
     /** The SIMs the user can pick from while [status] is [CallStatus.SELECT_SIM]; empty otherwise. */
     val simChoices: List<SimAccount> = emptyList(),
     /** Tones after a wait (";") in the dialled number, waiting for the user to send them; null when nothing waits. */
-    val postDialWait: String? = null
+    val postDialWait: String? = null,
+    /** The caller can be declined with a text message (the network and the SIM allow it). */
+    val canRespondViaText: Boolean = false
 ) {
     /** What to show as the title of the call. */
     val title: String get() = contactName ?: displayNumber

@@ -139,7 +139,8 @@ object TelecomCalls : CallController {
             businessCategory = label?.businessCategory,
             businessIcon = label?.businessIcon,
             simChoices = if (details.state == Call.STATE_SELECT_PHONE_ACCOUNT) simChoices(details) else emptyList(),
-            postDialWait = postDialWaits[id]
+            postDialWait = postDialWaits[id],
+            canRespondViaText = details.can(Call.Details.CAPABILITY_RESPOND_VIA_TEXT)
         )
     }
 
@@ -171,8 +172,8 @@ object TelecomCalls : CallController {
         callFor(id)?.answer(VideoProfile.STATE_AUDIO_ONLY)
     }
 
-    override fun reject(id: String) {
-        callFor(id)?.reject(false, null)
+    override fun reject(id: String, message: String?) {
+        callFor(id)?.reject(message != null, message)
     }
 
     override fun hangup(id: String) {
